@@ -7,7 +7,7 @@ from q2_types.per_sample_sequences import SequencesWithQuality
 
 import q2_demux
 from ._type import RawSequences
-from ._format import EMPMultiplexedDirFmt
+from ._format import EMPMultiplexedDirFmt, EMPMultiplexedSingleEndDirFmt
 
 
 plugin = qiime.plugin.Plugin(
@@ -20,6 +20,8 @@ plugin = qiime.plugin.Plugin(
 )
 
 plugin.register_semantic_types(RawSequences)
+
+plugin.register_formats(EMPMultiplexedDirFmt, EMPMultiplexedSingleEndDirFmt)
 
 plugin.register_semantic_type_to_format(
     RawSequences,
