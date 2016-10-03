@@ -93,7 +93,7 @@ class BarcodeSequenceFastqIterator(collections.Iterator):
         return next(self.barcode_generator), next(self.sequence_generator)
 
 
-def summary(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
+def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
         -> None:
     per_sample_fastqs = list(data.sequences.iter_views(FastqGzFormat))
     per_sample_fastq_counts = {}

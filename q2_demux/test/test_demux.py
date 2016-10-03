@@ -9,7 +9,7 @@ import numpy as np
 import numpy.testing as npt
 
 from q2_demux._demux import BarcodeSequenceFastqIterator
-from q2_demux import emp, summary
+from q2_demux import emp, summarize
 from q2_types.per_sample_sequences import (
     FastqGzFormat, FastqManifestFormat, YamlFormat)
 
@@ -374,7 +374,7 @@ class EmpTests(unittest.TestCase):
         self.assertEqual(act_metadata, exp_metadata)
 
 
-class SummaryTests(unittest.TestCase):
+class SummarizeTests(unittest.TestCase):
 
     def test_basic(self):
         barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY'),
@@ -394,7 +394,7 @@ class SummaryTests(unittest.TestCase):
         demux_data = emp(bsi, barcode_map)
         # test that an index.html file is created and that it has size > 0
         with tempfile.TemporaryDirectory() as output_dir:
-            result = summary(output_dir, demux_data)
+            result = summarize(output_dir, demux_data)
             self.assertTrue(result is None)
             index_fp = os.path.join(output_dir, 'index.html')
             self.assertTrue(os.path.exists(index_fp))
