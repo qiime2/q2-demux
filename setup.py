@@ -15,7 +15,7 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=['qiime >= 2.0.5', 'q2-types >= 0.0.5', 'numpy', 'pandas',
-                      'scikit-bio', 'seaborn'],
+                      'scikit-bio', 'seaborn', 'q2templates'],
     author="Greg Caporaso",
     author_email="gregcaporaso@gmail.com",
     description="Maps sequence barcodes to samples.",
@@ -24,6 +24,7 @@ setup(
         ["q2-demux=q2_demux.plugin_setup:plugin"]
     },
     package_data={
-        'q2_demux.test': ['data/**/*']
+        'q2_demux.test': ['data/**/*'],
+        'q2_demux': ['assets/index.html']
     }
 )
