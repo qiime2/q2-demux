@@ -434,11 +434,9 @@ class SummarizeTests(unittest.TestCase):
             self.assertTrue(os.path.exists(csv_fp))
             self.assertTrue(os.path.getsize(csv_fp) > 0)
             pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
-            self.assertTrue(os.path.exists(pdf_fp))
-            self.assertTrue(os.path.getsize(pdf_fp) > 0)
+            self.assertFalse(os.path.exists(pdf_fp))
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
-            self.assertTrue(os.path.exists(png_fp))
-            self.assertTrue(os.path.getsize(png_fp) > 0)
+            self.assertFalse(os.path.exists(png_fp))
             with open(index_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
