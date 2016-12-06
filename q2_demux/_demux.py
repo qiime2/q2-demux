@@ -113,7 +113,10 @@ def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
     result.sort_values(inplace=True, ascending=False)
     result.to_csv(os.path.join(output_dir, 'per-sample-fastq-counts.csv'),
                   header=True, index=True)
-    ax = sns.distplot(result, kde=False)
+    plot_args = {'kde': False}
+    if len(per_sample_fastqs) == 1:
+        plot_args.update({'hist': False})
+    ax = sns.distplot(result, **plot_args)
     ax.set_xlabel('Number of sequences')
     ax.set_ylabel('Frequency')
     fig = ax.get_figure()

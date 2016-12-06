@@ -412,3 +412,34 @@ class SummarizeTests(unittest.TestCase):
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
                 self.assertIn('<td>Maximum:</td><td>3</td>', html)
+
+    def test_single_sample(self):
+        barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY')]
+
+        sequences = [('@s1/1 abc/1', 'GGG', '+', 'YYY')]
+        bsi = BarcodeSequenceFastqIterator(barcodes, sequences)
+
+        barcode_map = pd.Series(['AAAA'], index=['sample1'])
+        barcode_map = qiime.MetadataCategory(barcode_map)
+
+        demux_data = emp(bsi, barcode_map)
+        # test that an index.html file is created and that it has size > 0
+        with tempfile.TemporaryDirectory() as output_dir:
+            result = summarize(output_dir, demux_data)
+            self.assertTrue(result is None)
+            index_fp = os.path.join(output_dir, 'index.html')
+            self.assertTrue(os.path.exists(index_fp))
+            self.assertTrue(os.path.getsize(index_fp) > 0)
+            csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
+            self.assertTrue(os.path.exists(csv_fp))
+            self.assertTrue(os.path.getsize(csv_fp) > 0)
+            pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
+            self.assertTrue(os.path.exists(pdf_fp))
+            self.assertTrue(os.path.getsize(pdf_fp) > 0)
+            png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
+            self.assertTrue(os.path.exists(png_fp))
+            self.assertTrue(os.path.getsize(png_fp) > 0)
+            with open(index_fp, 'r') as fh:
+                html = fh.read()
+                self.assertIn('<td>Minimum:</td><td>1</td>', html)
+                self.assertIn('<td>Maximum:</td><td>1</td>', html)
