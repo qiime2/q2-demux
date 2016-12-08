@@ -34,7 +34,7 @@ plugin.methods.register_function(
     parameters={'barcodes': qiime.plugin.MetadataCategory,
                 'rev_comp_barcodes': qiime.plugin.Bool,
                 'rev_comp_mapping_barcodes': qiime.plugin.Bool},
-    outputs={'per_sample_sequences': SampleData[SequencesWithQuality]},
+    outputs=[('per_sample_sequences', SampleData[SequencesWithQuality])],
     name='Demultiplex sequence data generated with the EMP protocol.',
     description=('Demultiplex sequence data (i.e., map barcode reads to '
                  'sample ids) for data generated with the Earth Microbiome '
