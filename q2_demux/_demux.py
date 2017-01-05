@@ -12,6 +12,7 @@ import yaml
 import itertools
 import collections
 import pkg_resources
+import random
 
 import skbio
 import pandas as pd
@@ -180,6 +181,7 @@ def emp(seqs: BarcodeSequenceFastqIterator,
     manifest_fh.write('# joined reads\n')
 
     per_sample_fastqs = {}
+    open_fh_count = 0
 
     for barcode_record, sequence_record in seqs:
         barcode_read = barcode_record[1]
@@ -205,12 +207,25 @@ def emp(seqs: BarcodeSequenceFastqIterator,
                                                barcode_id=barcode_id,
                                                lane_number=1,
                                                read_number=1)
-            per_sample_fastqs[sample_id] = gzip.open(str(path), mode='w')
+            per_sample_fastqs[sample_id] = gzip.open(str(path), mode='a')
+            open_fh_count += 1
             manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name, 'forward'))
+
+        if per_sample_fastqs[sample_id].closed:
+            per_sample_fastqs[sample_id] = gzip.open(str(path), mode='a')
+            open_fh_count += 1
 
         fastq_lines = '\n'.join(sequence_record) + '\n'
         fastq_lines = fastq_lines.encode('utf-8')
         per_sample_fastqs[sample_id].write(fastq_lines)
+
+        while open_fh_count >= 255:
+            sample_ids = list(per_sample_fastqs.keys())
+            id_max = len(per_sample_fastqs) - 1
+            rand_sample_id = sample_ids[random.randint(0, id_max)]
+            if not per_sample_fastqs[rand_sample_id].closed:
+                per_sample_fastqs[rand_sample_id].close()
+                open_fh_count -= 1
 
     if len(per_sample_fastqs) == 0:
         raise ValueError('No sequences were mapped to samples. Check that '
