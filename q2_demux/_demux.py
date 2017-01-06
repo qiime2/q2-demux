@@ -13,6 +13,7 @@ import itertools
 import collections
 import pkg_resources
 import random
+import resource
 
 import skbio
 import pandas as pd
@@ -182,6 +183,7 @@ def emp(seqs: BarcodeSequenceFastqIterator,
 
     per_sample_fastqs = {}
     open_fh_count = 0
+    open_fh_limit, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
 
     for barcode_record, sequence_record in seqs:
         barcode_read = barcode_record[1]
@@ -219,9 +221,9 @@ def emp(seqs: BarcodeSequenceFastqIterator,
         fastq_lines = fastq_lines.encode('utf-8')
         per_sample_fastqs[sample_id].write(fastq_lines)
 
-        while open_fh_count >= 255:
-            sample_ids = list(per_sample_fastqs.keys())
-            id_max = len(per_sample_fastqs) - 1
+        sample_ids = list(per_sample_fastqs.keys())
+        id_max = len(per_sample_fastqs) - 1
+        while open_fh_count > open_fh_limit:
             rand_sample_id = sample_ids[random.randint(0, id_max)]
             if not per_sample_fastqs[rand_sample_id].closed:
                 per_sample_fastqs[rand_sample_id].close()
