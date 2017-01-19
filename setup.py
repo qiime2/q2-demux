@@ -15,7 +15,7 @@ setup(
     packages=find_packages(),
     install_requires=['qiime2 == 2017.2.*', 'q2-types == 2017.2.*',
                       'q2templates == 2017.2.*', 'numpy', 'pandas',
-                      'scikit-bio', 'seaborn'],
+                      'scikit-bio', 'seaborn', 'psutil'],
     author="Greg Caporaso",
     author_email="gregcaporaso@gmail.com",
     url="https://qiime2.org",
