@@ -231,7 +231,8 @@ def emp(seqs: BarcodeSequenceFastqIterator,
 
         if per_sample_fastqs[sample_id].closed:
             _maintain_open_fh_count(per_sample_fastqs)
-            per_sample_fastqs[sample_id] = gzip.open(str(path), mode='a')
+            per_sample_fastqs[sample_id] = gzip.open(
+                per_sample_fastqs[sample_id].name, mode='a')
 
         fastq_lines = '\n'.join(sequence_record) + '\n'
         fastq_lines = fastq_lines.encode('utf-8')
