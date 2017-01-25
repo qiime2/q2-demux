@@ -160,10 +160,10 @@ def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
             'median': result.median(),
             'mean': result.mean(),
             'max': result.max(),
-            'sum': result.sum(),
-            'show_plot': show_plot,
+            'sum': result.sum()
         },
-        'result': html
+        'result': html,
+        'show_plot': show_plot
     }
     q2templates.render(index, output_dir, context=context)
 
