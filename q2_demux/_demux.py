@@ -11,6 +11,7 @@ import gzip
 import yaml
 import itertools
 import collections
+import collections.abc
 import pkg_resources
 import random
 import resource
@@ -22,8 +23,9 @@ import psutil
 
 import qiime2
 from q2_types.per_sample_sequences import (
-    SingleLanePerSampleSingleEndFastqDirFmt, FastqManifestFormat, YamlFormat,
-    FastqGzFormat)
+    SingleLanePerSampleSingleEndFastqDirFmt,
+    SingleLanePerSamplePairedEndFastqDirFmt,
+    FastqManifestFormat, YamlFormat, FastqGzFormat)
 import q2templates
 
 
@@ -40,8 +42,15 @@ def _read_fastq_seqs(filepath):
                qual.strip())
 
 
-def _trim_trailing_slash(header):
-    return header.rsplit('/', 1)[0]
+def _trim_id(id):
+    return id.rsplit('/', 1)[0]
+
+
+def _trim_description(desc):
+    # The first number of ':' seperated description is the read number
+    if ':' in desc:
+        desc = desc.split(':', 1)[1]
+    return desc.rsplit('/', 1)[0]
 
 
 def _record_to_fastq_header(record):
@@ -55,24 +64,42 @@ def _record_to_fastq_header(record):
     return FastqHeader(id=id, description=description)
 
 
-def _maintain_open_fh_count(per_sample_fastqs):
-    # Get the allotted resources, and sample id keys
-    open_fh_limit, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
-    sample_ids = list(per_sample_fastqs.keys())
+# This is global so that it can be tested without changing the actual ulimits
+OPEN_FH_LIMIT, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+
+
+def _maintain_open_fh_count(per_sample_fastqs, paired=False):
+    files_to_open = 1 if not paired else 2
+    if len(psutil.Process().open_files()) + files_to_open < OPEN_FH_LIMIT:
+        return
+
+    # currently open per-sample files
+    if not paired:
+        open_fhs = [fh for fh in per_sample_fastqs.values()
+                    if not fh.closed]
+    else:
+        open_fhs = [fh for fh in per_sample_fastqs.values()
+                    if not fh[0].closed]
 
     # If the number of open files reaches the allotted resources limit,
     # close around 15% of the open files. 15% was chosen because if you
     # only close a single file it will start to have to do it on every loop
     # and on a 35 file benchmark using a hard coded limit of 10 files,
     # only closing one file added an increased runtime of 160%
-    while len(psutil.Process().open_files()) >= open_fh_limit:
-        for i in range(round(len(sample_ids) * 0.15)):
-            rand_sample_id = random.choice(sample_ids)
-            if not per_sample_fastqs[rand_sample_id].closed:
-                per_sample_fastqs[rand_sample_id].close()
+    n_to_close = round(0.15 * len(open_fhs))
+    if paired:
+        n_to_close //= 2
+    n_to_close = min(len(open_fhs), max(n_to_close, 1))
+    for rand_fh in random.sample(open_fhs, n_to_close):
+        if paired:
+            fwd, rev = rand_fh
+            fwd.close()
+            rev.close()
+        else:
+            rand_fh.close()
 
 
-class BarcodeSequenceFastqIterator(collections.Iterator):
+class BarcodeSequenceFastqIterator(collections.abc.Iterable):
     def __init__(self, barcode_generator, sequence_generator):
         self.barcode_generator = barcode_generator
         self.sequence_generator = sequence_generator
@@ -92,12 +119,12 @@ class BarcodeSequenceFastqIterator(collections.Iterator):
             sequence_header = _record_to_fastq_header(sequence_record)
 
             # confirm that the id fields are equal
-            if _trim_trailing_slash(barcode_header.id) != \
-               _trim_trailing_slash(sequence_header.id):
+            if _trim_id(barcode_header.id) != \
+               _trim_id(sequence_header.id):
                 raise ValueError(
                     'Mismatched sequence ids: %s and %s' %
-                    (_trim_trailing_slash(barcode_header.id),
-                     _trim_trailing_slash(sequence_header.id)))
+                    (_trim_id(barcode_header.id),
+                     _trim_id(sequence_header.id)))
 
             # if a description field is present, confirm that they're equal
             if barcode_header.description is None and \
@@ -111,17 +138,74 @@ class BarcodeSequenceFastqIterator(collections.Iterator):
                 raise ValueError(
                     'Sequence header lines do not contain description fields '
                     'but barcode header lines do.')
-            elif _trim_trailing_slash(barcode_header.description) != \
-                    _trim_trailing_slash(sequence_header.description):
+            elif _trim_description(barcode_header.description) != \
+                    _trim_description(sequence_header.description):
                 raise ValueError(
                     'Mismatched sequence descriptions: %s and %s' %
-                    (_trim_trailing_slash(barcode_header.description),
-                     _trim_trailing_slash(sequence_header.description)))
+                    (_trim_description(barcode_header.description),
+                     _trim_description(sequence_header.description)))
 
             yield barcode_record, sequence_record
 
-    def __next__(self):
-        return next(self.barcode_generator), next(self.sequence_generator)
+
+class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
+    def __init__(self, barcode_generator, forward_generator,
+                 reverse_generator):
+        self.barcode_generator = barcode_generator
+        self.forward_generator = forward_generator
+        self.reverse_generator = reverse_generator
+
+    def __iter__(self):
+        # Adapted from q2-types
+        for barcode_record, forward_record, reverse_record \
+                in itertools.zip_longest(self.barcode_generator,
+                                         self.forward_generator,
+                                         self.reverse_generator):
+            if barcode_record is None:
+                raise ValueError('More sequences were provided than barcodes.')
+            if forward_record is None or reverse_record is None:
+                raise ValueError('More barcodes were provided than sequences.')
+            # The id or description fields may end with "/read-number", which
+            # will differ between the sequence and barcode reads. Confirm that
+            # they are identical up until the last /
+            barcode_header = _record_to_fastq_header(barcode_record)
+            forward_header = _record_to_fastq_header(forward_record)
+            reverse_header = _record_to_fastq_header(reverse_record)
+
+            # confirm that the id fields are equal
+            if not (_trim_id(barcode_header.id) ==
+                    _trim_id(forward_header.id) ==
+                    _trim_id(reverse_header.id)):
+                raise ValueError(
+                    'Mismatched sequence ids: %s, %s, and %s' %
+                    (_trim_id(barcode_header.id),
+                     _trim_id(forward_header.id),
+                     _trim_id(reverse_header.id)))
+
+            # if a description field is present, confirm that they're equal
+            if barcode_header.description is None and \
+               forward_header.description is None and \
+               reverse_header.description is None:
+                pass
+            elif barcode_header.description is None:
+                raise ValueError(
+                    'Barcode header lines do not contain description fields '
+                    'but sequence header lines do.')
+            elif (forward_header.description is None or
+                  reverse_header.description is None):
+                raise ValueError(
+                    'Sequence header lines do not contain description fields '
+                    'but barcode header lines do.')
+            elif not (_trim_description(barcode_header.description) ==
+                      _trim_description(forward_header.description) ==
+                      _trim_description(reverse_header.description)):
+                raise ValueError(
+                    'Mismatched sequence descriptions: %s, %s, and %s' %
+                    (_trim_description(barcode_header.description),
+                     _trim_description(forward_header.description),
+                     _trim_description(reverse_header.description)))
+
+            yield barcode_record, forward_record, reverse_record
 
 
 def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
@@ -168,11 +252,7 @@ def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
     q2templates.render(index, output_dir, context=context)
 
 
-def emp(seqs: BarcodeSequenceFastqIterator,
-        barcodes: qiime2.MetadataCategory,
-        rev_comp_barcodes: bool=False,
-        rev_comp_mapping_barcodes: bool=False) \
-        -> SingleLanePerSampleSingleEndFastqDirFmt:
+def _make_barcode_map(barcodes, rev_comp_mapping_barcodes):
     barcode_map = {}
     barcode_len = None
     for sample_id, barcode in barcodes.to_series().iteritems():
@@ -190,7 +270,24 @@ def emp(seqs: BarcodeSequenceFastqIterator,
                              % (barcode, sample_id, barcode_map[barcode]))
         barcode_map[barcode] = sample_id
 
+    return barcode_map, barcode_len
+
+
+def _write_metadata_yaml(dir_fmt):
+    metadata = YamlFormat()
+    metadata.path.write_text(yaml.dump({'phred-offset': 33}))
+    dir_fmt.metadata.write_data(metadata, YamlFormat)
+
+
+def emp_single(seqs: BarcodeSequenceFastqIterator,
+               barcodes: qiime2.MetadataCategory,
+               rev_comp_barcodes: bool=False,
+               rev_comp_mapping_barcodes: bool=False
+               ) -> SingleLanePerSampleSingleEndFastqDirFmt:
+
     result = SingleLanePerSampleSingleEndFastqDirFmt()
+    barcode_map, barcode_len = _make_barcode_map(
+        barcodes, rev_comp_mapping_barcodes)
 
     manifest = FastqManifestFormat()
     manifest_fh = manifest.open()
@@ -250,8 +347,85 @@ def emp(seqs: BarcodeSequenceFastqIterator,
     manifest_fh.close()
     result.manifest.write_data(manifest, FastqManifestFormat)
 
-    metadata = YamlFormat()
-    metadata.path.write_text(yaml.dump({'phred-offset': 33}))
-    result.metadata.write_data(metadata, YamlFormat)
+    _write_metadata_yaml(result)
+
+    return result
+
+
+def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
+               barcodes: qiime2.MetadataCategory,
+               rev_comp_barcodes: bool=False,
+               rev_comp_mapping_barcodes: bool=False
+               ) -> SingleLanePerSamplePairedEndFastqDirFmt:
+
+    result = SingleLanePerSamplePairedEndFastqDirFmt()
+    barcode_map, barcode_len = _make_barcode_map(
+        barcodes, rev_comp_mapping_barcodes)
+
+    manifest = FastqManifestFormat()
+    manifest_fh = manifest.open()
+    manifest_fh.write('sample-id,filename,direction\n')
+
+    per_sample_fastqs = {}
+    for barcode_record, forward_record, reverse_record in seqs:
+        barcode_read = barcode_record[1]
+        if rev_comp_barcodes:
+            barcode_read = str(skbio.DNA(barcode_read).reverse_complement())
+        barcode_read = barcode_read[:barcode_len]
+
+        try:
+            sample_id = barcode_map[barcode_read]
+        except KeyError:
+            # TODO: this should ultimately be logged, but we don't currently
+            # have support for that.
+            continue
+
+        if sample_id not in per_sample_fastqs:
+            barcode_id = len(per_sample_fastqs) + 1
+            fwd_path = result.sequences.path_maker(sample_id=sample_id,
+                                                   barcode_id=barcode_id,
+                                                   lane_number=1,
+                                                   read_number=1)
+            rev_path = result.sequences.path_maker(sample_id=sample_id,
+                                                   barcode_id=barcode_id,
+                                                   lane_number=1,
+                                                   read_number=2)
+
+            _maintain_open_fh_count(per_sample_fastqs, paired=True)
+            per_sample_fastqs[sample_id] = (
+                gzip.open(str(fwd_path), mode='a'),
+                gzip.open(str(rev_path), mode='a')
+            )
+            manifest_fh.write('%s,%s,%s\n' % (sample_id, fwd_path.name,
+                                              'forward'))
+            manifest_fh.write('%s,%s,%s\n' % (sample_id, rev_path.name,
+                                              'reverse'))
+
+        if per_sample_fastqs[sample_id][0].closed:
+            _maintain_open_fh_count(per_sample_fastqs, paired=True)
+            fwd, rev = per_sample_fastqs[sample_id]
+            per_sample_fastqs[sample_id] = (
+                gzip.open(fwd.name, mode='a'),
+                gzip.open(rev.name, mode='a')
+            )
+
+        fwd, rev = per_sample_fastqs[sample_id]
+        fwd.write(('\n'.join(forward_record) + '\n').encode('utf-8'))
+        rev.write(('\n'.join(reverse_record) + '\n').encode('utf-8'))
+
+    if len(per_sample_fastqs) == 0:
+        raise ValueError('No sequences were mapped to samples. Check that '
+                         'your barcodes are in the correct orientation (see '
+                         'rev_comp_barcodes and/or rev_comp_mapping_barcodes '
+                         'options).')
+
+    for fwd, rev in per_sample_fastqs.values():
+        fwd.close()
+        rev.close()
+
+    manifest_fh.close()
+    result.manifest.write_data(manifest, FastqManifestFormat)
+
+    _write_metadata_yaml(result)
 
     return result

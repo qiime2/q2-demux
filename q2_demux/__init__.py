@@ -8,9 +8,9 @@
 
 import pkg_resources
 
-from ._demux import emp, summarize
+from ._demux import emp_single, emp_paired, summarize
 
 
 __version__ = pkg_resources.get_distribution('q2-demux').version
 
-__all__ = ['emp', 'summarize']
+__all__ = ['emp_single', 'emp_paired', 'summarize']
