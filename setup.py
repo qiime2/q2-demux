@@ -15,7 +15,11 @@ setup(
     packages=find_packages(),
     install_requires=['qiime2 == 2017.2.*', 'q2-types == 2017.2.*',
                       'q2templates == 2017.2.*', 'numpy', 'pandas',
-                      'scikit-bio', 'seaborn', 'psutil'],
+                      'scikit-bio', 'seaborn', 'psutil',
+                      # `ipywidgets` included to avoid ShimWarning from
+                      # `seaborn` imports:
+                      #  https://github.com/mwaskom/seaborn/issues/874
+                      'ipywidgets'],
     author="Greg Caporaso",
     author_email="gregcaporaso@gmail.com",
     url="https://qiime2.org",
