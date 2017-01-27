@@ -11,6 +11,6 @@ from qiime2.plugin import SemanticType
 # TODO: migrate these to q2-types someday
 RawSequences = SemanticType('RawSequences')
 
-EMPSequences = SemanticType('EMPSequences')
+EMPSingleEndSequences = SemanticType('EMPSingleEndSequences')
 
-EMPPairedSequences = SemanticType('EMPPairedSequences')
+EMPPairedEndSequences = SemanticType('EMPPairedEndSequences')

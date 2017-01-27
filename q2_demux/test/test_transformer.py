@@ -9,8 +9,8 @@
 import unittest
 import tempfile
 
-from q2_demux._format import (EMPMultiplexedDirFmt,
-                              EMPMultiplexedSingleEndDirFmt)
+from q2_demux._format import (EMPSingleEndDirFmt,
+                              EMPSingleEndCasavaDirFmt)
 from q2_demux._demux import BarcodeSequenceFastqIterator
 from qiime2.plugin.testing import TestPluginBase
 
@@ -34,11 +34,11 @@ class TestTransformers(TestPluginBase):
             prefix='q2-demux-test-temp-')
 
     def test_emp_multiplexed_format_barcode_sequence_iterator(self):
-        transformer = self.get_transformer(EMPMultiplexedDirFmt,
+        transformer = self.get_transformer(EMPSingleEndDirFmt,
                                            BarcodeSequenceFastqIterator)
         dirname = 'emp_multiplexed'
         dirpath = self.get_data_path(dirname)
-        bsi = transformer(EMPMultiplexedDirFmt(dirpath, mode='r'))
+        bsi = transformer(EMPSingleEndDirFmt(dirpath, mode='r'))
         bsi = list(bsi)
         self.assertEqual(len(bsi), 250)
         self.assertEqual(
@@ -59,15 +59,15 @@ class TestTransformers(TestPluginBase):
              'CD<CDCA>A@A>:<?B@?<((2(>?'))
 
     def test_emp_se_multiplexed_format_barcode_sequence_iterator(self):
-        transformer1 = self.get_transformer(EMPMultiplexedSingleEndDirFmt,
-                                            EMPMultiplexedDirFmt)
-        transformer2 = self.get_transformer(EMPMultiplexedDirFmt,
+        transformer1 = self.get_transformer(EMPSingleEndCasavaDirFmt,
+                                            EMPSingleEndDirFmt)
+        transformer2 = self.get_transformer(EMPSingleEndDirFmt,
                                             BarcodeSequenceFastqIterator)
         dirname = 'emp_multiplexed_single_end'
         dirpath = self.get_data_path(dirname)
         emp_demultiplexed = \
-            transformer1(EMPMultiplexedSingleEndDirFmt(dirpath, mode='r'))
-        bsi = transformer2(EMPMultiplexedDirFmt(emp_demultiplexed, mode='r'))
+            transformer1(EMPSingleEndCasavaDirFmt(dirpath, mode='r'))
+        bsi = transformer2(EMPSingleEndDirFmt(emp_demultiplexed, mode='r'))
         bsi = list(bsi)
         self.assertEqual(len(bsi), 250)
         self.assertEqual(
@@ -90,15 +90,15 @@ class TestTransformers(TestPluginBase):
     def test_invalid(self):
         dirname = 'bad'
         dirpath = self.get_data_path(dirname)
-        transformer = self.get_transformer(EMPMultiplexedDirFmt,
+        transformer = self.get_transformer(EMPSingleEndDirFmt,
                                            BarcodeSequenceFastqIterator)
         with self.assertRaises(ValueError):
-            transformer(EMPMultiplexedDirFmt(dirpath, mode='r'))
+            transformer(EMPSingleEndDirFmt(dirpath, mode='r'))
 
-        transformer = self.get_transformer(EMPMultiplexedSingleEndDirFmt,
-                                           EMPMultiplexedDirFmt)
+        transformer = self.get_transformer(EMPSingleEndCasavaDirFmt,
+                                           EMPSingleEndDirFmt)
         with self.assertRaises(ValueError):
-            transformer(EMPMultiplexedSingleEndDirFmt(dirpath, 'r'))
+            transformer(EMPSingleEndCasavaDirFmt(dirpath, 'r'))
 
 
 if __name__ == "__main__":

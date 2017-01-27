@@ -15,10 +15,10 @@ from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality)
 
 import q2_demux
-from ._type import RawSequences, EMPSequences, EMPPairedSequences
-from ._format import (
-    EMPMultiplexedDirFmt, EMPMultiplexedSingleEndDirFmt,
-    PairedEMPMultiplexedDirFmt, EMPMultiplexedPairedEndDirFmt)
+from ._type import RawSequences, EMPSingleEndSequences, EMPPairedEndSequences
+from ._format import (EMPMultiplexedDirFmt,
+                      EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
+                      EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
 
 
 plugin = qiime2.plugin.Plugin(
@@ -30,33 +30,35 @@ plugin = qiime2.plugin.Plugin(
     citation_text=None
 )
 
-plugin.register_semantic_types(RawSequences, EMPSequences, EMPPairedSequences)
+plugin.register_semantic_types(
+    RawSequences, EMPSingleEndSequences, EMPPairedEndSequences)
 
-plugin.register_formats(EMPMultiplexedDirFmt, EMPMultiplexedSingleEndDirFmt,
-                        PairedEMPMultiplexedDirFmt,
-                        EMPMultiplexedPairedEndDirFmt)
+plugin.register_formats(EMPMultiplexedDirFmt,
+                        EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
+                        EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
 
+# TODO: remove when aliasing exists
 plugin.register_semantic_type_to_format(
     RawSequences,
-    artifact_format=EMPMultiplexedDirFmt
+    artifact_format=EMPSingleEndDirFmt
 )
 
 plugin.register_semantic_type_to_format(
-    EMPSequences,
-    artifact_format=EMPMultiplexedDirFmt
+    EMPSingleEndSequences,
+    artifact_format=EMPSingleEndDirFmt
 )
 
 
 plugin.register_semantic_type_to_format(
-    EMPPairedSequences,
-    artifact_format=PairedEMPMultiplexedDirFmt
+    EMPPairedEndSequences,
+    artifact_format=EMPPairedEndDirFmt
 )
 
 
 plugin.methods.register_function(
     function=q2_demux.emp_single,
     # TODO: remove RawSequences by creating an alias to EMPSequences
-    inputs={'seqs': RawSequences | EMPSequences},
+    inputs={'seqs': RawSequences | EMPSingleEndSequences},
     parameters={'barcodes': qiime2.plugin.MetadataCategory,
                 'rev_comp_barcodes': qiime2.plugin.Bool,
                 'rev_comp_mapping_barcodes': qiime2.plugin.Bool},
@@ -71,18 +73,19 @@ plugin.methods.register_function(
 
 plugin.methods.register_function(
     function=q2_demux.emp_paired,
-    inputs={'seqs': EMPPairedSequences},
+    inputs={'seqs': EMPPairedEndSequences},
     parameters={'barcodes': qiime2.plugin.MetadataCategory,
                 'rev_comp_barcodes': qiime2.plugin.Bool,
                 'rev_comp_mapping_barcodes': qiime2.plugin.Bool},
     outputs=[
         ('per_sample_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
-    name='Demultiplex paired sequence data generated with the EMP protocol.',
-    description=('Demultiplex paired sequence data (i.e., map barcode reads '
-                 'to sample ids) for data generated with the Earth Microbiome '
-                 'Project (EMP) amplicon sequencing protocol. Details about '
-                 'this protocol can be found at '
+    name=('Demultiplex paired-end sequence data generated with the EMP '
+          'protocol.'),
+    description=('Demultiplex paired-end sequence data (i.e., map barcode '
+                 'reads to sample ids) for data generated with the Earth '
+                 'Microbiome Project (EMP) amplicon sequencing protocol. '
+                 'Details about this protocol can be found at '
                  'http://www.earthmicrobiome.org/emp-standard-protocols/')
 )
 

@@ -89,7 +89,9 @@ def _maintain_open_fh_count(per_sample_fastqs, paired=False):
     n_to_close = round(0.15 * len(open_fhs))
     if paired:
         n_to_close //= 2
-    n_to_close = min(len(open_fhs), max(n_to_close, 1))
+    # Never close more than files than are open, also if closing,
+    #  close at least the number of files that will need to be opened.
+    n_to_close = min(len(open_fhs), max(n_to_close, files_to_open))
     for rand_fh in random.sample(open_fhs, n_to_close):
         if paired:
             fwd, rev = rand_fh
@@ -163,8 +165,12 @@ class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
                                          self.reverse_generator):
             if barcode_record is None:
                 raise ValueError('More sequences were provided than barcodes.')
-            if forward_record is None or reverse_record is None:
-                raise ValueError('More barcodes were provided than sequences.')
+            if forward_record is None:
+                raise ValueError('More barcodes were provided than '
+                                 'forward-sequences.')
+            elif reverse_record is None:
+                raise ValueError('More barcodes were provided than '
+                                 'reverse-sequences.')
             # The id or description fields may end with "/read-number", which
             # will differ between the sequence and barcode reads. Confirm that
             # they are identical up until the last /
@@ -191,11 +197,14 @@ class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
                 raise ValueError(
                     'Barcode header lines do not contain description fields '
                     'but sequence header lines do.')
-            elif (forward_header.description is None or
-                  reverse_header.description is None):
+            elif forward_header.description is None:
                 raise ValueError(
-                    'Sequence header lines do not contain description fields '
-                    'but barcode header lines do.')
+                    'Forward-read header lines do not contain description '
+                    'fields but barcode header lines do.')
+            elif reverse_header.description is None:
+                raise ValueError(
+                    'Reverse-read header lines do not contain description '
+                    'fields but barcode header lines do.')
             elif not (_trim_description(barcode_header.description) ==
                       _trim_description(forward_header.description) ==
                       _trim_description(reverse_header.description)):
@@ -338,8 +347,8 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
     if len(per_sample_fastqs) == 0:
         raise ValueError('No sequences were mapped to samples. Check that '
                          'your barcodes are in the correct orientation (see '
-                         'rev_comp_barcodes and/or rev_comp_mapping_barcodes '
-                         'options).')
+                         'the rev_comp_barcodes and/or '
+                         'rev_comp_mapping_barcodes options).')
 
     for fh in per_sample_fastqs.values():
         fh.close()
@@ -416,8 +425,8 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
     if len(per_sample_fastqs) == 0:
         raise ValueError('No sequences were mapped to samples. Check that '
                          'your barcodes are in the correct orientation (see '
-                         'rev_comp_barcodes and/or rev_comp_mapping_barcodes '
-                         'options).')
+                         'the rev_comp_barcodes and/or '
+                         'rev_comp_mapping_barcodes options).')
 
     for fwd, rev in per_sample_fastqs.values():
         fwd.close()

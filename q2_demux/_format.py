@@ -10,6 +10,7 @@ from q2_types.per_sample_sequences import FastqGzFormat
 import qiime2.plugin.model as model
 
 
+# TODO: deprecate this and alias it
 class EMPMultiplexedDirFmt(model.DirectoryFormat):
     sequences = model.File(
         r'sequences.fastq.gz', format=FastqGzFormat)
@@ -18,7 +19,12 @@ class EMPMultiplexedDirFmt(model.DirectoryFormat):
         r'barcodes.fastq.gz', format=FastqGzFormat)
 
 
-class PairedEMPMultiplexedDirFmt(model.DirectoryFormat):
+# The new cannonical name for EMPMultiplexedDirFmt
+class EMPSingleEndDirFmt(EMPMultiplexedDirFmt):
+    pass  # contents inherited
+
+
+class EMPPairedEndDirFmt(model.DirectoryFormat):
     forward = model.File(
         r'forward.fastq.gz', format=FastqGzFormat)
 
@@ -29,7 +35,9 @@ class PairedEMPMultiplexedDirFmt(model.DirectoryFormat):
         r'barcodes.fastq.gz', format=FastqGzFormat)
 
 
-class EMPMultiplexedSingleEndDirFmt(model.DirectoryFormat):
+# Originally called EMPMultiplexedSingleEndDirFmt, rename was possible as no
+# artifacts where created with this view, it is just for import.
+class EMPSingleEndCasavaDirFmt(model.DirectoryFormat):
     # TODO: generalize this with a regex when we have validation in place for
     # model.FileCollections. The file names are currently designed more
     # specificially for handling MiSeq data.
@@ -40,7 +48,7 @@ class EMPMultiplexedSingleEndDirFmt(model.DirectoryFormat):
         r'Undetermined_S0_L001_I1_001.fastq.gz', format=FastqGzFormat)
 
 
-class EMPMultiplexedPairedEndDirFmt(model.DirectoryFormat):
+class EMPPairedEndCasavaDirFmt(model.DirectoryFormat):
     forward = model.File(
         r'Undetermined_S0_L001_R1_001.fastq.gz', format=FastqGzFormat)
 
