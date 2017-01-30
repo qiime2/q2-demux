@@ -221,16 +221,17 @@ def summarize(output_dir: str, data: SingleLanePerSampleSingleEndFastqDirFmt) \
         -> None:
     per_sample_fastqs = list(data.sequences.iter_views(FastqGzFormat))
     per_sample_fastq_counts = {}
-    for per_sample_fastq in per_sample_fastqs:
-        seqs = _read_fastq_seqs(str(per_sample_fastq[1]))
+    for relpath, view in per_sample_fastqs:
+        seqs = _read_fastq_seqs(str(view))
         count = 0
         for seq in seqs:
             count += 1
-        per_sample_fastq_counts[per_sample_fastq[0]] = count
+        sample_name = relpath.name.split('_', 1)[0]
+        per_sample_fastq_counts[sample_name] = count
 
     result = pd.Series(per_sample_fastq_counts)
     result.name = 'Sequence count'
-    result.index.name = 'Sample filename'
+    result.index.name = 'Sample name'
     result.sort_values(inplace=True, ascending=False)
     result.to_csv(os.path.join(output_dir, 'per-sample-fastq-counts.csv'),
                   header=True, index=True)

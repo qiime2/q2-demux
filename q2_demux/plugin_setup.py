@@ -91,7 +91,8 @@ plugin.methods.register_function(
 
 plugin.visualizers.register_function(
     function=q2_demux.summarize,
-    inputs={'data': SampleData[SequencesWithQuality]},
+    inputs={'data':
+            SampleData[SequencesWithQuality | PairedEndSequencesWithQuality]},
     parameters={},
     name='Summarize counts per sample.',
     description=('Generate a summary of counts per sample from sequence data '
