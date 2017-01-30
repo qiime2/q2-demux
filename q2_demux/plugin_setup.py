@@ -63,6 +63,21 @@ plugin.methods.register_function(
                 'rev_comp_barcodes': qiime2.plugin.Bool,
                 'rev_comp_mapping_barcodes': qiime2.plugin.Bool},
     outputs=[('per_sample_sequences', SampleData[SequencesWithQuality])],
+    input_descriptions={
+        'seqs': 'The single-end sequences to be demultiplexed.'
+    },
+    parameter_descriptions={
+        'barcodes': 'The sample metadata category listing the per-sample '
+                    'barcodes.',
+        'rev_comp_barcodes': 'If provided, the barcode sequence reads will be '
+                             'reverse complemented prior to demultiplexing.',
+        'rev_comp_mapping_barcodes': 'If provided, the barcode sequences in '
+                                     'the sample metadata will be reverse '
+                                     'complemented prior to demultiplexing.'
+    },
+    output_descriptions={
+        'per_sample_sequences': 'The resulting demultiplexed sequences.'
+    },
     name='Demultiplex sequence data generated with the EMP protocol.',
     description=('Demultiplex sequence data (i.e., map barcode reads to '
                  'sample ids) for data generated with the Earth Microbiome '
@@ -80,6 +95,21 @@ plugin.methods.register_function(
     outputs=[
         ('per_sample_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
+    input_descriptions={
+        'seqs': 'The paired-end sequences to be demultiplexed.'
+    },
+    parameter_descriptions={
+        'barcodes': 'The sample metadata category listing the per-sample '
+                    'barcodes.',
+        'rev_comp_barcodes': 'If provided, the barcode sequence reads will be '
+                             'reverse complemented prior to demultiplexing.',
+        'rev_comp_mapping_barcodes': 'If provided, the barcode sequences in '
+                                     'the sample metadata will be reverse '
+                                     'complemented prior to demultiplexing.'
+    },
+    output_descriptions={
+        'per_sample_sequences': 'The resulting demultiplexed sequences.'
+    },
     name=('Demultiplex paired-end sequence data generated with the EMP '
           'protocol.'),
     description=('Demultiplex paired-end sequence data (i.e., map barcode '
@@ -93,6 +123,10 @@ plugin.visualizers.register_function(
     function=q2_demux.summarize,
     inputs={'data': SampleData[SequencesWithQuality]},
     parameters={},
+    input_descriptions={
+        'data': 'The demultiplexed sequences to be summarized.'
+    },
+    parameter_descriptions={},
     name='Summarize counts per sample.',
     description=('Generate a summary of counts per sample from sequence data '
                  'that has already been demultiplexed')
