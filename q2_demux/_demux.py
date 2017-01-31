@@ -65,14 +65,14 @@ def _record_to_fastq_header(record):
 
 
 # This is global so that it can be tested without changing the actual ulimits.
-# The value is set to ten less than the actual resource limit to leave some
-# file handles available for psutil.
-OPEN_FH_LIMIT = resource.getrlimit(resource.RLIMIT_NOFILE)[0] - 10
+# NOTE: UNIX only
+OPEN_FH_LIMIT, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
 
 
 def _maintain_open_fh_count(per_sample_fastqs, paired=False):
     files_to_open = 1 if not paired else 2
-    if len(psutil.Process().open_files()) + files_to_open < OPEN_FH_LIMIT:
+    # NOTE: UNIX only
+    if psutil.Process().num_fds() + files_to_open < OPEN_FH_LIMIT:
         return
 
     # currently open per-sample files
