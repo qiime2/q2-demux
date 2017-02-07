@@ -11,10 +11,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="q2-demux",
-    version="2017.2.0",
+    version="2017.3.0.dev",
     packages=find_packages(),
-    install_requires=['qiime2 == 2017.2.*', 'q2-types == 2017.2.*',
-                      'q2templates == 2017.2.*', 'numpy', 'pandas',
+    install_requires=['qiime2 == 2017.3.*', 'q2-types == 2017.3.*',
+                      'q2templates == 2017.3.*', 'numpy', 'pandas',
                       'scikit-bio', 'seaborn', 'psutil',
                       # `ipywidgets` included to avoid ShimWarning from
                       # `seaborn` imports:
