@@ -30,7 +30,7 @@ setup(
         ["q2-demux=q2_demux.plugin_setup:plugin"]
     },
     package_data={
-        'q2_demux.test': ['data/**/*'],
+        'q2_demux.tests': ['data/**/*'],
         'q2_demux': ['assets/index.html']
     }
 )

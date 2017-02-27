@@ -16,7 +16,7 @@ from qiime2.plugin.testing import TestPluginBase
 
 
 class TestTransformers(TestPluginBase):
-    package = 'q2_demux.test'
+    package = 'q2_demux.tests'
 
     def setUp(self):
         # TODO generalize plugin lookup when ported to framework. This code
