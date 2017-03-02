@@ -83,7 +83,7 @@ plugin.methods.register_function(
                  'sample ids) for data generated with the Earth Microbiome '
                  'Project (EMP) amplicon sequencing protocol. Details about '
                  'this protocol can be found at '
-                 'http://www.earthmicrobiome.org/emp-standard-protocols/')
+                 'http://www.earthmicrobiome.org/protocols-and-standards/')
 )
 
 plugin.methods.register_function(
@@ -116,7 +116,7 @@ plugin.methods.register_function(
                  'reads to sample ids) for data generated with the Earth '
                  'Microbiome Project (EMP) amplicon sequencing protocol. '
                  'Details about this protocol can be found at '
-                 'http://www.earthmicrobiome.org/emp-standard-protocols/')
+                 'http://www.earthmicrobiome.org/protocols-and-standards/')
 )
 
 plugin.visualizers.register_function(
