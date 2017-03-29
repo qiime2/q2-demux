@@ -37,5 +37,5 @@ setup(
         'q2_demux': ['_summarize/assets/*.html',
                      '_summarize/assets/app/*.js']
     },
-    zip_safe=True,
+    zip_safe=False,
 )
