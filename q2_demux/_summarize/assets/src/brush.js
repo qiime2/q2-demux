@@ -1,24 +1,43 @@
+// ----------------------------------------------------------------------------
+// Copyright (c) 2016-2017, QIIME 2 development team.
+//
+// Distributed under the terms of the Modified BSD License.
+//
+// The full license is in the file LICENSE, distributed with this software.
+// ----------------------------------------------------------------------------
+
 import * as d3 from 'd3';
 
-export default function addBrush(svg, plot, props, x, y, x0, y0, xAxis, yAxis) {
+import plotBoxes from './box';
+
+export function updateXTicks(svg, x) {
+  const ticks = svg.selectAll('.axis--x .tick');
+  const lenTicks = x.domain().length;
+
+  if (lenTicks > 48) {
+    ticks.style('display', i => (i % 12 ? 'none' : 'initial'));
+  } else if (lenTicks > 24) {
+    ticks.style('display', i => (i % 2 ? 'none' : 'initial'));
+  } else {
+    ticks.style('display', 'initial');
+  }
+}
+
+export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis) {
   const brush = d3.brush();
   let idleTimeout;
   const idleDelay = 350;
+  const ticks = svg.selectAll('.axis--x .tick');
 
   const idled = () => {
     idleTimeout = null;
   };
 
   const zoom = () => {
-    const t = svg.transition().duration(750);
-    svg.select('.axis--x').transition(t).call(xAxis);
-    svg.select('.axis--y').transition(t).call(yAxis);
-    plot
-      .domain(y.domain())
-      .width((x.range()[1] - x.range()[0]) / (x.domain()[1] - x.domain()[0]) / 2);
-    svg.selectAll('.boxplot').transition(t)
-      .call(plot)
-      .attr('transform', d => `translate(${x(d[0])}, ${props.margin.top})`);
+    svg.select('.axis--x').call(xAxis);
+    svg.select('.axis--y').call(yAxis);
+    plotBoxes(svg, data, x, y);
+    updateXTicks(svg, x);
   };
 
   const brushEnded = () => {
@@ -31,9 +50,15 @@ export default function addBrush(svg, plot, props, x, y, x0, y0, xAxis, yAxis) {
       x.domain(x0);
       y.domain(y0);
     } else {
-      x.domain([s[0][0], s[1][0]].map(x.invert, x));
+      const tempX = d3.scaleQuantize().domain(x.range()).range(x.domain());
+      const low = tempX(s[0][0]);
+      const high = tempX(s[1][0]);
+
+      x.domain(Array(high - low + 1).fill().map((_, i) => low + i));
       y.domain([s[1][1], s[0][1]].map(y.invert, y));
+
       svg.select('.brush').call(brush.move, null);
+
     }
     return zoom();
   };

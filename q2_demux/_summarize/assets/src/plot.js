@@ -8,8 +8,8 @@
 
 import * as d3 from 'd3';
 
-import addBoxplotsToD3 from './box';
-import addBrush from './brush';
+import plotBoxes from './box';
+import { updateXTicks, addBrush } from './brush';
 
 const plot = (data, props, container) => {
   const plotContainer = d3.select(container);
@@ -71,35 +71,23 @@ const plot = (data, props, container) => {
     .text(d => d);
 
   const maxX = d3.max(data, d => d[0]);
-  const x0 = [0, maxX];
+  const x0 = data.map(d => d[0]);
   const y0 = [0, 45];
-  const x = d3.scaleLinear()
+  const x = d3.scaleBand()
     .domain(x0)
     .range([props.margin.left, props.width]);
   const y = d3.scaleLinear()
     .domain(y0)
     .range([props.height - props.margin.bottom, props.margin.top]);
 
-  const xAxis = d3.axisBottom(x).ticks(12);
+  const xAxis = d3.axisBottom(x);
   const yAxis = d3.axisLeft(y).ticks(9);
 
-  const chart = d3.boxplot()
-    .height(props.height - props.margin.bottom - props.margin.top)
-    .domain(y0);
+  svg.attr('height', props.height + props.margin.bottom + props.margin.top);
+  svg.attr('width', x.range()[0] + x.range()[1]);
 
-  addBrush(svg, chart, props, x, y, x0, y0, xAxis, yAxis);
-
-  chart
-    .width((x.range()[1] - x.range()[0]) / (x.domain()[1] - x.domain()[0]) / 2);
-
-  svg.selectAll('.box')
-    .attr('font', '10px sans-serif')
-    .data(data)
-  .enter()
-    .append('g')
-    .attr('class', 'boxplot')
-    .attr('transform', d => `translate(${x(d[0])}, ${props.margin.top})`)
-    .call(chart);
+  addBrush(svg, data, x, y, x0, y0, xAxis, yAxis)
+  plotBoxes(svg, data, x, y);
 
   svg.append('rect')
       .attr('width', props.width + props.margin.left + props.margin.right)
@@ -129,9 +117,6 @@ const plot = (data, props, container) => {
       .attr('transform', `translate(${props.margin.left},0)`)
       .call(yAxis);
 
-  svg.selectAll('.domain')
-      .style('display', 'none');
-
   svg.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('x', 0 - (props.height / 2))
@@ -147,10 +132,11 @@ const plot = (data, props, container) => {
       .attr('font-size', '10px')
       .style('text-anchor', 'middle')
       .text('Sequence Base');
+
+  updateXTicks(svg, x);
 };
 
 const initializePlot = (data) => {
-  addBoxplotsToD3(d3);
   const margin = { top: 10, right: 30, bottom: 30, left: 30 };
   const width = d3.select('#forwardContainer').node().offsetWidth;
   const props = {
