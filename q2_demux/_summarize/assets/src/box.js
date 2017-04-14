@@ -9,8 +9,9 @@
 import * as d3 from 'd3';
 
 export default function plotBoxes(svg, data, x, y) {
-  const halfWidth = x.bandwidth() < 2 ? 1 : x.bandwidth() / 2;
+  const halfWidth = (x.range()[1] - x.range()[0]) / (x.domain()[1] - x.domain()[0]) / 2;
   const quarterWidth = halfWidth / 2;
+  const t = svg.transition().duration(750);
 
   const containerUpdate = svg.selectAll('.container')
     .data(data)
@@ -20,8 +21,9 @@ export default function plotBoxes(svg, data, x, y) {
     .append('g')
     .attr('class', 'container');
   const containers = containerUpdate.merge(containerEnter)
-    .attr('transform', d => `translate(${x(d[0]) ? x(d[0]) : -100}, 0)`)
-    .attr('display', d => (x(d[0]) ? 'initial' : 'none'))
+    .transition(t)
+    .attr('transform', d => `translate(${x(d[0])}, 0)`)
+    .selection()
     .on('mouseover', function mouseover() {
       const data = d3.select(this).data();
       const stats = data[0][1];
@@ -50,10 +52,11 @@ export default function plotBoxes(svg, data, x, y) {
   centerUpdate.exit().remove();
   const centerEnter = centerUpdate.enter().append('line');
   centerUpdate.merge(centerEnter)
+    .transition(t)
     .attr('class', 'center')
-    .attr('x1', halfWidth)
+    .attr('x1', 0)
     .attr('y1', d => y(d[1]['min']))
-    .attr('x2', halfWidth)
+    .attr('x2', 0)
     .attr('y2', d => y(d[1]['max']))
     .attr('stroke-dasharray', '2,2')
     .attr('stroke-width', 1)
@@ -63,14 +66,16 @@ export default function plotBoxes(svg, data, x, y) {
   boxUpdate.exit().remove();
   const boxEnter = boxUpdate.enter().append('rect');
   boxUpdate.merge(boxEnter)
+    .transition(t)
     .attr('class', 'box')
-    .attr('x', quarterWidth)
+    .attr('x', -quarterWidth)
     .attr('y', d => y(d[1]['75%']))
     .attr('width', halfWidth)
     .attr('height', d => (y(d[1]['25%']) - y(d[1]['75%'])))
     .attr('fill', 'steelblue')
     .attr('stroke-width', 1)
     .attr('stroke', 'black')
+    .selection()
     // The two event handlers don't use fat-arrows because we need the lexical `this` in scope
     .on('mouseover', function mouseover() {
       d3.select(this)
@@ -85,10 +90,11 @@ export default function plotBoxes(svg, data, x, y) {
   medianUpdate.exit().remove();
   const medianEnter = medianUpdate.enter().append('line');
   medianUpdate.merge(medianEnter)
+    .transition(t)
     .attr('class', 'median')
-    .attr('x1', quarterWidth)
+    .attr('x1', -quarterWidth)
     .attr('y1', d => y(d[1]['50%']))
-    .attr('x2', halfWidth + quarterWidth)
+    .attr('x2', quarterWidth)
     .attr('y2', d => y(d[1]['50%']))
     .attr('stroke-width', 1)
     .attr('stroke', 'black');
@@ -97,10 +103,11 @@ export default function plotBoxes(svg, data, x, y) {
   lowerWhiskerUpdate.exit().remove();
   const lowerWhiskerEnter = lowerWhiskerUpdate.enter().append('line');
   lowerWhiskerUpdate.merge(lowerWhiskerEnter)
+    .transition(t)
     .attr('class', 'lower-whisker')
-    .attr('x1', quarterWidth)
+    .attr('x1', -quarterWidth)
     .attr('y1', d => y(d[1]['min']))
-    .attr('x2', halfWidth + quarterWidth)
+    .attr('x2', quarterWidth)
     .attr('y2', d => y(d[1]['min']))
     .attr('stroke-width', 1)
     .attr('stroke', 'black');
@@ -109,10 +116,11 @@ export default function plotBoxes(svg, data, x, y) {
   upperWhiskerUpdate.exit().remove();
   const upperWhiskerEnter = upperWhiskerUpdate.enter().append('line');
   upperWhiskerUpdate.merge(upperWhiskerEnter)
+    .transition(t)
     .attr('class', 'upper-whisker')
-    .attr('x1', quarterWidth)
+    .attr('x1', -quarterWidth)
     .attr('y1', d => y(d[1]['max']))
-    .attr('x2', halfWidth + quarterWidth)
+    .attr('x2', quarterWidth)
     .attr('y2', d => y(d[1]['max']))
     .attr('stroke-width', 1)
     .attr('stroke', 'black');

@@ -71,16 +71,16 @@ const plot = (data, props, container) => {
     .text(d => d);
 
   const maxX = d3.max(data, d => d[0]);
-  const x0 = data.map(d => d[0]);
+  const x0 = [0, maxX];
   const y0 = [0, 45];
-  const x = d3.scaleBand()
+  const x = d3.scaleLinear()
     .domain(x0)
     .range([props.margin.left, props.width]);
   const y = d3.scaleLinear()
     .domain(y0)
     .range([props.height - props.margin.bottom, props.margin.top]);
 
-  const xAxis = d3.axisBottom(x);
+  const xAxis = d3.axisBottom(x).ticks(12, d3.format('d'));
   const yAxis = d3.axisLeft(y).ticks(9);
 
   svg.attr('height', props.height + props.margin.bottom + props.margin.top);
@@ -132,8 +132,6 @@ const plot = (data, props, container) => {
       .attr('font-size', '10px')
       .style('text-anchor', 'middle')
       .text('Sequence Base');
-
-  updateXTicks(svg, x);
 };
 
 const initializePlot = (data) => {

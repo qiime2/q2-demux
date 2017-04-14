@@ -10,19 +10,6 @@ import * as d3 from 'd3';
 
 import plotBoxes from './box';
 
-export function updateXTicks(svg, x) {
-  const ticks = svg.selectAll('.axis--x .tick');
-  const lenTicks = x.domain().length;
-
-  if (lenTicks > 48) {
-    ticks.style('display', i => (i % 12 ? 'none' : 'initial'));
-  } else if (lenTicks > 24) {
-    ticks.style('display', i => (i % 2 ? 'none' : 'initial'));
-  } else {
-    ticks.style('display', 'initial');
-  }
-}
-
 export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis) {
   const brush = d3.brush();
   let idleTimeout;
@@ -34,10 +21,18 @@ export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis) {
   };
 
   const zoom = () => {
-    svg.select('.axis--x').call(xAxis);
-    svg.select('.axis--y').call(yAxis);
+    const t = svg.transition().duration(750);
+    const xMin = Math.floor(x.domain()[0]);
+    const xMax = Math.ceil(x.domain().slice(-1)[0]);
+    const vals = d3.range(xMin, xMax, 1);
+    if (vals.length <= 12) {
+        xAxis.tickValues(vals).tickFormat(d3.format('d'));
+    } else {
+        xAxis.tickValues(null).ticks(12, d3.format('d'));
+    }
+    svg.select('.axis--x').transition(t).call(xAxis);
+    svg.select('.axis--y').transition(t).call(yAxis);
     plotBoxes(svg, data, x, y);
-    updateXTicks(svg, x);
   };
 
   const brushEnded = () => {
@@ -50,15 +45,9 @@ export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis) {
       x.domain(x0);
       y.domain(y0);
     } else {
-      const tempX = d3.scaleQuantize().domain(x.range()).range(x.domain());
-      const low = tempX(s[0][0]);
-      const high = tempX(s[1][0]);
-
-      x.domain(Array(high - low + 1).fill().map((_, i) => low + i));
+      x.domain([s[0][0], s[1][0]].map(x.invert, x));
       y.domain([s[1][1], s[0][1]].map(y.invert, y));
-
       svg.select('.brush').call(brush.move, null);
-
     }
     return zoom();
   };
