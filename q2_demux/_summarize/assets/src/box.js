@@ -14,8 +14,7 @@ export default function plotBoxes(svg, data, x, y) {
   const t = svg.transition().duration(750);
 
   const containerUpdate = svg.selectAll('.container')
-    .data(data)
-    .attr('font', '10px sans-serif');
+    .data(data);
   containerUpdate.exit().remove();
   const containerEnter = containerUpdate.enter()
     .append('g')
@@ -27,21 +26,23 @@ export default function plotBoxes(svg, data, x, y) {
     .on('mouseover', function mouseover() {
       const data = d3.select(this).data();
       const stats = data[0][1];
-      const quartiles = [stats['25%'], stats['50%'], stats['75%']];
-      const whiskers = [stats.min, stats.max];
       const svg = d3.select(this.parentNode).node();
       const plotContainer = d3.select(svg.parentNode);
+      plotContainer
+        .select('.panel-heading')
+        .html(`Parametric seven-number summary for <strong>position ${data[0][0]}</strong>`);
       plotContainer
         .select('.stats')
         .select('tbody')
         .selectAll('tr')
         .data([
-          ['Position Number', data[0][0]],
-          ['Minimum', whiskers[0]],
-          ['1st Quartile', quartiles[0]],
-          ['Median', quartiles[1]],
-          ['3rd Quartile', quartiles[2]],
-          ['Maximum', whiskers[1]],
+          ['(Not shown in box plot)', '2nd', stats['2%']],
+          ['Lower Whisker', '9th', stats['9%']],
+          ['Bottom of Box', '25th', stats['25%']],
+          ['Middle of Box', '50th (Median)', stats['50%']],
+          ['Top of Box', '75th', stats['75%']],
+          ['Upper Whisker', '91st', stats['91%']],
+          ['(Not shown in box plot)', '98th', stats['98%']],
         ])
         .selectAll('td')
           .data(d => d)
@@ -55,9 +56,9 @@ export default function plotBoxes(svg, data, x, y) {
     .transition(t)
     .attr('class', 'center')
     .attr('x1', 0)
-    .attr('y1', d => y(d[1]['min']))
+    .attr('y1', d => y(d[1]['9%']))
     .attr('x2', 0)
-    .attr('y2', d => y(d[1]['max']))
+    .attr('y2', d => y(d[1]['91%']))
     .attr('stroke-dasharray', '2,2')
     .attr('stroke-width', 1)
     .attr('stroke', 'black');
@@ -106,9 +107,9 @@ export default function plotBoxes(svg, data, x, y) {
     .transition(t)
     .attr('class', 'lower-whisker')
     .attr('x1', -quarterWidth)
-    .attr('y1', d => y(d[1]['min']))
+    .attr('y1', d => y(d[1]['9%']))
     .attr('x2', quarterWidth)
-    .attr('y2', d => y(d[1]['min']))
+    .attr('y2', d => y(d[1]['9%']))
     .attr('stroke-width', 1)
     .attr('stroke', 'black');
 
@@ -119,9 +120,9 @@ export default function plotBoxes(svg, data, x, y) {
     .transition(t)
     .attr('class', 'upper-whisker')
     .attr('x1', -quarterWidth)
-    .attr('y1', d => y(d[1]['max']))
+    .attr('y1', d => y(d[1]['91%']))
     .attr('x2', quarterWidth)
-    .attr('y2', d => y(d[1]['max']))
+    .attr('y2', d => y(d[1]['91%']))
     .attr('stroke-width', 1)
     .attr('stroke', 'black');
 }

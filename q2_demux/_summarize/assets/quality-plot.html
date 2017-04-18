@@ -51,9 +51,12 @@
 {% endif %}
 <div class="row">
   <div class="col-xs-12 text-center">
-    <p><small>
+    <p>
       Click and drag on a plot to zoom in. Double click to zoom back out to full size.
-    </small></p>
+    </p>
+    <p>
+      Hover over a box to see the parametric seven-number summary of the quality scores at the corresponding position.
+    </p>
   </div>
   {% if paired %}
   <div id="forwardContainer" class="col-xs-12 col-md-6">
@@ -66,9 +69,10 @@
   <div id="forwardContainer" class="col-xs-12 col-md-6 col-md-offset-3"></div>
   {% endif %}
   <div class="col-xs-12 text-center">
-    <p><small>
-      These plots were generated using {{ "{:,}".format(sample_n) }} sequences.
-    </small></p>
+    <p>
+      These plots were generated using a random sampling of {{ "{:,}".format(sample_n) }} out of {{ "{:,}".format(result_data['sum']) }} sequences without replacement.
+      Outlier quality scores are not shown in box plots for clarity.
+    </p>
   </div>
 </div>
 <script src="./app/bundle.js" charset="utf-8"></script>

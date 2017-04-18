@@ -81,11 +81,9 @@ def _subsample_single(fastq_map):
 
 
 def _compute_stats_of_df(df):
-    df_95p = df.quantile([0.05, 0.95])
-    df = df.apply(lambda x: x[(x > df_95p.loc[0.05, x.name]) &
-                              (x < df_95p.loc[0.95, x.name])])
-    df_stats = df.describe()
-    df_stats = df_stats[~df_stats.index.isin(['count', 'std', 'mean'])]
+    df_stats = df.describe(percentiles=[0.02, 0.09, 0.25, 0.5, 0.75, 0.91, 0.98])
+    drop_cols = df_stats.index.isin(['count', 'std', 'mean', 'min', 'max'])
+    df_stats = df_stats[~drop_cols]
     return df_stats
 
 

@@ -29,7 +29,7 @@ const plot = (data, props, container) => {
       .attr('class', 'panel panel-default');
   panel.append('div')
     .attr('class', 'panel-heading')
-    .html('Statistical Summary');
+    .html('Parametric seven-number summary');
   const table = panel.append('div')
     .attr('class', 'stats')
   .append('table')
@@ -40,20 +40,20 @@ const plot = (data, props, container) => {
     .append('thead')
     .append('tr')
       .selectAll('th')
-    .data([['Hover over a boxplot to learn more...', 9], ['', 3]])
+    .data([['Box plot feature', 5], ['Percentile', 5], ['Quality score', 2]])
       .enter()
     .append('th')
     .text(d => d[0])
-    .attr('class', d => `col-xs-${d[1]}`)
-    .style('font-size', '10px');
+    .attr('class', d => `col-xs-${d[1]}`);
 
   const initialData = [
-    ['Position Number', '...'],
-    ['Minimum', '...'],
-    ['1st Quartile', '...'],
-    ['Median', '...'],
-    ['3rd Quartile', '...'],
-    ['Maximum', '...'],
+    ['(Not shown in box plot)', '2nd', '...'],
+    ['Lower Whisker', '9th', '...'],
+    ['Bottom of Box', '25th', '...'],
+    ['Middle of Box', '50th (Median)', '...'],
+    ['Top of Box', '75th', '...'],
+    ['Upper Whisker', '91st', '...'],
+    ['(Not shown in box plot)', '98th', '...'],
   ];
 
   const rows = table
@@ -122,7 +122,7 @@ const plot = (data, props, container) => {
       .attr('transform', 'rotate(-90)')
       .attr('x', 0 - (props.height / 2))
       .attr('dy', '0em')
-      .attr('font-size', '10px')
+      .attr('font-size', '12px')
       .style('text-anchor', 'middle')
       .text('Quality Score');
 
@@ -130,7 +130,7 @@ const plot = (data, props, container) => {
       .attr('x', props.width / 2)
       .attr('y', props.height)
       .attr('dy', '1em')
-      .attr('font-size', '10px')
+      .attr('font-size', '12px')
       .style('text-anchor', 'middle')
       .text('Sequence Base');
 };
