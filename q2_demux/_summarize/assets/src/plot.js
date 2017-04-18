@@ -79,14 +79,15 @@ const plot = (data, props, container) => {
   const y = d3.scaleLinear()
     .domain(y0)
     .range([props.height - props.margin.bottom, props.margin.top]);
+  const ticks = [12, 9];
 
-  const xAxis = d3.axisBottom(x).ticks(12, d3.format('d'));
-  const yAxis = d3.axisLeft(y).ticks(9);
+  const xAxis = d3.axisBottom(x).ticks(ticks[0], d3.format('d'));
+  const yAxis = d3.axisLeft(y).ticks(ticks[1], d3.format('d'));
 
   svg.attr('height', props.height + props.margin.bottom + props.margin.top);
   svg.attr('width', x.range()[0] + x.range()[1]);
 
-  addBrush(svg, data, x, y, x0, y0, xAxis, yAxis)
+  addBrush(svg, data, x, y, x0, y0, xAxis, yAxis, ticks)
   plotBoxes(svg, data, x, y);
 
   svg.append('rect')
@@ -104,7 +105,7 @@ const plot = (data, props, container) => {
   svg.append('rect')
     .attr('width', props.margin.right + 1000)
     .attr('height', props.height + 200)
-    .attr('x', props.width + 10)
+    .attr('x', props.width)
     .attr('fill', 'white');
 
   svg.append('g')
@@ -120,7 +121,7 @@ const plot = (data, props, container) => {
   svg.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('x', 0 - (props.height / 2))
-      .attr('dy', '1em')
+      .attr('dy', '0em')
       .attr('font-size', '10px')
       .style('text-anchor', 'middle')
       .text('Quality Score');
