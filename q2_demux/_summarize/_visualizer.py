@@ -81,7 +81,8 @@ def _subsample_single(fastq_map):
 
 
 def _compute_stats_of_df(df):
-    df_stats = df.describe(percentiles=[0.02, 0.09, 0.25, 0.5, 0.75, 0.91, 0.98])
+    df_stats = df.describe(
+        percentiles=[0.02, 0.09, 0.25, 0.5, 0.75, 0.91, 0.98])
     drop_cols = df_stats.index.isin(['count', 'std', 'mean', 'min', 'max'])
     df_stats = df_stats[~drop_cols]
     return df_stats
