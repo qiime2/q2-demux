@@ -70,7 +70,7 @@ const plot = (data, props, container) => {
     .append('td')
     .text(d => d);
 
-  const maxX = d3.max(data, d => d[0]);
+  const maxX = d3.max(data, d => d[0]) + 1;
   const x0 = [0, maxX];
   const y0 = [0, 45];
   const x = d3.scaleLinear()
