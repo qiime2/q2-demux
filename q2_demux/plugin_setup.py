@@ -26,8 +26,9 @@ plugin = qiime2.plugin.Plugin(
     version=q2_demux.__version__,
     website='https://github.com/qiime2/q2-demux',
     package='q2_demux',
-    user_support_text=None,
-    citation_text=None
+    description=('This QIIME 2 plugin supports demultiplexing of '
+                 'single-end and paired-end sequence reads.'),
+    short_description='Plugin for demultiplexing sequence reads.'
 )
 
 plugin.register_semantic_types(
