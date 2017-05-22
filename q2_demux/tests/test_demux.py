@@ -774,3 +774,46 @@ class SummarizeTests(unittest.TestCase):
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<strong>Danger:</strong>', html)
+
+    def test_inconsistent_sequence_length_single(self):
+        sequences = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                     ('@s2/1 abc/1', 'CC', '+', 'PPP'),
+                     ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                     ('@s4/1 abc/1', 'TTT', '+', 'PPP')]
+        bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_single(bsi, barcode_map)
+        # TODO: Remove _PlotQualView wrapper
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaisesRegex(ValueError, 'inconsistent length'):
+                summarize(output_dir, _PlotQualView(demux_data,
+                                                    paired=False), n=2)
+
+    def test_inconsistent_sequence_length_paired(self):
+        forward = [('@s1/1 abc/1', 'G', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'TTTT', '+', 'PPP')]
+        reverse = [('@s1/1 abc/1', 'AAAA', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'TTT', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'GG', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'C', '+', 'PPP')]
+        bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
+                                                  reverse)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_paired(bpsi, barcode_map)
+        # TODO: Remove _PlotQualView wrapper
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaisesRegex(ValueError, 'inconsistent length'):
+                summarize(output_dir, _PlotQualView(demux_data,
+                                                    paired=True), n=2)
+
+
+if __name__ == '__main__':
+    unittest.main()

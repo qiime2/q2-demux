@@ -55,9 +55,20 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
 
 def _subsample_paired(fastq_map):
     qual_sample = collections.defaultdict(list)
+    seq_len = None
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
+            if not seq_len:
+                seq_len = len(fseq[1])
+            if seq_len != len(fseq[1]):
+                raise ValueError('Encountered inconsistent length '
+                                 'sequence in %s.'
+                                 % os.path.basename(fwd))
+            if seq_len != len(rseq[1]):
+                raise ValueError('Encountered inconsistent length '
+                                 'sequence in %s.'
+                                 % os.path.basename(rev))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
@@ -70,8 +81,15 @@ def _subsample_paired(fastq_map):
 
 def _subsample_single(fastq_map):
     qual_sample = collections.defaultdict(list)
+    seq_len = None
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
+            if not seq_len:
+                seq_len = len(seq[1])
+            if seq_len != len(seq[1]):
+                raise ValueError('Encountered inconsistent length '
+                                 'sequence in %s.'
+                                 % os.path.basename(file))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
                 index.pop(0)
@@ -108,6 +126,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         count = 0
         for seq in _read_fastq_seqs(file):
             count += 1
+
         sample_name = os.path.basename(file).split('_', 1)[0]
         per_sample_fastq_counts[sample_name] = count
 
