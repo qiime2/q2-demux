@@ -59,14 +59,14 @@ def _subsample_paired(fastq_map):
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
-            if not seq_len:
+            if seq_len is None:
                 seq_len = len(fseq[1])
             if seq_len != len(fseq[1]):
                 raise ValueError(inconsistent_length_template
-                                 % (str(seq_len), str(len(fseq[1]))))
+                                 % (seq_len, len(fseq[1])))
             if seq_len != len(rseq[1]):
                 raise ValueError(inconsistent_length_template
-                                 % (str(seq_len), str(len(rseq[1]))))
+                                 % (seq_len, len(rseq[1])))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
@@ -82,11 +82,11 @@ def _subsample_single(fastq_map):
     seq_len = None
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
-            if not seq_len:
+            if seq_len is None:
                 seq_len = len(seq[1])
             if seq_len != len(seq[1]):
                 raise ValueError(inconsistent_length_template
-                                 % (str(seq_len), str(len(seq[1]))))
+                                 % (seq_len, len(seq[1])))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
                 index.pop(0)
@@ -123,7 +123,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         count = 0
         for seq in _read_fastq_seqs(file):
             count += 1
-
         sample_name = os.path.basename(file).split('_', 1)[0]
         per_sample_fastq_counts[sample_name] = count
 
@@ -212,8 +211,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         fh.write(');')
 
 
-inconsistent_length_template = ('Observed sequences of length %s '
-                                'and %s while generating a random '
+inconsistent_length_template = ('Observed sequences of length %d '
+                                'and %d while generating a random '
                                 'subsample of sequences. Inconsistent '
                                 'length sequences are not supported '
                                 'in this visualization at this time.')
