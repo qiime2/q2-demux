@@ -62,13 +62,11 @@ def _subsample_paired(fastq_map):
             if not seq_len:
                 seq_len = len(fseq[1])
             if seq_len != len(fseq[1]):
-                raise ValueError('Encountered inconsistent length '
-                                 'sequence in %s.'
-                                 % os.path.basename(fwd))
+                raise ValueError(inconsistent_length_template
+                                 % (str(seq_len), str(len(fseq[1]))))
             if seq_len != len(rseq[1]):
-                raise ValueError('Encountered inconsistent length '
-                                 'sequence in %s.'
-                                 % os.path.basename(rev))
+                raise ValueError(inconsistent_length_template
+                                 % (str(seq_len), str(len(rseq[1]))))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
@@ -87,9 +85,8 @@ def _subsample_single(fastq_map):
             if not seq_len:
                 seq_len = len(seq[1])
             if seq_len != len(seq[1]):
-                raise ValueError('Encountered inconsistent length '
-                                 'sequence in %s.'
-                                 % os.path.basename(file))
+                raise ValueError(inconsistent_length_template
+                                 % (str(seq_len), str(len(seq[1]))))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
                 index.pop(0)
@@ -213,3 +210,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
             fh.write(',')
             reverse_stats.to_json(fh)
         fh.write(');')
+
+
+inconsistent_length_template = ('Encountered sequences of length %s and %s. '
+                                'Demux does not support inconsistent sequence '
+                                'lengths at this time.')
