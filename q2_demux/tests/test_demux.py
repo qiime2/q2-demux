@@ -788,8 +788,8 @@ class SummarizeTests(unittest.TestCase):
         demux_data = emp_single(bsi, barcode_map)
         # TODO: Remove _PlotQualView wrapper
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaisesRegex(ValueError, 
-                                        'Encountered sequences of length'):
+            with self.assertRaisesRegex(ValueError,
+                                        'Observed sequences of length'):
                 summarize(output_dir, _PlotQualView(demux_data,
                                                     paired=False), n=2)
 
@@ -811,8 +811,8 @@ class SummarizeTests(unittest.TestCase):
         demux_data = emp_paired(bpsi, barcode_map)
         # TODO: Remove _PlotQualView wrapper
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaisesRegex(ValueError, 
-                                        'Encountered sequences of length'):
+            with self.assertRaisesRegex(ValueError,
+                                        'Observed sequences of length'):
                 summarize(output_dir, _PlotQualView(demux_data,
                                                     paired=True), n=2)
 

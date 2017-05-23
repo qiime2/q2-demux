@@ -212,6 +212,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         fh.write(');')
 
 
-inconsistent_length_template = ('Encountered sequences of length %s and %s. '
-                                'Demux does not support inconsistent sequence '
-                                'lengths at this time.')
+inconsistent_length_template = ('Observed sequences of length %s '
+                                'and %s while generating a random '
+                                'subsample of sequences. Inconsistent '
+                                'length sequences are not supported '
+                                'in this visualization at this time.')
