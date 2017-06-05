@@ -788,12 +788,12 @@ class SummarizeTests(unittest.TestCase):
         demux_data = emp_single(bsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
-            result = summarize(output_dir, _PlotQualView(demux_data,
-                                                         paired=False), n=2)
+            summarize(output_dir, _PlotQualView(demux_data,
+                                                paired=False), n=2)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('Observed sequences of length', html)           
+                self.assertIn('Observed sequences of length', html)
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
@@ -812,9 +812,9 @@ class SummarizeTests(unittest.TestCase):
 
         demux_data = emp_paired(bpsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
-           # TODO: Remove _PlotQualView wrapper
-            result = summarize(output_dir, _PlotQualView(demux_data,
-                                                         paired=True), n=2)
+            # TODO: Remove _PlotQualView wrapper
+            summarize(output_dir, _PlotQualView(demux_data,
+                                                paired=True), n=2)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
             with open(plot_fp, 'r') as fh:
                 html = fh.read()

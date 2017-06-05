@@ -140,7 +140,7 @@ plugin.visualizers.register_function(
               'generated for both forward and reverse reads for the same `n` '
               'sequences.'),
         'delta': ('The acceptable delta cutoff for disparities in sequence '
-              'length')
+                  'length')
     },
     name='Summarize counts per sample.',
     description=('Summarize counts per sample for all samples, and generate '

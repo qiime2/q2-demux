@@ -53,6 +53,7 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
                 break
     return results
 
+
 def _subsample_paired(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
     min_seq_len = math.inf
@@ -73,7 +74,7 @@ def _subsample_paired(fastq_map, delta=1):
                     break
     if abs(max_seq_len - min_seq_len) > delta:
         warning = (inconsistent_length_template %
-            (min_seq_len, max_seq_len))
+                   (min_seq_len, max_seq_len))
         for key in qual_sample.keys():
             array_list = qual_sample[key]
             for i in range(len(array_list)):
@@ -97,7 +98,7 @@ def _subsample_single(fastq_map, delta=1):
                     break
     if abs(max_seq_len - min_seq_len) > delta:
         warning = (inconsistent_length_template %
-            (min_seq_len, max_seq_len))
+                   (min_seq_len, max_seq_len))
         for key in qual_sample.keys():
             array_list = qual_sample[key]
             for i in range(len(array_list)):
@@ -113,7 +114,8 @@ def _compute_stats_of_df(df):
     return df_stats
 
 
-def summarize(output_dir: str, data: _PlotQualView, n: int=10000, delta=1) -> None:
+def summarize(output_dir: str, data: _PlotQualView,
+              n: int=10000, delta=1) -> None:
     paired = data.paired
     data = data.directory_format
     dangers = []
