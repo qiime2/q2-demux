@@ -57,6 +57,7 @@ def _subsample_paired(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
     min_seq_len = math.inf
     max_seq_len = 0
+    warning = ''
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
@@ -71,17 +72,20 @@ def _subsample_paired(fastq_map, delta=1):
                 if len(index) == 0:
                     break
     if abs(max_seq_len - min_seq_len) > delta:
+        warning = (inconsistent_length_template %
+            (min_seq_len, max_seq_len))
         for key in qual_sample.keys():
             array_list = qual_sample[key]
             for i in range(len(array_list)):
                 array_list[i] = array_list[i][0:min_seq_len:1]
-    return qual_sample
+    return [qual_sample, warning]
 
 
 def _subsample_single(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
     min_seq_len = math.inf
     max_seq_len = 0
+    warning = ''
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
             min_seq_len = min(min_seq_len, len(seq[1]))
@@ -92,11 +96,13 @@ def _subsample_single(fastq_map, delta=1):
                 if len(index) == 0:
                     break
     if abs(max_seq_len - min_seq_len) > delta:
+        warning = (inconsistent_length_template %
+            (min_seq_len, max_seq_len))
         for key in qual_sample.keys():
             array_list = qual_sample[key]
             for i in range(len(array_list)):
                 array_list[i] = array_list[i][0:min_seq_len:1]
-    return qual_sample
+    return [qual_sample, warning]
 
 
 def _compute_stats_of_df(df):
@@ -153,6 +159,9 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000, delta=1) -> No
     else:
         sample_map = [(file, link[file]) for file in link]
         quality_scores = _subsample_single(sample_map, delta)
+    if (quality_scores[1]):
+        warnings.append(quality_scores[1])
+    quality_scores = quality_scores[0]
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
     forward_stats = _compute_stats_of_df(forward_scores)
