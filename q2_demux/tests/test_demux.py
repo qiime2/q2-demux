@@ -791,7 +791,7 @@ class SummarizeTests(unittest.TestCase):
                                         'Observed sequences of length'):
                 # TODO: Remove _PlotQualView wrapper
                 summarize(output_dir, _PlotQualView(demux_data,
-                                                    paired=False), n=2)
+                                                    paired=False), n=4)
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),

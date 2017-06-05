@@ -125,7 +125,10 @@ plugin.visualizers.register_function(
     function=q2_demux.summarize,
     inputs={'data':
             SampleData[SequencesWithQuality | PairedEndSequencesWithQuality]},
-    parameters={'n': qiime2.plugin.Int},
+    parameters={
+      'n': qiime2.plugin.Int,
+      'delta': qiime2.plugin.Int
+    },
     input_descriptions={
         'data': 'The demultiplexed sequences to be summarized.'
     },
@@ -135,7 +138,9 @@ plugin.visualizers.register_function(
               'average positional qualities across all of the sequences '
               'selected. If input sequences are paired end, plots will be '
               'generated for both forward and reverse reads for the same `n` '
-              'sequences.')
+              'sequences.'),
+        'delta': ('The acceptable delta cutoff for disparities in sequence '
+              'length')
     },
     name='Summarize counts per sample.',
     description=('Summarize counts per sample for all samples, and generate '
