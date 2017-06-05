@@ -103,7 +103,7 @@ def _compute_stats_of_df(df):
     return df_stats
 
 
-def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
+def summarize(output_dir: str, data: _PlotQualView, n: int=10000, delta=1) -> None:
     paired = data.paired
     data = data.directory_format
     dangers = []
@@ -145,10 +145,10 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
     if paired:
         sample_map = [(file, rev[fwd.index(file)], link[file])
                       for file in link]
-        quality_scores = _subsample_paired(sample_map)
+        quality_scores = _subsample_paired(sample_map, delta)
     else:
         sample_map = [(file, link[file]) for file in link]
-        quality_scores = _subsample_single(sample_map)
+        quality_scores = _subsample_single(sample_map, delta)
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
     forward_stats = _compute_stats_of_df(forward_scores)
