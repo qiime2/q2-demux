@@ -789,7 +789,7 @@ class SummarizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
             summarize(output_dir, _PlotQualView(demux_data,
-                                                paired=False), n=4)
+                                                paired=False), n=4, delta=5)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
@@ -814,7 +814,7 @@ class SummarizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
             summarize(output_dir, _PlotQualView(demux_data,
-                                                paired=True), n=4)
+                                                paired=True), n=4, delta=3)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
 
             with open(plot_fp, 'r') as fh:
