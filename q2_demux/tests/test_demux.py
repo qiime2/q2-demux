@@ -816,6 +816,7 @@ class SummarizeTests(unittest.TestCase):
             summarize(output_dir, _PlotQualView(demux_data,
                                                 paired=True), n=2)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
+
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('Observed sequences of length', html)

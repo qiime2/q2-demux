@@ -116,6 +116,7 @@ def _compute_stats_of_df(df):
 
 def summarize(output_dir: str, data: _PlotQualView,
               n: int=10000, delta=1) -> None:
+    delta = abs(int(round(delta)))
     paired = data.paired
     data = data.directory_format
     dangers = []
