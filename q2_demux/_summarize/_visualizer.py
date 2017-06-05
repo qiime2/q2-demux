@@ -53,7 +53,7 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
     return results
 
 
-def _subsample_paired(fastq_map):
+def _subsample_paired(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
     seq_len = None
     for fwd, rev, index in fastq_map:
@@ -61,10 +61,10 @@ def _subsample_paired(fastq_map):
         for i, (fseq, rseq) in enumerate(file_pair):
             if seq_len is None:
                 seq_len = len(fseq[1])
-            if seq_len != len(fseq[1]):
+            if abs(seq_len - len(fseq[1])) > delta:
                 raise ValueError(inconsistent_length_template
                                  % (seq_len, len(fseq[1])))
-            if seq_len != len(rseq[1]):
+            if abs(seq_len - len(rseq[1])) > delta:
                 raise ValueError(inconsistent_length_template
                                  % (seq_len, len(rseq[1])))
             if i == index[0]:
@@ -77,14 +77,14 @@ def _subsample_paired(fastq_map):
     return qual_sample
 
 
-def _subsample_single(fastq_map):
+def _subsample_single(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
     seq_len = None
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
             if seq_len is None:
                 seq_len = len(seq[1])
-            if seq_len != len(seq[1]):
+            if abs(seq_len - len(seq[1])) > delta:
                 raise ValueError(inconsistent_length_template
                                  % (seq_len, len(seq[1])))
             if i == index[0]:
