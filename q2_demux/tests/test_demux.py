@@ -821,6 +821,32 @@ class SummarizeTests(unittest.TestCase):
                 html = fh.read()
                 self.assertIn('Observed sequences of length 1 and 7', html)
 
+    def test_inconsistent_sequence_length_under_delta(self):
+        forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAAAA', '+', 'PPPPP'),
+                   ('@s4/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP')]
+        reverse = [('@s1/1 abc/1', 'AAAAAAA', '+', 'YYYYYYY'),
+                   ('@s2/1 abc/1', 'TTTTT', '+', 'PPPPP'),
+                   ('@s3/1 abc/1', 'GGG', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'C', '+', 'P')]
+        bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
+                                                  reverse)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_paired(bpsi, barcode_map)
+        with tempfile.TemporaryDirectory() as output_dir:
+            # TODO: Remove _PlotQualView wrapper
+            summarize(output_dir, _PlotQualView(demux_data,
+                                                paired=True), n=4, delta=9)
+            plot_fp = os.path.join(output_dir, 'quality-plot.html')
+
+            with open(plot_fp, 'r') as fh:
+                html = fh.read()
+                self.assertFalse('Observed sequences of length' in html)
+
 
 if __name__ == '__main__':
     unittest.main()
