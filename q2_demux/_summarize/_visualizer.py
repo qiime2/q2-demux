@@ -193,8 +193,6 @@ def summarize(output_dir: str, data: _PlotQualView,
     overview_template = os.path.join(TEMPLATES, 'assets', 'overview.html')
     quality_template = os.path.join(TEMPLATES, 'assets', 'quality-plot.html')
     context = {
-        'dangers': dangers,
-        'warnings': warnings,
         'result_data': {
             'min': result.min(),
             'median': result.median(),
@@ -209,6 +207,8 @@ def summarize(output_dir: str, data: _PlotQualView,
                   'url': 'overview.html'},
                  {'title': 'Interactive Quality Plot',
                   'url': 'quality-plot.html'}],
+        'dangers': dangers,
+        'warnings': warnings,
         'sample_n': n
     }
     templates = [index, overview_template, quality_template]
