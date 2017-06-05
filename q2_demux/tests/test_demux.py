@@ -789,11 +789,11 @@ class SummarizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
             summarize(output_dir, _PlotQualView(demux_data,
-                                                paired=False), n=2)
+                                                paired=False), n=4)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('Observed sequences of length', html)
+                self.assertIn('Observed sequences of length 1 and 7', html)
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
@@ -814,12 +814,12 @@ class SummarizeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
             summarize(output_dir, _PlotQualView(demux_data,
-                                                paired=True), n=2)
+                                                paired=True), n=4)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
 
             with open(plot_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('Observed sequences of length', html)
+                self.assertIn('Observed sequences of length 1 and 7', html)
 
 
 if __name__ == '__main__':
