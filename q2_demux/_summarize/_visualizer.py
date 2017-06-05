@@ -227,5 +227,5 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000, delta=1) -> No
 inconsistent_length_template = ('Observed sequences of length %d '
                                 'and %d while generating a random '
                                 'subsample of sequences. Inconsistent '
-                                'length sequences are not supported '
-                                'in this visualization at this time.')
+                                'length sequences may decrease the '
+                                'accuracy of the visualization.')
