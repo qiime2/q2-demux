@@ -53,19 +53,7 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
     return results
 
 
-def _subsample_delta_handler(min_seq_len, max_seq_len, qual_sample, delta):
-    warning = (inconsistent_length_template %
-               (min_seq_len, max_seq_len)) if (
-               max_seq_len - min_seq_len > delta) else ''
-    for key in qual_sample.keys():
-        array_list = qual_sample[key]
-        print(array_list)
-        for i in range(len(array_list)):
-            array_list[i] = array_list[i][0:min_seq_len]
-    return qual_sample, warning
-
-
-def _subsample_paired(fastq_map, delta=1):
+def _subsample_paired(fastq_map):
     qual_sample = collections.defaultdict(list)
     min_seq_len = float('inf')
     max_seq_len = 0
@@ -80,11 +68,10 @@ def _subsample_paired(fastq_map, delta=1):
                 index.pop(0)
                 if len(index) == 0:
                     break
-    return _subsample_delta_handler(min_seq_len, max_seq_len,
-                                    qual_sample, delta)
+    return qual_sample, min_seq_len
 
 
-def _subsample_single(fastq_map, delta=1):
+def _subsample_single(fastq_map):
     qual_sample = collections.defaultdict(list)
     min_seq_len = float('inf')
     max_seq_len = 0
@@ -97,8 +84,7 @@ def _subsample_single(fastq_map, delta=1):
                 index.pop(0)
                 if len(index) == 0:
                     break
-    return _subsample_delta_handler(min_seq_len, max_seq_len,
-                                    qual_sample, delta)
+    return qual_sample, min_seq_len
 
 
 def _compute_stats_of_df(df):
@@ -109,9 +95,7 @@ def _compute_stats_of_df(df):
     return df_stats
 
 
-def summarize(output_dir: str, data: _PlotQualView,
-              n: int=10000, delta: int=1) -> None:
-    delta = abs(int(round(delta)))
+def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
     paired = data.paired
     data = data.directory_format
     dangers = []
@@ -153,12 +137,10 @@ def summarize(output_dir: str, data: _PlotQualView,
     if paired:
         sample_map = [(file, rev[fwd.index(file)], link[file])
                       for file in link]
-        quality_scores, warning = _subsample_paired(sample_map, delta)
+        quality_scores, min_seq_len = _subsample_paired(sample_map)
     else:
         sample_map = [(file, link[file]) for file in link]
-        quality_scores, warning = _subsample_single(sample_map, delta)
-    if (warning):
-        warnings.append(warning)
+        quality_scores, min_seq_len = _subsample_single(sample_map)
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
     forward_stats = _compute_stats_of_df(forward_scores)
