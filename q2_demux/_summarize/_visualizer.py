@@ -11,7 +11,6 @@ import os
 import pkg_resources
 import shutil
 import random
-import math
 
 import pandas as pd
 import seaborn as sns
@@ -54,39 +53,41 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
     return results
 
 
+def _subsample_delta_handler(min_seq_len, max_seq_len, qual_sample, delta):
+    warning = (inconsistent_length_template %
+               (min_seq_len, max_seq_len)) if (
+               max_seq_len - min_seq_len > delta) else ''
+    for key in qual_sample.keys():
+        array_list = qual_sample[key]
+        print(array_list)
+        for i in range(len(array_list)):
+            array_list[i] = array_list[i][0:min_seq_len]
+    return qual_sample, warning
+
+
 def _subsample_paired(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
-    min_seq_len = math.inf
+    min_seq_len = float('inf')
     max_seq_len = 0
-    warning = ''
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
-            min_seqs = min(len(fseq[1]), len(rseq[1]))
-            max_seqs = max(len(fseq[1]), len(rseq[1]))
-            min_seq_len = min(min_seq_len, min_seqs)
-            max_seq_len = max(max_seq_len, max_seqs)
+            min_seq_len = min(min_seq_len, len(fseq[1]), len(rseq[1]))
+            max_seq_len = min(max_seq_len, len(fseq[1]), len(rseq[1]))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
                 index.pop(0)
                 if len(index) == 0:
                     break
-    if abs(max_seq_len - min_seq_len) > delta:
-        warning = (inconsistent_length_template %
-                   (min_seq_len, max_seq_len))
-        for key in qual_sample.keys():
-            array_list = qual_sample[key]
-            for i in range(len(array_list)):
-                array_list[i] = array_list[i][0:min_seq_len:1]
-    return [qual_sample, warning]
+    return _subsample_delta_handler(min_seq_len, max_seq_len,
+                                    qual_sample, delta)
 
 
 def _subsample_single(fastq_map, delta=1):
     qual_sample = collections.defaultdict(list)
-    min_seq_len = math.inf
+    min_seq_len = float('inf')
     max_seq_len = 0
-    warning = ''
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
             min_seq_len = min(min_seq_len, len(seq[1]))
@@ -96,14 +97,8 @@ def _subsample_single(fastq_map, delta=1):
                 index.pop(0)
                 if len(index) == 0:
                     break
-    if abs(max_seq_len - min_seq_len) > delta:
-        warning = (inconsistent_length_template %
-                   (min_seq_len, max_seq_len))
-        for key in qual_sample.keys():
-            array_list = qual_sample[key]
-            for i in range(len(array_list)):
-                array_list[i] = array_list[i][0:min_seq_len:1]
-    return [qual_sample, warning]
+    return _subsample_delta_handler(min_seq_len, max_seq_len,
+                                    qual_sample, delta)
 
 
 def _compute_stats_of_df(df):
@@ -115,7 +110,7 @@ def _compute_stats_of_df(df):
 
 
 def summarize(output_dir: str, data: _PlotQualView,
-              n: int=10000, delta=1) -> None:
+              n: int=10000, delta: int=1) -> None:
     delta = abs(int(round(delta)))
     paired = data.paired
     data = data.directory_format
@@ -158,13 +153,12 @@ def summarize(output_dir: str, data: _PlotQualView,
     if paired:
         sample_map = [(file, rev[fwd.index(file)], link[file])
                       for file in link]
-        quality_scores = _subsample_paired(sample_map, delta)
+        quality_scores, warning = _subsample_paired(sample_map, delta)
     else:
         sample_map = [(file, link[file]) for file in link]
-        quality_scores = _subsample_single(sample_map, delta)
-    if (quality_scores[1]):
-        warnings.append(quality_scores[1])
-    quality_scores = quality_scores[0]
+        quality_scores, warning = _subsample_single(sample_map, delta)
+    if (warning):
+        warnings.append(warning)
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
     forward_stats = _compute_stats_of_df(forward_scores)
@@ -230,5 +224,5 @@ def summarize(output_dir: str, data: _PlotQualView,
 inconsistent_length_template = ('Observed sequences of length %d '
                                 'and %d while generating a random '
                                 'subsample of sequences. Inconsistent '
-                                'length sequences may decrease the '
-                                'accuracy of the visualization.')
+                                'length sequences may limit the visible '
+                                'range of the visualization')

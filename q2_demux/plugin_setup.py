@@ -126,11 +126,13 @@ plugin.visualizers.register_function(
     inputs={'data':
             SampleData[SequencesWithQuality | PairedEndSequencesWithQuality]},
     parameters={
-      'n': qiime2.plugin.Int,
-      'delta': qiime2.plugin.Int
+      'n': qiime2.plugin.Int % qiime2.plugin.Range(0, None),
+      'acceptable_length_difference':
+      qiime2.plugin.Int % qiime2.plugin.Range(0, None)
     },
     input_descriptions={
-        'data': 'The demultiplexed sequences to be summarized.'
+        'acceptable_length_difference':
+        'The demultiplexed sequences to be summarized.'
     },
     parameter_descriptions={
         'n': ('The number of sequences that should be selected at random for '
@@ -139,8 +141,9 @@ plugin.visualizers.register_function(
               'selected. If input sequences are paired end, plots will be '
               'generated for both forward and reverse reads for the same `n` '
               'sequences.'),
-        'delta': ('The acceptable delta cutoff for disparities in sequence '
-                  'length')
+        'acceptable_length_difference':
+        ('The acceptable delta cutoff for disparities in sequence '
+         'length')
     },
     name='Summarize counts per sample.',
     description=('Summarize counts per sample for all samples, and generate '
