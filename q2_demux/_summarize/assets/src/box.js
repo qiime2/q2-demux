@@ -31,7 +31,7 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
       const data = d3.select(this).data();
       const position = data[0][0];
       const stats = data[0][1];
-      const inTheDangerZone = stats.count !== seqProps.seqCount;
+      const inTheDangerZone = stats.count < seqProps.seqCount;
       const svg = d3.select(this.parentNode).node();
       const plotContainer = d3.select(svg.parentNode);
       plotContainer
@@ -94,18 +94,18 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
     .attr('y', d => y(d[1]['75%']))
     .attr('width', halfWidth)
     .attr('height', d => (y(d[1]['25%']) - y(d[1]['75%'])))
-    .attr('fill', d => (d[1]['count'] === seqProps.n ? lightBlue : lightRed))
+    .attr('fill', d => (d[1]['count'] < seqProps.seqCount ? lightRed : lightBlue))
     .attr('stroke-width', 1)
     .attr('stroke', 'black')
     .selection()
     // The two event handlers don't use fat-arrows because we need the lexical `this` in scope
     .on('mouseover', function mouseover() {
       d3.select(this)
-        .attr('fill', d => (d[1]['count'] === seqProps.n ? darkBlue : darkRed));
+        .attr('fill', d => (d[1]['count'] < seqProps.seqCount ? darkRed : darkBlue));
       })
     .on('mouseout', function mouseout() {
       d3.select(this)
-        .attr('fill', d => (d[1]['count'] === seqProps.n ? lightBlue : lightRed));
+        .attr('fill', d => (d[1]['count'] < seqProps.seqCount ? lightRed : lightBlue));
     });
 
   const medianUpdate = containers.selectAll('line.median').data(d => [d]);

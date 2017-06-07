@@ -195,8 +195,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
 
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
         fh.write("app.init(")
-        fh.write('%s,' % {'n': n, 'seqCount': sequence_count,
-                          'minSeqLen': min_seq_len})
+        fh.write('{"n":%s,"seqCount":%s,"minSeqLen":%s},' %
+                 (n, sequence_count, min_seq_len))
         forward_stats.to_json(fh)
         if paired:
             fh.write(',')

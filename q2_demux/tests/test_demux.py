@@ -775,51 +775,54 @@ class SummarizeTests(unittest.TestCase):
                 html = fh.read()
                 self.assertIn('<strong>Danger:</strong>', html)
 
-# def test_inconsistent_sequence_length_single(self):
-#     sequences = [('@s1/1 abc/1', 'GGGGGGG', '+', 'YYYYYYY'),
-#                  ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
-#                  ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
-#                  ('@s4/1 abc/1', 'T', '+', 'P')]
-#     bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
-#
-#     barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-#     barcode_map = qiime2.MetadataCategory(barcode_map)
-#
-#     demux_data = emp_single(bsi, barcode_map)
-#     with tempfile.TemporaryDirectory() as output_dir:
-#         # TODO: Remove _PlotQualView wrapper
-#         summarize(output_dir, _PlotQualView(demux_data,
-#                                             paired=False), n=4)
-#         plot_fp = os.path.join(output_dir, 'quality-plot.html')
-#         with open(plot_fp, 'r') as fh:
-#             html = fh.read()
-#             self.assertIn('Observed sequences of length 1 and 7', html)
-#
-# def test_inconsistent_sequence_length_paired(self):
-#     forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
-#                ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
-#                ('@s3/1 abc/1', 'AAAAA', '+', 'PPPPP'),
-#                ('@s4/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP')]
-#     reverse = [('@s1/1 abc/1', 'AAAAAAA', '+', 'YYYYYYY'),
-#                ('@s2/1 abc/1', 'TTTTT', '+', 'PPPPP'),
-#                ('@s3/1 abc/1', 'GGG', '+', 'PPP'),
-#                ('@s4/1 abc/1', 'C', '+', 'P')]
-#     bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
-#                                               reverse)
-#
-#     barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-#     barcode_map = qiime2.MetadataCategory(barcode_map)
-#
-#     demux_data = emp_paired(bpsi, barcode_map)
-#     with tempfile.TemporaryDirectory() as output_dir:
-#         # TODO: Remove _PlotQualView wrapper
-#         summarize(output_dir, _PlotQualView(demux_data,
-#                                             paired=True), n=4)
-#         plot_fp = os.path.join(output_dir, 'quality-plot.html')
-#
-#         with open(plot_fp, 'r') as fh:
-#             html = fh.read()
-#             self.assertIn('Observed sequences of length 1 and 7', html)
+    def test_inconsistent_sequence_length_single(self):
+        sequences = [('@s1/1 abc/1', 'GGGGGGG', '+', 'YYYYYYY'),
+                     ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
+                     ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                     ('@s4/1 abc/1', 'T', '+', 'P')]
+        bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_single(bsi, barcode_map)
+        with tempfile.TemporaryDirectory() as output_dir:
+            # TODO: Remove _PlotQualView wrapper
+            summarize(output_dir, _PlotQualView(demux_data,
+                                                paired=False), n=4)
+            plot_fp = os.path.join(output_dir, 'data.jsonp')
+            with open(plot_fp, 'r') as fh:
+                jsonp = fh.read()
+                self.assertIn('"seqCount":4', jsonp)
+                self.assertIn('"minSeqLen":1', jsonp)
+                self.assertIn('"n":4', jsonp)
+
+    def test_inconsistent_sequence_length_paired(self):
+        forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAAAA', '+', 'PPPPP'),
+                   ('@s4/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP')]
+        reverse = [('@s1/1 abc/1', 'AAAAAAA', '+', 'YYYYYYY'),
+                   ('@s2/1 abc/1', 'TTTTT', '+', 'PPPPP'),
+                   ('@s3/1 abc/1', 'GGG', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'C', '+', 'P')]
+        bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
+                                                  reverse)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_paired(bpsi, barcode_map)
+        with tempfile.TemporaryDirectory() as output_dir:
+            # TODO: Remove _PlotQualView wrapper
+            summarize(output_dir, _PlotQualView(demux_data,
+                                                paired=True), n=4)
+            plot_fp = os.path.join(output_dir, 'data.jsonp')
+            with open(plot_fp, 'r') as fh:
+                jsonp = fh.read()
+                self.assertIn('"seqCount":4', jsonp)
+                self.assertIn('"minSeqLen":1', jsonp)
+                self.assertIn('"n":4', jsonp)
 
 
 if __name__ == '__main__':
