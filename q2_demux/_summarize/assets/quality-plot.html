@@ -53,8 +53,6 @@
   <div class="col-xs-12 text-center">
     <p>
       Click and drag on plot to zoom in. Double click to zoom back out to full size.
-    </p>
-    <p>
       Hover over a box to see the parametric seven-number summary of the quality scores at the corresponding position.
     </p>
   </div>
@@ -68,12 +66,6 @@
   {% else %}
   <div id="forwardContainer" class="col-xs-12 col-md-6 col-md-offset-3"></div>
   {% endif %}
-  <div class="col-xs-12 text-center">
-    <p>
-      These plots were generated using a random sampling of {{ "{:,}".format(sample_n) }} out of {{ "{:,}".format(result_data['sum']) }} sequences without replacement.
-      Outlier quality scores are not shown in box plots for clarity.
-    </p>
-  </div>
 </div>
 <script src="./app/bundle.js" charset="utf-8"></script>
 <script src="./data.jsonp" charset="utf-8"></script>

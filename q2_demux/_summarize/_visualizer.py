@@ -90,7 +90,7 @@ def _subsample_single(fastq_map):
 def _compute_stats_of_df(df):
     df_stats = df.describe(
         percentiles=[0.02, 0.09, 0.25, 0.5, 0.75, 0.91, 0.98])
-    drop_cols = df_stats.index.isin(['count', 'std', 'mean', 'min', 'max'])
+    drop_cols = df_stats.index.isin(['std', 'mean', 'min', 'max'])
     df_stats = df_stats[~drop_cols]
     return df_stats
 
@@ -186,7 +186,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
                   'url': 'quality-plot.html'}],
         'dangers': dangers,
         'warnings': warnings,
-        'sample_n': n
     }
     templates = [index, overview_template, quality_template]
     q2templates.render(templates, output_dir, context=context)
@@ -196,6 +195,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
 
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
         fh.write("app.init(")
+        fh.write('%s,' % {'n': n, 'seqCount': sequence_count,
+                          'minSeqLen': min_seq_len})
         forward_stats.to_json(fh)
         if paired:
             fh.write(',')

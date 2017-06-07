@@ -10,7 +10,7 @@ import * as d3 from 'd3';
 
 import plotBoxes from './box';
 
-export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis, ticksCounts) {
+export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis, ticksCounts, seqProps) {
   const brush = d3.brush();
   let idleTimeout;
   const idleDelay = 350;
@@ -44,7 +44,7 @@ export function addBrush(svg, data, x, y, x0, y0, xAxis, yAxis, ticksCounts) {
 
     svg.select('.axis--x').transition(t).call(xAxis);
     svg.select('.axis--y').transition(t).call(yAxis);
-    plotBoxes(svg, data, x, y);
+    plotBoxes(svg, data, x, y, seqProps);
   };
 
   const brushEnded = () => {

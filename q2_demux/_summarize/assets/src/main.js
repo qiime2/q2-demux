@@ -8,10 +8,10 @@
 
 import initializePlot from './plot';
 
-export const init = (fwdScores, revScores = undefined) => { // eslint-disable-line
+export const init = (seqProps, fwdScores, revScores = undefined) => { // eslint-disable-line
   const qualScores = { forward: Object.keys(fwdScores).map(key => [+key + 1, fwdScores[key]]) };
   if (revScores) {
     qualScores.reverse = Object.keys(revScores).map(key => [+key + 1, revScores[key]]);
   }
-  initializePlot(qualScores);
+  initializePlot(qualScores, seqProps);
 };
