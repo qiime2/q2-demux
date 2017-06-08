@@ -55,12 +55,15 @@ def _link_sample_n_to_file(files, counts, subsample_ns):
 
 def _subsample_paired(fastq_map):
     qual_sample = collections.defaultdict(list)
-    min_seq_len = float('inf')
+    min_seq_len = {}
+    min_seq_len['forward'] = float('inf')
+    min_seq_len['reverse'] = float('inf')
     max_seq_len = 0
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
-            min_seq_len = min(min_seq_len, len(fseq[1]), len(rseq[1]))
+            min_seq_len['forward'] = min(min_seq_len['forward'], len(fseq[1]))
+            min_seq_len['reverse'] = min(min_seq_len['reverse'], len(rseq[1]))
             max_seq_len = min(max_seq_len, len(fseq[1]), len(rseq[1]))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
@@ -73,11 +76,13 @@ def _subsample_paired(fastq_map):
 
 def _subsample_single(fastq_map):
     qual_sample = collections.defaultdict(list)
-    min_seq_len = float('inf')
+    min_seq_len = {}
+    min_seq_len['forward'] = float('inf')
+    min_seq_len['reverse'] = 'null'
     max_seq_len = 0
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
-            min_seq_len = min(min_seq_len, len(seq[1]))
+            min_seq_len['forward'] = min(min_seq_len['forward'], len(seq[1]))
             max_seq_len = max(max_seq_len, len(seq[1]))
             if i == index[0]:
                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
@@ -134,6 +139,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
 
     subsample_ns = sorted(random.sample(range(sequence_count), n))
     link = _link_sample_n_to_file(reads, per_sample_fastq_counts, subsample_ns)
+    min_seq_len = {}
     if paired:
         sample_map = [(file, rev[fwd.index(file)], link[file])
                       for file in link]
@@ -195,8 +201,10 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
 
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
         fh.write("app.init(")
-        fh.write('{"n":%s,"seqCount":%s,"minSeqLen":%s},' %
-                 (n, sequence_count, min_seq_len))
+        fh.write('{"n":%s,"seqCount":%s,"minSeqLen":'
+                 '{\"forward\":%s,\"reverse\":%s}},' %
+                 (n, sequence_count, min_seq_len['forward'],
+                  min_seq_len['reverse']))
         forward_stats.to_json(fh)
         if paired:
             fh.write(',')

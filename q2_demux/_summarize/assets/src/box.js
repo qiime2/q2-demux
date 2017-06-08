@@ -16,6 +16,7 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
   const lightBlue = 'skyblue';
   const darkRed = '#a94442';
   const lightRed = '#ebccd1';
+  const min_seq_len = seqProps.minSeqLen[data.direction];
 
   const containerUpdate = svg.selectAll('.container')
     .data(data);
@@ -57,9 +58,12 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
           .data(d => d)
           .text(d => d);
 
-      let seqLenNote = `The minimum sequence length identified during subsampling was ${seqProps.minSeqLen}`;
+      let seqLenNote = `The minimum sequence length identified during subsampling was ${min_seq_len}`;
       if (inTheDangerZone) {
-        seqLenNote = `This position (${position}) is greater than ${seqProps.minSeqLen}, the minimum sequence length identified during subsampling`;
+        seqLenNote = `This position (${position}) is greater than the minimum sequence length observed
+                      during subsampling (${min_seq_len} bases). As a result this plot is not based on
+                      data from all of the sequences, so should be interpreted with caution when
+                      compared to plots for other positions`;
       }
 
       plotContainer.select('.random-sampling')

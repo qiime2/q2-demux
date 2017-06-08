@@ -13,7 +13,6 @@ import { updateXTicks, addBrush } from './brush';
 
 const plot = (data, props, container, seqProps) => {
   const plotContainer = d3.select(container);
-
   const svg = plotContainer
     .append('svg')
       .attr('class', 'col-xs-12')
@@ -30,8 +29,8 @@ const plot = (data, props, container, seqProps) => {
       .html(`These plots were generated using a random sampling of ${seqProps.n}
              out of ${seqProps.seqCount} sequences without replacement. The
              minimum sequence length identified during subsampling was
-             ${seqProps.minSeqLen}. Outlier quality scores are not shown in box
-             plots for clarity.`);
+             ${seqProps.minSeqLen[data.direction]}. Outlier quality scores are not shown in box
+             plots for clarity`);
 
   const panel = plotContainer
     .append('div')
@@ -155,6 +154,7 @@ const initializePlot = (data, seqProps) => {
     height: ((width * 9) / 16) - margin.top - margin.bottom };
 
   Object.keys(data).forEach((direction) => {
+    data[direction].direction = direction
     plot(data[direction], props, `#${direction}Container`, seqProps);
   });
 };

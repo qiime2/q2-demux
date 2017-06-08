@@ -794,7 +794,8 @@ class SummarizeTests(unittest.TestCase):
             with open(plot_fp, 'r') as fh:
                 jsonp = fh.read()
                 self.assertIn('"seqCount":4', jsonp)
-                self.assertIn('"minSeqLen":1', jsonp)
+                self.assertIn('"minSeqLen":{"forward":1,"reverse":null}',
+                              jsonp)
                 self.assertIn('"n":4', jsonp)
 
     def test_inconsistent_sequence_length_paired(self):
@@ -821,7 +822,7 @@ class SummarizeTests(unittest.TestCase):
             with open(plot_fp, 'r') as fh:
                 jsonp = fh.read()
                 self.assertIn('"seqCount":4', jsonp)
-                self.assertIn('"minSeqLen":1', jsonp)
+                self.assertIn('"minSeqLen":{"forward":1,"reverse":1}', jsonp)
                 self.assertIn('"n":4', jsonp)
 
 
