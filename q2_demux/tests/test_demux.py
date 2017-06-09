@@ -790,20 +790,20 @@ class SummarizeTests(unittest.TestCase):
         lengths = [1, 3, 5, 7]
         for n in range(1, 6):
             with tempfile.TemporaryDirectory() as output_dir:
-                _lengths = lengths[0:5-n] if n < 4 else [1]
+                lengths_ = lengths[0:5-n] if n < 4 else [1]
                 # TODO: Remove _PlotQualView wrapper
                 summarize(output_dir, _PlotQualView(demux_data,
                                                     paired=False), n=n)
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
                     jsonp = fh.read()
-                    payload = jsonp.replace('app.init(',
-                                            '[').replace(');', ']')
-                    _json = json.loads(payload)[0]
-                    self.assertEqual(_json["totalSeqCount"], 4)
-                    self.assertIn(_json["minSeqLen"]["forward"], _lengths)
-                    self.assertEqual(_json["minSeqLen"]["reverse"], None)
-                    self.assertEqual(_json["n"], min(n, 4))
+                    json_ = jsonp.replace('app.init(',
+                                          '[').replace(');', ']')
+                    payload = json.loads(json_)[0]
+                    self.assertEqual(payload["totalSeqCount"], 4)
+                    self.assertIn(payload["minSeqLen"]["forward"], lengths_)
+                    self.assertEqual(payload["minSeqLen"]["reverse"], None)
+                    self.assertEqual(payload["n"], min(n, 4))
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
@@ -824,20 +824,20 @@ class SummarizeTests(unittest.TestCase):
         lengths = [1, 3, 5, 7]
         for n in range(1, 6):
             with tempfile.TemporaryDirectory() as output_dir:
-                _lengths = lengths[0:5-n] if n < 4 else [1]
+                lengths_ = lengths[0:5-n] if n < 4 else [1]
                 # TODO: Remove _PlotQualView wrapper
                 summarize(output_dir, _PlotQualView(demux_data,
                                                     paired=True), n=n)
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
                     jsonp = fh.read()
-                    payload = jsonp.replace('app.init(',
-                                            '[').replace(');', ']')
-                    _json = json.loads(payload)[0]
-                    self.assertEqual(_json["totalSeqCount"], 4)
-                    self.assertIn(_json["minSeqLen"]["forward"], _lengths)
-                    self.assertIn(_json["minSeqLen"]["reverse"], _lengths)
-                    self.assertEqual(_json["n"], min(n, 4))
+                    json_ = jsonp.replace('app.init(',
+                                          '[').replace(');', ']')
+                    payload = json.loads(json_)[0]
+                    self.assertEqual(payload["totalSeqCount"], 4)
+                    self.assertIn(payload["minSeqLen"]["forward"], lengths_)
+                    self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
+                    self.assertEqual(payload["n"], min(n, 4))
 
 
 if __name__ == '__main__':
