@@ -788,7 +788,7 @@ class SummarizeTests(unittest.TestCase):
 
         demux_data = emp_single(bsi, barcode_map)
         lengths = [1, 3, 5, 7]
-        for n in range(1, 5):
+        for n in range(1, 6):
             with tempfile.TemporaryDirectory() as output_dir:
                 _lengths = lengths[0:5-n] if n < 4 else [1]
                 # TODO: Remove _PlotQualView wrapper
@@ -796,13 +796,14 @@ class SummarizeTests(unittest.TestCase):
                                                     paired=False), n=n)
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
-                    text = fh.read()
-                    text = text.replace('app.init(', '[').replace(');', ']')
-                    jsonp = json.loads(text)[0]
-                    self.assertEqual(jsonp["totalSeqCount"], 4)
-                    self.assertIn(jsonp["minSeqLen"]["forward"], _lengths)
-                    self.assertEqual(jsonp["minSeqLen"]["reverse"], None)
-                    self.assertEqual(jsonp["n"], n)
+                    jsonp = fh.read()
+                    payload = jsonp.replace('app.init(',
+                                            '[').replace(');', ']')
+                    _json = json.loads(payload)[0]
+                    self.assertEqual(_json["totalSeqCount"], 4)
+                    self.assertIn(_json["minSeqLen"]["forward"], _lengths)
+                    self.assertEqual(_json["minSeqLen"]["reverse"], None)
+                    self.assertEqual(_json["n"], min(n, 4))
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
@@ -821,7 +822,7 @@ class SummarizeTests(unittest.TestCase):
 
         demux_data = emp_paired(bpsi, barcode_map)
         lengths = [1, 3, 5, 7]
-        for n in range(1, 5):
+        for n in range(1, 6):
             with tempfile.TemporaryDirectory() as output_dir:
                 _lengths = lengths[0:5-n] if n < 4 else [1]
                 # TODO: Remove _PlotQualView wrapper
@@ -829,13 +830,14 @@ class SummarizeTests(unittest.TestCase):
                                                     paired=True), n=n)
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
-                    text = fh.read()
-                    text = text.replace('app.init(', '[').replace(');', ']')
-                    jsonp = json.loads(text)[0]
-                    self.assertEqual(jsonp["totalSeqCount"], 4)
-                    self.assertIn(jsonp["minSeqLen"]["forward"], _lengths)
-                    self.assertIn(jsonp["minSeqLen"]["reverse"], _lengths)
-                    self.assertEqual(jsonp["n"], n)
+                    jsonp = fh.read()
+                    payload = jsonp.replace('app.init(',
+                                            '[').replace(');', ']')
+                    _json = json.loads(payload)[0]
+                    self.assertEqual(_json["totalSeqCount"], 4)
+                    self.assertIn(_json["minSeqLen"]["forward"], _lengths)
+                    self.assertIn(_json["minSeqLen"]["reverse"], _lengths)
+                    self.assertEqual(_json["n"], min(n, 4))
 
 
 if __name__ == '__main__':

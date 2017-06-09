@@ -62,7 +62,7 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
       if (inTheDangerZone) {
         seqLenNote = `This position (${position}) is greater than the minimum sequence length observed
                       during subsampling (${minSeqLen} bases). As a result, the plot at this position
-                      is not based on data from all of the sequences, so should be interpreted with 
+                      is not based on data from all of the sequences, so it should be interpreted with 
                       caution when compared to plots for other positions`;
       }
 
