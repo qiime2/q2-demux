@@ -27,10 +27,10 @@ const plot = (data, props, container, seqProps) => {
     .append('p')
       .attr('class', 'random-sampling')
       .html(`These plots were generated using a random sampling of ${seqProps.n}
-             out of ${seqProps.seqCount} sequences without replacement. The
+             out of ${seqProps.totalSeqCount} sequences without replacement. The
              minimum sequence length identified during subsampling was
              ${seqProps.minSeqLen[data.direction]}. Outlier quality scores are not shown in box
-             plots for clarity`);
+             plots for clarity.`);
 
   const panel = plotContainer
     .append('div')
