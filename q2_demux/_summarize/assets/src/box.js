@@ -58,7 +58,7 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
           .data(d => d)
           .text(d => d);
 
-      let seqLenNote = `The minimum sequence length identified during subsampling was ${minSeqLen}`;
+      let seqLenNote = `The minimum sequence length identified during subsampling was ${minSeqLen} bases`;
       if (inTheDangerZone) {
         seqLenNote = `This position (${position}) is greater than the minimum sequence length observed
                       during subsampling (${minSeqLen} bases). As a result, the plot at this position

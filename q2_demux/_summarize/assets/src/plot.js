@@ -29,7 +29,7 @@ const plot = (data, props, container, seqProps) => {
       .html(`These plots were generated using a random sampling of ${seqProps.n}
              out of ${seqProps.totalSeqCount} sequences without replacement. The
              minimum sequence length identified during subsampling was
-             ${seqProps.minSeqLen[data.direction]}. Outlier quality scores are not shown in box
+             ${seqProps.minSeqLen[data.direction]} bases. Outlier quality scores are not shown in box
              plots for clarity.`);
 
   const panel = plotContainer
