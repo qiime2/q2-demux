@@ -651,7 +651,8 @@ class SummarizeTests(unittest.TestCase):
     def test_basic(self):
         bsi = BarcodeSequenceFastqIterator(self.barcodes, self.sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = pd.Series(['AAAA', 'AACC'],
+                                index=['sample_1', 'sample2'])
         barcode_map = qiime2.MetadataCategory(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
@@ -677,6 +678,9 @@ class SummarizeTests(unittest.TestCase):
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
                 self.assertIn('<td>Maximum:</td><td>3</td>', html)
+            with open(csv_fp, 'r') as ch:
+                csv = ch.read()
+                self.assertIn('sample_1', csv)
 
     def test_single_sample(self):
         bsi = BarcodeSequenceFastqIterator(self.barcodes[:1],
