@@ -40,15 +40,15 @@ class _PlotQualView:
         self.paired = paired
 
 
-def _link_sample_n_to_file(id_reads, counts, subsample_ns):
+def _link_sample_n_to_file(file_records, counts, subsample_ns):
     results = collections.defaultdict(list)
     for num in subsample_ns:
         total = 0
-        for read, sample_id in id_reads:
+        for file, sample_id in file_records:
             total += counts[sample_id]
             if num < total:
                 idx = counts[sample_id] - (total - num)
-                results[read].append(idx)
+                results[file].append(idx)
                 break
     return results
 
@@ -108,15 +108,15 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
 
     per_sample_fastq_counts = {}
     reads = rev if not fwd and rev else fwd
-    id_reads = []
+    file_records = []
     for file in reads:
         count = 0
         for seq in _read_fastq_seqs(file):
             count += 1
-        sample_name = manifest[manifest.filename == file]
-        sample_name = sample_name['sample-id'].values[0]
-        per_sample_fastq_counts[sample_name] = count
-        id_reads.append((file, sample_name))
+        sample_id = manifest.loc[manifest.filename == file,
+                                 'sample-id'].iloc[0]
+        per_sample_fastq_counts[sample_id] = count
+        file_records.append((file, sample_id))
 
     result = pd.Series(per_sample_fastq_counts)
     result.name = 'Sequence count'
@@ -133,7 +133,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
                         'was generated using all available sequences.')
 
     subsample_ns = sorted(random.sample(range(sequence_count), n))
-    link = _link_sample_n_to_file(id_reads,
+    link = _link_sample_n_to_file(file_records,
                                   per_sample_fastq_counts,
                                   subsample_ns)
     if paired:
