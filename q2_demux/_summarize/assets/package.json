@@ -5,7 +5,7 @@
   "main": "main.js",
   "author": "Jorden Kreps",
   "dependencies": {
-    "d3": "^4.5.0"
+    "d3": "4.10.0"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
