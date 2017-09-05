@@ -16,7 +16,7 @@ q2_demux/_summarize/assets/dist:
 	cd q2_demux/_summarize/assets && \
 	npm install && \
 	npm run build && \
-	cp licenses/* dist
+	cp licenses/* dist/
 
 viz-summarize: q2_demux/_summarize/assets/dist
 
