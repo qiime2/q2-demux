@@ -23,7 +23,7 @@ requirements:
     - pandas
     - numpy
     - scikit-bio
-    - seaborn >= 0.8.1
+    - seaborn >=0.8.1
     - psutil
     # `ipywidgets` included to avoid ShimWarning from
     # `seaborn` imports:
