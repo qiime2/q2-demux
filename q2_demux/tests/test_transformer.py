@@ -13,6 +13,7 @@ from q2_demux._format import (EMPSingleEndDirFmt,
                               EMPSingleEndCasavaDirFmt)
 from q2_demux._demux import BarcodeSequenceFastqIterator
 from qiime2.plugin.testing import TestPluginBase
+from qiime2.plugin import ValidationError
 
 
 class TestTransformers(TestPluginBase):
@@ -92,12 +93,12 @@ class TestTransformers(TestPluginBase):
         dirpath = self.get_data_path(dirname)
         transformer = self.get_transformer(EMPSingleEndDirFmt,
                                            BarcodeSequenceFastqIterator)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             transformer(EMPSingleEndDirFmt(dirpath, mode='r'))
 
         transformer = self.get_transformer(EMPSingleEndCasavaDirFmt,
                                            EMPSingleEndDirFmt)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             transformer(EMPSingleEndCasavaDirFmt(dirpath, 'r'))
 
 
