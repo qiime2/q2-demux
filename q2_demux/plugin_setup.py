@@ -12,7 +12,8 @@ import qiime2
 import qiime2.plugin
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import (
-    SequencesWithQuality, PairedEndSequencesWithQuality)
+    SequencesWithQuality, PairedEndSequencesWithQuality,
+    JoinedSequencesWithQuality)
 
 import q2_demux
 from ._type import RawSequences, EMPSingleEndSequences, EMPPairedEndSequences
@@ -124,7 +125,9 @@ plugin.methods.register_function(
 plugin.visualizers.register_function(
     function=q2_demux.summarize,
     inputs={'data':
-            SampleData[SequencesWithQuality | PairedEndSequencesWithQuality]},
+            SampleData[SequencesWithQuality |
+                       PairedEndSequencesWithQuality |
+                       JoinedSequencesWithQuality]},
     parameters={'n': qiime2.plugin.Int},
     input_descriptions={
         'data': 'The demultiplexed sequences to be summarized.'
