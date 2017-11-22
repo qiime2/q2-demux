@@ -61,7 +61,9 @@ plugin.register_semantic_type_to_format(
 plugin.methods.register_function(
     function=q2_demux.emp_single,
     # TODO: remove RawSequences by creating an alias to EMPSequences
-    inputs={'seqs': RawSequences | EMPSingleEndSequences},
+    inputs={'seqs': (RawSequences |
+                     EMPSingleEndSequences |
+                     EMPPairedEndSequences)},
     parameters={'barcodes': qiime2.plugin.MetadataCategory,
                 'rev_comp_barcodes': qiime2.plugin.Bool,
                 'rev_comp_mapping_barcodes': qiime2.plugin.Bool},

@@ -98,3 +98,17 @@ def _5(dirfmt: SingleLanePerSampleSingleEndFastqDirFmt) -> _PlotQualView:
 @plugin.register_transformer
 def _6(dirfmt: SingleLanePerSamplePairedEndFastqDirFmt) -> _PlotQualView:
     return _PlotQualView(dirfmt, paired=True)
+
+
+@plugin.register_transformer
+def _7(dirfmt: EMPPairedEndDirFmt) -> BarcodeSequenceFastqIterator:
+    barcode_generator = _read_fastq_seqs(
+        str(dirfmt.barcodes.view(FastqGzFormat)))
+    sequence_generator = _read_fastq_seqs(
+        str(dirfmt.forward.view(FastqGzFormat)))
+    result = BarcodeSequenceFastqIterator(barcode_generator,
+                                          sequence_generator)
+    # ensure that dirfmt stays in scope as long as result does so these
+    # generators will work.
+    result.__dirfmt = dirfmt
+    return result
