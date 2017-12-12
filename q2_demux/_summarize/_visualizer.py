@@ -59,9 +59,11 @@ def _subsample_paired(fastq_map):
     for fwd, rev, index in fastq_map:
         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
         for i, (fseq, rseq) in enumerate(file_pair):
-            min_seq_len['forward'] = min(min_seq_len['forward'], len(fseq[1]))
-            min_seq_len['reverse'] = min(min_seq_len['reverse'], len(rseq[1]))
             if i == index[0]:
+                min_seq_len['forward'] = min(min_seq_len['forward'],
+                                             len(fseq[1]))
+                min_seq_len['reverse'] = min(min_seq_len['reverse'],
+                                             len(rseq[1]))
                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
                 index.pop(0)
@@ -75,8 +77,9 @@ def _subsample_single(fastq_map):
     min_seq_len = {'forward': float('inf'), 'reverse': None}
     for file, index in fastq_map:
         for i, seq in enumerate(_read_fastq_seqs(file)):
-            min_seq_len['forward'] = min(min_seq_len['forward'], len(seq[1]))
             if i == index[0]:
+                min_seq_len['forward'] = min(min_seq_len['forward'],
+                                             len(seq[1]))
                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
                 index.pop(0)
                 if len(index) == 0:

@@ -12,6 +12,7 @@ import os.path
 import tempfile
 import json
 import shutil
+import random
 
 import pandas as pd
 import skbio
@@ -885,6 +886,59 @@ class SummarizeTests(TestPluginBase):
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
                     self.assertEqual(payload["n"], min(n, 4))
+
+    def test_sequence_length_uses_subsample_single(self):
+        random.seed(6)  # Will select s1 and s2 which aren't the shortest ones
+
+        sequences = [('@s1/1 abc/1', 'GGGGGGG', '+', 'YYYYYYY'),
+                     ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
+                     ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                     ('@s4/1 abc/1', 'T', '+', 'P')]
+        bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_single(bsi, barcode_map)
+        with tempfile.TemporaryDirectory() as output_dir:
+            summarize(output_dir, _PlotQualView(demux_data, paired=False), n=2)
+            plot_fp = os.path.join(output_dir, 'data.jsonp')
+            with open(plot_fp, 'r') as fh:
+                jsonp = fh.read()
+                json_ = jsonp.replace('app.init(',
+                                      '[').replace(');', ']')
+                payload = json.loads(json_)[0]
+                self.assertEqual(payload["minSeqLen"]["forward"], 5)
+                self.assertEqual(payload["minSeqLen"]["reverse"], None)
+
+    def test_sequence_length_uses_subsample_paired(self):
+        random.seed(6)  # Will select s1 and s2 which aren't the shortest pairs
+
+        forward = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
+                   ('@s3/1 abc/1', 'A', '+', 'P'),
+                   ('@s4/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP')]
+        reverse = [('@s1/1 abc/1', 'AAAAA', '+', 'YYYYY'),
+                   ('@s2/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP'),
+                   ('@s3/1 abc/1', 'GGG', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'C', '+', 'P')]
+        bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
+                                                  reverse)
+
+        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
+        barcode_map = qiime2.MetadataCategory(barcode_map)
+
+        demux_data = emp_paired(bpsi, barcode_map)
+        with tempfile.TemporaryDirectory() as output_dir:
+            summarize(output_dir, _PlotQualView(demux_data, paired=True), n=2)
+            plot_fp = os.path.join(output_dir, 'data.jsonp')
+            with open(plot_fp, 'r') as fh:
+                jsonp = fh.read()
+                json_ = jsonp.replace('app.init(',
+                                      '[').replace(');', ']')
+                payload = json.loads(json_)[0]
+                self.assertEqual(payload["minSeqLen"]["forward"], 3)
+                self.assertEqual(payload["minSeqLen"]["reverse"], 5)
 
 
 if __name__ == '__main__':
