@@ -241,7 +241,7 @@ def _write_metadata_yaml(dir_fmt):
 
 
 def emp_single(seqs: BarcodeSequenceFastqIterator,
-               barcodes: qiime2.MetadataCategory,
+               barcodes: qiime2.CategoricalMetadataColumn,
                rev_comp_barcodes: bool=False,
                rev_comp_mapping_barcodes: bool=False
                ) -> SingleLanePerSampleSingleEndFastqDirFmt:
@@ -314,7 +314,7 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
 
 
 def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
-               barcodes: qiime2.MetadataCategory,
+               barcodes: qiime2.CategoricalMetadataColumn,
                rev_comp_barcodes: bool=False,
                rev_comp_mapping_barcodes: bool=False
                ) -> SingleLanePerSamplePairedEndFastqDirFmt:

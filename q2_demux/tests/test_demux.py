@@ -226,10 +226,12 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                           ('@s11/1 abc/1', 'TGA', '+', 'PPP')]
         self.bsi = BarcodeSequenceFastqIterator(barcodes, self.sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC', 'TTAA', 'GGAA', 'CGGC'],
-                                index=['sample1', 'sample2', 'sample3',
-                                       'sample4', 'sample5'])
-        self.barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC', 'TTAA', 'GGAA', 'CGGC'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3', 'sample4',
+                            'sample5'], name='id')
+        )
+        self.barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
     def test_valid(self):
         actual = emp_single(self.bsi, self.barcode_map)
@@ -277,28 +279,33 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
         self.test_valid()
 
     def test_variable_length_barcodes(self):
-        barcodes = pd.Series(['AAA', 'AACC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(['AAA', 'AACC'], name='bc',
+                             index=pd.Index(['sample1', 'sample2'], name='id'))
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_single(self.bsi, barcodes)
 
     def test_duplicate_barcodes(self):
-        barcodes = pd.Series(['AACC', 'AACC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(['AACC', 'AACC'], name='bc',
+                             index=pd.Index(['sample1', 'sample2'], name='id'))
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_single(self.bsi, barcodes)
 
     def test_no_matched_barcodes(self):
-        barcodes = pd.Series(['CCCC', 'GGCC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(['CCCC', 'GGCC'], name='bc',
+                             index=pd.Index(['sample1', 'sample2'], name='id'))
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_single(self.bsi, barcodes)
 
     def test_rev_comp_mapping_barcodes(self):
-        barcodes = pd.Series(['TTTT', 'GGTT', 'TTAA', 'TTCC', 'GCCG'],
-                             index=['sample1', 'sample2', 'sample3', 'sample4',
-                                    'sample5'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(
+            ['TTTT', 'GGTT', 'TTAA', 'TTCC', 'GCCG'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3', 'sample4',
+                            'sample5'], name='id')
+        )
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         actual = emp_single(self.bsi, barcodes, rev_comp_mapping_barcodes=True)
         output_fastq = list(actual.sequences.iter_views(FastqGzFormat))
         # five per-sample files were written
@@ -489,10 +496,12 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
         self.bpsi = BarcodePairedSequenceFastqIterator(
             self.barcodes, self.forward, self.reverse)
 
-        barcode_map = pd.Series(['AAAA', 'AACC', 'TTAA', 'GGAA', 'CGGC'],
-                                index=['sample1', 'sample2', 'sample3',
-                                       'sample4', 'sample5'])
-        self.barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC', 'TTAA', 'GGAA', 'CGGC'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3',
+                            'sample4', 'sample5'], name='id')
+        )
+        self.barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
     def check_valid(self, *args, **kwargs):
         actual = emp_paired(*args, **kwargs)
@@ -580,28 +589,39 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
         self.test_valid()
 
     def test_variable_length_barcodes(self):
-        barcodes = pd.Series(['AAA', 'AACC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(
+            ['AAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_paired(self.bpsi, barcodes)
 
     def test_duplicate_barcodes(self):
-        barcodes = pd.Series(['AACC', 'AACC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(
+            ['AACC', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_paired(self.bpsi, barcodes)
 
     def test_no_matched_barcodes(self):
-        barcodes = pd.Series(['CCCC', 'GGCC'], index=['sample1', 'sample2'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(
+            ['CCCC', 'GGCC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         with self.assertRaises(ValueError):
             emp_paired(self.bpsi, barcodes)
 
     def test_rev_comp_mapping_barcodes(self):
-        barcodes = pd.Series(['TTTT', 'GGTT', 'TTAA', 'TTCC', 'GCCG'],
-                             index=['sample1', 'sample2', 'sample3', 'sample4',
-                                    'sample5'])
-        barcodes = qiime2.MetadataCategory(barcodes)
+        barcodes = pd.Series(
+            ['TTTT', 'GGTT', 'TTAA', 'TTCC', 'GCCG'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3', 'sample4',
+                            'sample5'], name='id')
+        )
+        barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         self.check_valid(self.bpsi, barcodes, rev_comp_mapping_barcodes=True)
 
     def test_rev_comp_barcodes(self):
@@ -657,9 +677,11 @@ class SummarizeTests(TestPluginBase):
     def test_basic(self):
         bsi = BarcodeSequenceFastqIterator(self.barcodes, self.sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'],
-                                index=['sample_1', 'sample2'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample_1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         # test that an index.html file is created and that it has size > 0
@@ -692,8 +714,11 @@ class SummarizeTests(TestPluginBase):
         bsi = BarcodeSequenceFastqIterator(self.barcodes[:1],
                                            self.sequences[:1])
 
-        barcode_map = pd.Series(['AAAA'], index=['sample1'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA'], name='bc',
+            index=pd.Index(['sample1'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         # test that an index.html file is created and that it has size > 0
@@ -766,9 +791,11 @@ class SummarizeTests(TestPluginBase):
 
         bpsi = BarcodePairedSequenceFastqIterator(barcodes, forward, reverse)
 
-        barcode_map = pd.Series(['AAAA', 'AACC', 'TTAA'],
-                                index=['sample1', 'sample2', 'sample3'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC', 'TTAA'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_paired(bpsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
@@ -789,8 +816,9 @@ class SummarizeTests(TestPluginBase):
         sequences = self.sequences[:1]
         bsi = BarcodeSequenceFastqIterator(barcodes, sequences)
 
-        barcode_map = pd.Series(['AAAA'], index=['sample1'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(['AAAA'], name='bc',
+                                index=pd.Index(['sample1'], name='id'))
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
@@ -810,9 +838,11 @@ class SummarizeTests(TestPluginBase):
                      ('@s3/1 abc/1', 'AAA', '+', 'hhh')]
         bsi = BarcodeSequenceFastqIterator(barcodes, sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC', 'TTAA'],
-                                index=['sample1', 'sample2', 'sample3'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC', 'TTAA'], name='bc',
+            index=pd.Index(['sample1', 'sample2', 'sample3'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
@@ -831,8 +861,11 @@ class SummarizeTests(TestPluginBase):
                      ('@s4/1 abc/1', 'T', '+', 'P')]
         bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         lengths = [1, 3, 5, 7]
@@ -865,8 +898,11 @@ class SummarizeTests(TestPluginBase):
         bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
                                                   reverse)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_paired(bpsi, barcode_map)
         lengths = [1, 3, 5, 7]
@@ -896,8 +932,11 @@ class SummarizeTests(TestPluginBase):
                      ('@s4/1 abc/1', 'T', '+', 'P')]
         bsi = BarcodeSequenceFastqIterator(self.barcodes, sequences)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_single(bsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
@@ -925,8 +964,11 @@ class SummarizeTests(TestPluginBase):
         bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
                                                   reverse)
 
-        barcode_map = pd.Series(['AAAA', 'AACC'], index=['sample1', 'sample2'])
-        barcode_map = qiime2.MetadataCategory(barcode_map)
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
 
         demux_data = emp_paired(bpsi, barcode_map)
         with tempfile.TemporaryDirectory() as output_dir:
