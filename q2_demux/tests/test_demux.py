@@ -680,6 +680,9 @@ class SummarizeTests(TestPluginBase):
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertTrue(os.path.exists(png_fp))
             self.assertTrue(os.path.getsize(png_fp) > 0)
+            qual_forward_fp = os.path.join(output_dir, 'forward-index-quality-scores.csv')
+            self.assertTrue(os.path.exists(qual_forward_fp))
+            self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
