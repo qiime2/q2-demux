@@ -150,8 +150,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
     forward_scores = pd.DataFrame(quality_scores['forward'])
     forward_stats = _compute_stats_of_df(forward_scores)
     forward_stats.to_csv(os.path.join(output_dir,
-                                      'forward-index-quality-scores.csv'),
-                                      header=True, index=True)
+                         'forward-index-quality-scores.csv'),
+                         header=True, index=True)
 
     if (forward_stats.loc['50%'] > 45).any():
         dangers.append('Some of the PHRED quality values are out of range. '
@@ -163,8 +163,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         reverse_scores = pd.DataFrame(quality_scores['reverse'])
         reverse_stats = _compute_stats_of_df(reverse_scores)
         reverse_stats.to_csv(os.path.join(output_dir,
-                                          'reverse-index-quality-scores.csv'),
-                                          header=True, index=True)
+                             'reverse-index-quality-scores.csv'),
+                             header=True, index=True)
 
     show_plot = len(fwd) > 1
     if show_plot:
