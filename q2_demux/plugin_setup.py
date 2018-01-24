@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Copyright (c) 2016-2017, QIIME 2 development team.
+# Copyright (c) 2016-2018, QIIME 2 development team.
 #
 # Distributed under the terms of the Modified BSD License.
 #
@@ -8,8 +8,9 @@
 
 import importlib
 
-import qiime2
-import qiime2.plugin
+from qiime2.plugin import (
+    Plugin, MetadataColumn, Categorical, Bool, Int
+)
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
@@ -22,7 +23,7 @@ from ._format import (EMPMultiplexedDirFmt,
                       EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
 
 
-plugin = qiime2.plugin.Plugin(
+plugin = Plugin(
     name='demux',
     version=q2_demux.__version__,
     website='https://github.com/qiime2/q2-demux',
@@ -64,15 +65,15 @@ plugin.methods.register_function(
     inputs={'seqs': (RawSequences |
                      EMPSingleEndSequences |
                      EMPPairedEndSequences)},
-    parameters={'barcodes': qiime2.plugin.MetadataCategory,
-                'rev_comp_barcodes': qiime2.plugin.Bool,
-                'rev_comp_mapping_barcodes': qiime2.plugin.Bool},
+    parameters={'barcodes': MetadataColumn[Categorical],
+                'rev_comp_barcodes': Bool,
+                'rev_comp_mapping_barcodes': Bool},
     outputs=[('per_sample_sequences', SampleData[SequencesWithQuality])],
     input_descriptions={
         'seqs': 'The single-end sequences to be demultiplexed.'
     },
     parameter_descriptions={
-        'barcodes': 'The sample metadata category listing the per-sample '
+        'barcodes': 'The sample metadata column containing the per-sample '
                     'barcodes.',
         'rev_comp_barcodes': 'If provided, the barcode sequence reads will be '
                              'reverse complemented prior to demultiplexing.',
@@ -94,9 +95,9 @@ plugin.methods.register_function(
 plugin.methods.register_function(
     function=q2_demux.emp_paired,
     inputs={'seqs': EMPPairedEndSequences},
-    parameters={'barcodes': qiime2.plugin.MetadataCategory,
-                'rev_comp_barcodes': qiime2.plugin.Bool,
-                'rev_comp_mapping_barcodes': qiime2.plugin.Bool},
+    parameters={'barcodes': MetadataColumn[Categorical],
+                'rev_comp_barcodes': Bool,
+                'rev_comp_mapping_barcodes': Bool},
     outputs=[
         ('per_sample_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
@@ -104,7 +105,7 @@ plugin.methods.register_function(
         'seqs': 'The paired-end sequences to be demultiplexed.'
     },
     parameter_descriptions={
-        'barcodes': 'The sample metadata category listing the per-sample '
+        'barcodes': 'The sample metadata column containing the per-sample '
                     'barcodes.',
         'rev_comp_barcodes': 'If provided, the barcode sequence reads will be '
                              'reverse complemented prior to demultiplexing.',
@@ -130,7 +131,7 @@ plugin.visualizers.register_function(
             SampleData[SequencesWithQuality |
                        PairedEndSequencesWithQuality |
                        JoinedSequencesWithQuality]},
-    parameters={'n': qiime2.plugin.Int},
+    parameters={'n': Int},
     input_descriptions={
         'data': 'The demultiplexed sequences to be summarized.'
     },
