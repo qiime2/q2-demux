@@ -80,6 +80,12 @@ const plot = (data, props, container, seqProps) => {
     .append('td')
     .text(d => d);
 
+  plotContainer
+    .append('div')
+      .attr('class', 'col-xs-12')
+    .append('div')
+      .html(`<a href="${data.direction}-seven-number-summaries.csv">Download ${data.direction} parametric seven-number summaries as CSV</a>`)
+
   const maxX = d3.max(data, d => d[0]) + 1;
   const x0 = [0, maxX];
   const y0 = [0, 45];
