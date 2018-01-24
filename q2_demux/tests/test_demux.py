@@ -702,9 +702,8 @@ class SummarizeTests(TestPluginBase):
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertTrue(os.path.exists(png_fp))
             self.assertTrue(os.path.getsize(png_fp) > 0)
-            qual_forward_fp = os.path.join(output_dir,
-                                           'forward-seven-number-summaries'
-                                           '.csv')
+            qual_forward_fp = os.path.join(
+                output_dir, 'forward-seven-number-summaries.csv')
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
@@ -808,14 +807,12 @@ class SummarizeTests(TestPluginBase):
                                                          paired=True), n=2)
             self.assertTrue(result is None)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
-            qual_forward_fp = os.path.join(output_dir,
-                                           'forward-seven-number-summaries'
-                                           '.csv')
+            qual_forward_fp = os.path.join(
+                output_dir, 'forward-seven-number-summaries.csv')
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
-            qual_reverse_fp = os.path.join(output_dir,
-                                           'reverse-seven-number-summaries'
-                                           '.csv')
+            qual_reverse_fp = os.path.join(
+                output_dir, 'reverse-seven-number-summaries.csv')
             self.assertTrue(os.path.exists(qual_reverse_fp))
             self.assertTrue(os.path.getsize(qual_reverse_fp) > 0)
             with open(plot_fp, 'r') as fh:
