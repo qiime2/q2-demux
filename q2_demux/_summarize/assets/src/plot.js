@@ -137,7 +137,7 @@ const plot = (data, props, container, seqProps) => {
   svg.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('x', 0 - (props.height / 2))
-      .attr('dy', '0em')
+      .attr('dy', '1em')
       .attr('font-size', '12px')
       .style('text-anchor', 'middle')
       .text('Quality Score');
@@ -152,7 +152,7 @@ const plot = (data, props, container, seqProps) => {
 };
 
 const initializePlot = (data, seqProps) => {
-  const margin = { top: 10, right: 30, bottom: 30, left: 30 };
+  const margin = { top: 10, right: 30, bottom: 30, left: 40 };
   const width = d3.select('#forwardContainer').node().offsetWidth;
   const props = {
     margin,
