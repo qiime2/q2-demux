@@ -95,6 +95,17 @@ def _compute_stats_of_df(df):
     return df_stats
 
 
+def _build_seq_len_table(qscores: pd.Series) -> str:
+    sequence_lengths = qscores.notnull().sum(axis=1).copy()
+    sequence_length_stats = _compute_stats_of_df(sequence_lengths)
+
+    sequence_length_stats.rename(index={'50%': '50% (Median)',
+                                        'count': 'Total Sequences Sampled'},
+                                 inplace=True)
+    frame = sequence_length_stats.to_frame(name="")
+    return q2templates.df_to_html(frame)
+
+
 def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
     paired = data.paired
     data = data.directory_format
@@ -152,6 +163,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
     forward_stats.to_csv(os.path.join(output_dir,
                          'forward-seven-number-summaries.csv'),
                          header=True, index=True)
+    forward_length_table = _build_seq_len_table(forward_scores)
 
     if (forward_stats.loc['50%'] > 45).any():
         dangers.append('Some of the PHRED quality values are out of range. '
@@ -159,12 +171,16 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
                        'was chosen on import of your raw data. You can learn '
                        'how to choose your PHRED offset during import in the '
                        'importing tutorial.')
+
+    # Required initilization for conditional display of the table
+    reverse_length_table = None
     if paired:
         reverse_scores = pd.DataFrame(quality_scores['reverse'])
         reverse_stats = _compute_stats_of_df(reverse_scores)
         reverse_stats.to_csv(os.path.join(output_dir,
                              'reverse-seven-number-summaries.csv'),
                              header=True, index=True)
+        reverse_length_table = _build_seq_len_table(reverse_scores)
 
     show_plot = len(fwd) > 1
     if show_plot:
@@ -187,6 +203,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
             'max': result.max(),
             'sum': sequence_count
         },
+        'forward_length_table': forward_length_table,
+        'reverse_length_table': reverse_length_table,
         'result': html,
         'show_plot': show_plot,
         'paired': paired,
