@@ -206,6 +206,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
         'forward_length_table': forward_length_table,
         'reverse_length_table': reverse_length_table,
         'result': html,
+        'n_samples': result.count(),
         'show_plot': show_plot,
         'paired': paired,
         'tabs': [{'title': 'Overview',
