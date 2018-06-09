@@ -95,7 +95,7 @@ def _compute_stats_of_df(df):
     return df_stats
 
 
-def _build_seq_len_table(qscores: pd.Series) -> str:
+def _build_seq_len_table(qscores: pd.DataFrame) -> str:
     sequence_lengths = qscores.notnull().sum(axis=1).copy()
     sequence_length_stats = _compute_stats_of_df(sequence_lengths)
 
