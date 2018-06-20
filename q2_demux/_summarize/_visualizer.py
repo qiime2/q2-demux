@@ -97,12 +97,15 @@ def _compute_stats_of_df(df):
 
 def _build_seq_len_table(qscores: pd.DataFrame) -> str:
     sequence_lengths = qscores.notnull().sum(axis=1).copy()
-    sequence_length_stats = _compute_stats_of_df(sequence_lengths)
+    stats = _compute_stats_of_df(sequence_lengths)
 
-    sequence_length_stats.rename(index={'50%': '50% (Median)',
-                                        'count': 'Total Sequences Sampled'},
-                                 inplace=True)
-    frame = sequence_length_stats.to_frame(name="")
+    stats[stats.index != 'count'] = \
+        stats[stats.index != 'count'].astype(int).apply('{} nts'.format)
+
+    stats.rename(index={'50%': '50% (Median)',
+                        'count': 'Total Sequences Sampled'},
+                 inplace=True)
+    frame = stats.to_frame(name="")
     return q2templates.df_to_html(frame)
 
 

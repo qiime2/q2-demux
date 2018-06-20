@@ -67,6 +67,24 @@
   <div id="forwardContainer" class="col-xs-12 col-md-6 col-md-offset-3"></div>
   {% endif %}
 </div>
+
+<div class="row">
+  <div class="col-lg-6 col-lg-offset-3">
+      <h1>Demultiplexed sequence length summary</h1>
+      {% set colsize = 6 if reverse_length_table else 12 %}
+      <div class="col-lg-{{ colsize }}">
+          <h4>Forward Reads</h4>
+          {{ forward_length_table }}
+      </div>
+      {% if reverse_length_table %}
+      <div class="col-lg-{{ colsize }}">
+          <h4>Reverse Reads</h4>
+          {{ reverse_length_table }}
+      </div>
+      {% endif %}
+  </div>
+</div>
+
 <script src="./dist/bundle.js" charset="utf-8"></script>
 <script src="./data.jsonp" charset="utf-8"></script>
 {% endblock %}
