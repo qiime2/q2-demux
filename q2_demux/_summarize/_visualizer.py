@@ -109,7 +109,7 @@ def _build_seq_len_table(qscores: pd.DataFrame) -> str:
     return q2templates.df_to_html(frame)
 
 
-def summarize(output_dir: str, data: _PlotQualView, n: int=10000) -> None:
+def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     paired = data.paired
     data = data.directory_format
     dangers = []
