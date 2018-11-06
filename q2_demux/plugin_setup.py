@@ -153,7 +153,7 @@ plugin.methods.register_function(
     function=q2_demux.subsample_single,
     inputs={'sequences': SampleData[SequencesWithQuality |
                                     PairedEndSequencesWithQuality]},
-    parameters={'percentage': Float % Range(0, 1,
+    parameters={'fraction': Float % Range(0, 1,
                                             inclusive_start=False,
                                             inclusive_end=True)},
     outputs=[
@@ -163,7 +163,7 @@ plugin.methods.register_function(
         'sequences': 'The demultiplexed sequences to be subsampled.'
     },
     parameter_descriptions={
-        'percentage': ('The percentage of sequences to retain in subsample.')
+        'fraction': ('The fraction of sequences to retain in subsample.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
@@ -171,13 +171,13 @@ plugin.methods.register_function(
     name='Subsample single-end sequences.',
     description=('Generate a random subsample of single-end sequences '
                  'containing approximately the percent of sequences '
-                 'specified by the percentage parameter.')
+                 'specified by the fraction parameter.')
 )
 
 plugin.methods.register_function(
     function=q2_demux.subsample_paired,
     inputs={'sequences': SampleData[PairedEndSequencesWithQuality]},
-    parameters={'percentage': Float % Range(0, 1,
+    parameters={'fraction': Float % Range(0, 1,
                                             inclusive_start=False,
                                             inclusive_end=True)},
     outputs=[
@@ -187,7 +187,7 @@ plugin.methods.register_function(
         'sequences': 'The demultiplexed sequences to be subsampled.'
     },
     parameter_descriptions={
-        'percentage': ('The percentage of sequences to retain in subsample.')
+        'fraction': ('The fraction of sequences to retain in subsample.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
@@ -195,7 +195,7 @@ plugin.methods.register_function(
     name='Subsample paired-end sequences.',
     description=('Generate a random subsample of paired-end sequences '
                  'containing approximately the percent of sequences '
-                 'specified by the percentage parameter.')
+                 'specified by the fraction parameter.')
 )
 
 importlib.import_module('q2_demux._transformer')

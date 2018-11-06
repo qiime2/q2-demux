@@ -18,41 +18,10 @@ from q2_types.per_sample_sequences import (
     SingleLanePerSamplePairedEndFastqDirFmt,
     FastqManifestFormat, YamlFormat)
 
-# def _subsample_paired(fastq_map):
-#     qual_sample = collections.defaultdict(list)
-#     min_seq_len = {'forward': float('inf'), 'reverse': float('inf')}
-#     for fwd, rev, index in fastq_map:
-#         file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
-#         for i, (fseq, rseq) in enumerate(file_pair):
-#             if i == index[0]:
-#                 min_seq_len['forward'] = min(min_seq_len['forward'],
-#                                              len(fseq[1]))
-#                 min_seq_len['reverse'] = min(min_seq_len['reverse'],
-#                                              len(rseq[1]))
-#                 qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
-#                 qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
-#                 index.pop(0)
-#                 if len(index) == 0:
-#                     break
-#     return qual_sample, min_seq_len
-#
-#
-# def _subsample_single(fastq_map):
-#     qual_sample = collections.defaultdict(list)
-#     min_seq_len = {'forward': float('inf'), 'reverse': None}
-#     for file, index in fastq_map:
-#         for i, seq in enumerate(_read_fastq_seqs(file)):
-#             if i == index[0]:
-#                 min_seq_len['forward'] = min(min_seq_len['forward'],
-#                                              len(seq[1]))
-#                 qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
-#                 index.pop(0)
-#                 if len(index) == 0:
-#                     break
-#     return qual_sample, min_seq_len
+from q2_demux._demux import _read_fastq_seqs
 
 def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
-                     percentage: float
+                     fraction: float
                     ) -> SingleLanePerSampleSingleEndFastqDirFmt:
     # result = SingleLanePerSamplePairedEndFastqDirFmt()
     #
@@ -66,7 +35,7 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     return sequences
 
 def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
-                     percentage: float
+                     fraction: float
                     ) -> SingleLanePerSamplePairedEndFastqDirFmt:
     result = SingleLanePerSamplePairedEndFastqDirFmt()
 
@@ -92,8 +61,12 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                                                    read_number=2)
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             with gzip.open(str(rev_path_out), mode='w') as rev:
-                fwd.write(gzip.open(fwd_path_in).read())
-                rev.write(gzip.open(rev_path_in).read())
+                file_pair = zip(_read_fastq_seqs(fwd_path_in),
+                                _read_fastq_seqs(rev_path_in))
+                for fwd_rec, rev_rec in file_pair:
+                    if random.random() <= fraction:
+                        fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
+                        rev.write(('\n'.join(rev_rec) + '\n').encode('utf-8'))
 
     _write_metadata_yaml(result)
 
