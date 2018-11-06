@@ -154,10 +154,10 @@ plugin.methods.register_function(
     inputs={'sequences': SampleData[SequencesWithQuality |
                                     PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
-                                            inclusive_start=False,
-                                            inclusive_end=True)},
+                                          inclusive_start=False,
+                                          inclusive_end=True)},
     outputs=[
-    ('subsampled_sequences', SampleData[SequencesWithQuality])
+        ('subsampled_sequences', SampleData[SequencesWithQuality])
     ],
     input_descriptions={
         'sequences': 'The demultiplexed sequences to be subsampled.'
@@ -178,10 +178,10 @@ plugin.methods.register_function(
     function=q2_demux.subsample_paired,
     inputs={'sequences': SampleData[PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
-                                            inclusive_start=False,
-                                            inclusive_end=True)},
+                                          inclusive_start=False,
+                                          inclusive_end=True)},
     outputs=[
-    ('subsampled_sequences', SampleData[PairedEndSequencesWithQuality])
+        ('subsampled_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
     input_descriptions={
         'sequences': 'The demultiplexed sequences to be subsampled.'
