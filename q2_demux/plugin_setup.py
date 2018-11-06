@@ -9,7 +9,7 @@
 import importlib
 
 from qiime2.plugin import (
-    Plugin, MetadataColumn, Categorical, Bool, Int
+    Plugin, MetadataColumn, Categorical, Bool, Int, Float, Range
 )
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import (
@@ -147,6 +147,55 @@ plugin.visualizers.register_function(
     description=('Summarize counts per sample for all samples, and generate '
                  'interactive positional quality plots based on `n` randomly '
                  'selected sequences.')
+)
+
+plugin.methods.register_function(
+    function=q2_demux.subsample_single,
+    inputs={'sequences': SampleData[SequencesWithQuality |
+                                    PairedEndSequencesWithQuality]},
+    parameters={'percentage': Float % Range(0, 1,
+                                            inclusive_start=False,
+                                            inclusive_end=True)},
+    outputs=[
+    ('subsampled_sequences', SampleData[SequencesWithQuality])
+    ],
+    input_descriptions={
+        'sequences': 'The demultiplexed sequences to be subsampled.'
+    },
+    parameter_descriptions={
+        'percentage': ('The percentage of sequences to retain in subsample.')
+    },
+    output_descriptions={
+        'subsampled_sequences': 'The subsampled sequences.'
+    },
+    name='Subsample single-end sequences.',
+    description=('Generate a random subsample of single-end sequences '
+                 'containing approximately the percent of sequences '
+                 'specified by the percentage parameter.')
+)
+
+plugin.methods.register_function(
+    function=q2_demux.subsample_paired,
+    inputs={'sequences': SampleData[PairedEndSequencesWithQuality]},
+    parameters={'percentage': Float % Range(0, 1,
+                                            inclusive_start=False,
+                                            inclusive_end=True)},
+    outputs=[
+    ('subsampled_sequences', SampleData[PairedEndSequencesWithQuality])
+    ],
+    input_descriptions={
+        'sequences': 'The demultiplexed sequences to be subsampled.'
+    },
+    parameter_descriptions={
+        'percentage': ('The percentage of sequences to retain in subsample.')
+    },
+    output_descriptions={
+        'subsampled_sequences': 'The subsampled sequences.'
+    },
+    name='Subsample paired-end sequences.',
+    description=('Generate a random subsample of paired-end sequences '
+                 'containing approximately the percent of sequences '
+                 'specified by the percentage parameter.')
 )
 
 importlib.import_module('q2_demux._transformer')
