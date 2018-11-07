@@ -15,8 +15,10 @@ import numpy as np
 
 import qiime2
 from qiime2.plugin.testing import TestPluginBase
+from qiime2.plugin.util import transform
 from q2_types.per_sample_sequences import (
-    FastqGzFormat, FastqManifestFormat, YamlFormat)
+    FastqGzFormat, CasavaOneEightSingleLanePerSampleDirFmt,
+    SingleLanePerSampleSingleEndFastqDirFmt)
 from q2_demux._demux import (BarcodeSequenceFastqIterator,
                              BarcodePairedSequenceFastqIterator)
 from q2_demux import (emp_single, emp_paired,
@@ -69,39 +71,11 @@ class SubsampleSingleTests(SubsampleTests):
 
     def setUp(self):
         super().setUp()
-        self.barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY'),
-                         ('@s2/2 abc/2', 'TTAA', '+', 'PPPP'),
-                         ('@s3/2 abc/2', 'AACC', '+', 'PPPP'),
-                         ('@s4/2 abc/2', 'TTAA', '+', 'PPPP'),
-                         ('@s5/2 abc/2', 'AACC', '+', 'PPPP'),
-                         ('@s6/2 abc/2', 'AAAA', '+', 'PPPP'),
-                         ('@s7/2 abc/2', 'CGGC', '+', 'PPPP'),
-                         ('@s8/2 abc/2', 'GGAA', '+', 'PPPP'),
-                         ('@s9/2 abc/2', 'CGGC', '+', 'PPPP'),
-                         ('@s10/2 abc/2', 'CGGC', '+', 'PPPP'),
-                         ('@s11/2 abc/2', 'GGAA', '+', 'PPPP')]
 
-        self.sequences = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
-                          ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
-                          ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
-                          ('@s4/1 abc/1', 'TTT', '+', 'PPP'),
-                          ('@s5/1 abc/1', 'ATA', '+', 'PPP'),
-                          ('@s6/1 abc/1', 'TAT', '+', 'PPP'),
-                          ('@s7/1 abc/1', 'CGC', '+', 'PPP'),
-                          ('@s8/1 abc/1', 'GCG', '+', 'PPP'),
-                          ('@s9/1 abc/1', 'ACG', '+', 'PPP'),
-                          ('@s10/1 abc/1', 'GCA', '+', 'PPP'),
-                          ('@s11/1 abc/1', 'TGA', '+', 'PPP')]
-        bsi = BarcodeSequenceFastqIterator(self.barcodes, self.sequences)
-
-        barcode_map = pd.Series(
-            ['AAAA', 'AACC', 'TTAA', 'GGAA', 'CGGC'], name='bc',
-            index=pd.Index(['sample1', 'sample2', 'sample3',
-                            'sample4', 'sample5'], name='id')
-        )
-        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
-
-        self.demux_data = emp_single(bsi, barcode_map)
+        demuxed = CasavaOneEightSingleLanePerSampleDirFmt(
+            self.get_data_path('subsample_single_end'), mode='r')
+        self.demux_data = transform(
+            demuxed, to_type=SingleLanePerSampleSingleEndFastqDirFmt)
 
     def test_no_subsample(self):
         actual = subsample_single(self.demux_data, fraction=1.0)
