@@ -6,6 +6,8 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import unittest
+
 import pandas as pd
 import skbio
 import numpy.testing as npt
@@ -37,11 +39,6 @@ class SubsampleTests(TestPluginBase):
         self.assertEqual(fields[1], str(sequence))
         npt.assert_array_equal(self._decode_qual_to_phred(fields[3]),
                                sequence.positional_metadata['quality'])
-
-    def _compare_manifests(self, act_manifest, exp_manifest):
-        # strip comment lines before comparing
-        act_manifest = [l for l in act_manifest if not l.startswith('#')]
-        self.assertEqual(act_manifest, exp_manifest)
 
     def _validate_fastq_subsampled(self, fastq, sequences, indices):
         # used for tests where only some input seqs must be present in the
@@ -148,22 +145,6 @@ class SubsampleSingleTests(SubsampleTests):
         # all input sequences are included in output
         self.assertEqual(fwd_subsampled_sequences, 11)
 
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
-
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     def test_subsample(self):
         actual = subsample_single(self.demux_data, fraction=0.5)
 
@@ -198,22 +179,6 @@ class SubsampleSingleTests(SubsampleTests):
         # but the frequency of that should be ~ 2 * 0.5 ** 11
         self.assertTrue(0 < fwd_subsampled_sequences < 11)
 
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
-
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     def test_correct_output_files_on_small_subsample(self):
         # some or all of the output files are likely to be empty, but they
         # should still be present and in the manifest
@@ -224,22 +189,6 @@ class SubsampleSingleTests(SubsampleTests):
             view for path, view in actual.sequences.iter_views(FastqGzFormat)
             if 'R1_001.fastq' in path.name]
         self.assertEqual(len(forward_fastq), 5)
-
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
-
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
 
 
 class SubsamplePairedTests(SubsampleTests):
@@ -358,27 +307,6 @@ class SubsamplePairedTests(SubsampleTests):
         # all input sequences are included in output
         self.assertEqual(rev_subsampled_sequences, 11)
 
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample1,sample1_1_L001_R2_001.fastq.gz,reverse\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R2_001.fastq.gz,reverse\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R2_001.fastq.gz,reverse\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R2_001.fastq.gz,reverse\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R2_001.fastq.gz,reverse\n']
-
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     def test_subsample(self):
         actual = subsample_paired(self.demux_data, fraction=0.5)
 
@@ -446,27 +374,6 @@ class SubsamplePairedTests(SubsampleTests):
 
         self.assertEqual(fwd_subsampled_sequences, rev_subsampled_sequences)
 
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample1,sample1_1_L001_R2_001.fastq.gz,reverse\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R2_001.fastq.gz,reverse\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R2_001.fastq.gz,reverse\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R2_001.fastq.gz,reverse\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R2_001.fastq.gz,reverse\n']
-
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     def test_correct_output_files_on_small_subsample(self):
         # some or all of the output files are likely to be empty, but they
         # should still be present and in the manifest
@@ -484,23 +391,6 @@ class SubsamplePairedTests(SubsampleTests):
             if 'R2_001.fastq' in path.name]
         self.assertEqual(len(reverse_fastq), 5)
 
-        # manifest is correct
-        act_manifest = list(actual.manifest.view(FastqManifestFormat).open())
-        exp_manifest = ['sample-id,filename,direction\n',
-                        'sample1,sample1_1_L001_R1_001.fastq.gz,forward\n',
-                        'sample1,sample1_1_L001_R2_001.fastq.gz,reverse\n',
-                        'sample3,sample3_2_L001_R1_001.fastq.gz,forward\n',
-                        'sample3,sample3_2_L001_R2_001.fastq.gz,reverse\n',
-                        'sample2,sample2_3_L001_R1_001.fastq.gz,forward\n',
-                        'sample2,sample2_3_L001_R2_001.fastq.gz,reverse\n',
-                        'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
-                        'sample5,sample5_4_L001_R2_001.fastq.gz,reverse\n',
-                        'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n',
-                        'sample4,sample4_5_L001_R2_001.fastq.gz,reverse\n']
 
-        self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
+if __name__ == '__main__':
+    unittest.main()
