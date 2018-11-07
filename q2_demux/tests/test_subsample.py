@@ -32,14 +32,6 @@ class SubsampleTests(TestPluginBase):
         qual = np.fromstring(qual_str, dtype=np.uint8) - 33
         return qual
 
-    def _compare_sequence_to_record(self, sequence, fields):
-        header_line = ' '.join([sequence.metadata['id'],
-                                sequence.metadata['description']])
-        self.assertEqual(fields[0][1:], header_line)
-        self.assertEqual(fields[1], str(sequence))
-        npt.assert_array_equal(self._decode_qual_to_phred(fields[3]),
-                               sequence.positional_metadata['quality'])
-
     def _validate_fastq_subsampled(self, fastq, sequences, indices):
         # used for tests where only some input seqs must be present in the
         # output (i.e., some subsampling has been performed)
