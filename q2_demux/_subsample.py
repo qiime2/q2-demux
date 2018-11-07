@@ -15,10 +15,9 @@ import pandas as pd
 from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt,
-    CasavaOneEightSingleLanePerSampleDirFmt,
-    FastqManifestFormat)
+    CasavaOneEightSingleLanePerSampleDirFmt)
 
-from q2_demux._demux import _read_fastq_seqs, _write_metadata_yaml
+from q2_demux._demux import _read_fastq_seqs
 
 
 def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,

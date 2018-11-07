@@ -9,19 +9,13 @@ import itertools
 import gzip
 import unittest
 
-import pandas as pd
-import numpy as np
-
-import qiime2
 from qiime2.plugin.testing import TestPluginBase
 from qiime2.plugin.util import transform
 from q2_types.per_sample_sequences import (
     FastqGzFormat, CasavaOneEightSingleLanePerSampleDirFmt,
     SingleLanePerSampleSingleEndFastqDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt)
-from q2_demux._demux import (BarcodePairedSequenceFastqIterator)
-from q2_demux import (emp_paired,
-                      subsample_single, subsample_paired)
+from q2_demux import subsample_single, subsample_paired
 
 
 class SubsampleTests(TestPluginBase):
@@ -31,7 +25,7 @@ class SubsampleTests(TestPluginBase):
     def _get_total_sequence_count(self, seq_ids):
         return len(list(itertools.chain(*seq_ids)))
 
-    def _validate_fastq_subsampled(self, obs, exp, forward : bool):
+    def _validate_fastq_subsampled(self, obs, exp, forward):
         subsampled_sequence_ids = []
         observed_samples = 0
 
@@ -132,10 +126,13 @@ class SubsamplePairedTests(SubsampleTests):
 
         # some sequences have been removed - this could occasionally fail,
         # but the frequency of that should be ~ 2 * 0.5 ** 11
-        f_seq_count = self._get_total_sequence_count(fwd_subsampled_sequence_ids)
+        f_seq_count = self._get_total_sequence_count(
+            fwd_subsampled_sequence_ids)
+        r_seq_count = self._get_total_sequence_count(
+            rev_subsampled_sequence_ids)
         self.assertTrue(0 < f_seq_count < 11)
-        r_seq_count = self._get_total_sequence_count(rev_subsampled_sequence_ids)
         self.assertTrue(0 < r_seq_count < 11)
+
         self.assertEqual(f_seq_count, r_seq_count)
 
         self.assertEqual(fwd_subsampled_sequence_ids,
