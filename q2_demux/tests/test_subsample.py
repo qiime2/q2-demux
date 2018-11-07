@@ -138,8 +138,6 @@ class SubsamplePairedTests(SubsampleTests):
         self.assertTrue(0 < r_seq_count < 11)
         self.assertEqual(f_seq_count, r_seq_count)
 
-        print(fwd_subsampled_sequence_ids)
-        print(rev_subsampled_sequence_ids)
         self.assertEqual(fwd_subsampled_sequence_ids,
                          rev_subsampled_sequence_ids)
 

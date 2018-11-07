@@ -27,10 +27,10 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
 
-    for _, fwd_name in manifest.itertuples():
-        # can the following be modified?
-        fwd_path_in = os.path.join(str(sequences), fwd_name)
-        fwd_path_out = str(result.path / os.path.basename(fwd_name))
+    for _, fwd_path in manifest.itertuples():
+        fwd_name = os.path.basename(fwd_path)
+        fwd_path_in = str(sequences.path / fwd_name)
+        fwd_path_out = str(result.path / fwd_name)
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             for fwd_rec in _read_fastq_seqs(fwd_path_in):
                 if random.random() <= fraction:
@@ -41,29 +41,17 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
 
 def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                      fraction: float
-                     ) -> SingleLanePerSamplePairedEndFastqDirFmt:
-    result = SingleLanePerSamplePairedEndFastqDirFmt()
+                     ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+    result = CasavaOneEightSingleLanePerSampleDirFmt()
+    manifest = sequences.manifest.view(pd.DataFrame)
 
-    manifest_path = os.path.join(str(sequences), sequences.manifest.pathspec)
-
-    manifest = pd.read_csv(manifest_path, header=0, comment='#')
-
-    fwd = manifest[manifest.direction == 'forward'].filename.tolist()
-    rev = manifest[manifest.direction == 'reverse'].filename.tolist()
-    sample_map = [(file, rev[fwd.index(file)]) for file in fwd]
-
-    for fwd_name, rev_name in sample_map:
-        fwd_path_in = os.path.join(str(sequences), fwd_name)
-        rev_path_in = os.path.join(str(sequences), rev_name)
-        sample_id, barcode_id, _ = fwd_name.split('_', maxsplit=2)
-        fwd_path_out = result.sequences.path_maker(sample_id=sample_id,
-                                                   barcode_id=barcode_id,
-                                                   lane_number=1,
-                                                   read_number=1)
-        rev_path_out = result.sequences.path_maker(sample_id=sample_id,
-                                                   barcode_id=barcode_id,
-                                                   lane_number=1,
-                                                   read_number=2)
+    for _, fwd_path, rev_path in manifest.itertuples():
+        fwd_name = os.path.basename(fwd_path)
+        rev_name = os.path.basename(rev_path)
+        fwd_path_in = str(sequences.path / fwd_name)
+        rev_path_in = str(sequences.path / rev_name)
+        fwd_path_out = str(result.path / fwd_name)
+        rev_path_out = str(result.path / rev_name)
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             with gzip.open(str(rev_path_out), mode='w') as rev:
                 file_pair = zip(_read_fastq_seqs(fwd_path_in),
@@ -72,12 +60,5 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                     if random.random() <= fraction:
                         fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
                         rev.write(('\n'.join(rev_rec) + '\n').encode('utf-8'))
-
-    _write_metadata_yaml(result)
-
-    manifest = FastqManifestFormat()
-    with manifest.open() as manifest_fh:
-        manifest_fh.write(open(manifest_path).read())
-    result.manifest.write_data(manifest, FastqManifestFormat)
 
     return result
