@@ -5,12 +5,11 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
-
+import itertools
+import gzip
 import unittest
 
 import pandas as pd
-import skbio
-import numpy.testing as npt
 import numpy as np
 
 import qiime2
@@ -19,9 +18,8 @@ from qiime2.plugin.util import transform
 from q2_types.per_sample_sequences import (
     FastqGzFormat, CasavaOneEightSingleLanePerSampleDirFmt,
     SingleLanePerSampleSingleEndFastqDirFmt)
-from q2_demux._demux import (BarcodeSequenceFastqIterator,
-                             BarcodePairedSequenceFastqIterator)
-from q2_demux import (emp_single, emp_paired,
+from q2_demux._demux import (BarcodePairedSequenceFastqIterator)
+from q2_demux import (emp_paired,
                       subsample_single, subsample_paired)
 
 
@@ -29,42 +27,42 @@ class SubsampleTests(TestPluginBase):
     # this functionality is derived from test_demux.EmpTestingUtils
     package = 'q2_demux.tests'
 
-    def _decode_qual_to_phred(self, qual_str):
-        # this function is adapted from scikit-bio
-        qual = np.fromstring(qual_str, dtype=np.uint8) - 33
-        return qual
+    def _validate_fastq_subsampled(self, obs, exp, forward : bool):
+        subsampled_sequence_ids = set()
+        observed_samples = 0
 
-    def _validate_fastq_subsampled(self, fastq, sequences, indices):
-        # used for tests where only some input seqs must be present in the
-        # output (i.e., some subsampling has been performed)
-        output_seqs = skbio.io.read(fastq, format='fastq', phred_offset=33,
-                                    compression='gzip', constructor=skbio.DNA)
-        output_seqs = list(output_seqs)
+        # Iterate over each sample, side-by-side
+        for (_, exp_fp), (_, obs_fp) in zip(exp, obs):
+            # Process fwd only if `forward==True`
+            if forward and 'R2' in str(exp_fp):
+                continue
+            # Process rev only if `forward==False`
+            if not forward and 'R1' in str(exp_fp):
+                continue
 
-        input_seqs = set()
-        for idx in indices:
-            sequence = sequences[idx]
-            input_seqs.add((sequence[0], sequence[1], sequence[2],
-                           tuple(self._decode_qual_to_phred(sequence[3]))))
+            observed_samples += 1
+            exp_fh = gzip.open(str(exp_fp), 'rt')
+            obs_fh = gzip.open(str(obs_fp), 'rt')
 
-        # the number of output sequences is less than or equal to the
-        # number of input sequences
-        self.assertTrue(len(output_seqs) <= len(input_seqs))
+            # Assemble expected sequences, per-sample
+            exp_seqs = {r for r in itertools.zip_longest(*[exp_fh] * 4)}
 
-        # confirm that any output seqs are found in the input seqs, and
-        # the header, sequence, and quality all perfectly match the input
-        for e in output_seqs:
-            header_line = '@%s %s' % (e.metadata['id'],
-                                      e.metadata['description'])
-            output_seq = (header_line,
-                          str(e),
-                          '+',
-                          tuple(e.positional_metadata['quality']))
-            self.assertTrue(output_seq in input_seqs)
+            # Assemble observed sequences, per-sample
+            obs_seqs = {r for r in itertools.zip_longest(*[obs_fh] * 4)}
 
-        # return the number of output sequences, so that can be used in
+            # the number of output sequences is less than or equal to the
+            # number of input sequences
+            self.assertTrue(len(obs_seqs) <= len(exp_seqs))
+
+            # is the observed set a subset of expected?
+            self.assertTrue(obs_seqs.issubset(exp_seqs))
+
+            for (seq_id, _, _, _) in obs_seqs:
+                subsampled_sequence_ids.add(seq_id)
+
+        # return the output sequence IDs, so that they can be used in
         # other tests
-        return len(output_seqs)
+        return subsampled_sequence_ids, observed_samples
 
 
 class SubsampleSingleTests(SubsampleTests):
@@ -80,36 +78,14 @@ class SubsampleSingleTests(SubsampleTests):
     def test_no_subsample(self):
         actual = subsample_single(self.demux_data, fraction=1.0)
 
-        # five forward sample files
-        forward_fastq = [
-            view for path, view in actual.sequences.iter_views(FastqGzFormat)
-            if 'R1_001.fastq' in path.name]
-        self.assertEqual(len(forward_fastq), 5)
+        obs_fqs = actual.sequences.iter_views(FastqGzFormat)
+        exp_fqs = self.demux_data.sequences.iter_views(FastqGzFormat)
 
-        # FORWARD:
-        fwd_subsampled_sequences = 0
-        # sequences in sample1 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[0].open(), self.sequences, [0, 5])
+        fwd_subsampled_sequence_ids, obs_sample_count = \
+            self._validate_fastq_subsampled(obs_fqs, exp_fqs, forward=True)
 
-        # sequences in sample2 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[1].open(), self.sequences, [2, 4])
-
-        # sequences in sample3 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[2].open(), self.sequences, [1, 3])
-
-        # sequences in sample4 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[3].open(), self.sequences, [7, 10])
-
-        # sequences in sample5 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[4].open(), self.sequences, [6, 8, 9])
-
-        # all input sequences are included in output
-        self.assertEqual(fwd_subsampled_sequences, 11)
+        self.assertEqual(obs_sample_count, 5)
+        self.assertEqual(len(fwd_subsampled_sequence_ids), 11)
 
     def test_subsample(self):
         actual = subsample_single(self.demux_data, fraction=0.5)
@@ -124,23 +100,23 @@ class SubsampleSingleTests(SubsampleTests):
         fwd_subsampled_sequences = 0
         # sequences in sample1 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[0].open(), self.sequences, [0, 5])
+            forward_fastq[0], self.sequences, [0, 5])
 
         # sequences in sample2 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[1].open(), self.sequences, [2, 4])
+            forward_fastq[1], self.sequences, [2, 4])
 
         # sequences in sample3 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[2].open(), self.sequences, [1, 3])
+            forward_fastq[2], self.sequences, [1, 3])
 
         # sequences in sample4 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[3].open(), self.sequences, [7, 10])
+            forward_fastq[3], self.sequences, [7, 10])
 
         # sequences in sample5 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[4].open(), self.sequences, [6, 8, 9])
+            forward_fastq[4], self.sequences, [6, 8, 9])
         # some sequences have been removed - this could occasionally fail,
         # but the frequency of that should be ~ 2 * 0.5 ** 11
         self.assertTrue(0 < fwd_subsampled_sequences < 11)
@@ -227,23 +203,23 @@ class SubsamplePairedTests(SubsampleTests):
         fwd_subsampled_sequences = 0
         # sequences in sample1 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[0].open(), self.forward, [0, 5])
+            forward_fastq[0], self.forward, [0, 5])
 
         # sequences in sample2 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[1].open(), self.forward, [2, 4])
+            forward_fastq[1], self.forward, [2, 4])
 
         # sequences in sample3 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[2].open(), self.forward, [1, 3])
+            forward_fastq[2], self.forward, [1, 3])
 
         # sequences in sample4 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[3].open(), self.forward, [7, 10])
+            forward_fastq[3], self.forward, [7, 10])
 
         # sequences in sample5 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[4].open(), self.forward, [6, 8, 9])
+            forward_fastq[4], self.forward, [6, 8, 9])
 
         # all input sequences are included in output
         self.assertEqual(fwd_subsampled_sequences, 11)
@@ -252,23 +228,23 @@ class SubsamplePairedTests(SubsampleTests):
         rev_subsampled_sequences = 0
         # sequences in sample1 are correct
         rev_subsampled_sequences += self._validate_fastq_subsampled(
-            reverse_fastq[0].open(), self.reverse, [0, 5])
+            reverse_fastq[0], self.reverse, [0, 5])
 
         # sequences in sample2 are correct
         rev_subsampled_sequences += self._validate_fastq_subsampled(
-            reverse_fastq[1].open(), self.reverse, [2, 4])
+            reverse_fastq[1], self.reverse, [2, 4])
 
         # sequences in sample3 are correct
         rev_subsampled_sequences += self._validate_fastq_subsampled(
-            reverse_fastq[2].open(), self.reverse, [1, 3])
+            reverse_fastq[2], self.reverse, [1, 3])
 
         # sequences in sample4 are correct
         rev_subsampled_sequences += self._validate_fastq_subsampled(
-            reverse_fastq[3].open(), self.reverse, [7, 10])
+            reverse_fastq[3], self.reverse, [7, 10])
 
         # sequences in sample5 are correct
         rev_subsampled_sequences += self._validate_fastq_subsampled(
-            reverse_fastq[4].open(), self.reverse, [6, 8, 9])
+            reverse_fastq[4], self.reverse, [6, 8, 9])
 
         # all input sequences are included in output
         self.assertEqual(rev_subsampled_sequences, 11)
@@ -292,23 +268,23 @@ class SubsamplePairedTests(SubsampleTests):
         fwd_subsampled_sequences = 0
         # sequences in sample1 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[0].open(), self.forward, [0, 5])
+            forward_fastq[0], self.forward, [0, 5])
 
         # sequences in sample2 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[1].open(), self.forward, [2, 4])
+            forward_fastq[1], self.forward, [2, 4])
 
         # sequences in sample3 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[2].open(), self.forward, [1, 3])
+            forward_fastq[2], self.forward, [1, 3])
 
         # sequences in sample4 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[3].open(), self.forward, [7, 10])
+            forward_fastq[3], self.forward, [7, 10])
 
         # sequences in sample5 are correct
         fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[4].open(), self.forward, [6, 8, 9])
+            forward_fastq[4], self.forward, [6, 8, 9])
         # some sequences have been removed - this could occasionally fail,
         # but the frequency of that should be ~ 2 * 0.5 ** 11
         self.assertTrue(0 < fwd_subsampled_sequences < 11)
