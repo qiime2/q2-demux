@@ -52,17 +52,17 @@ class SubsampleTests(TestPluginBase):
             obs_fh = gzip.open(str(obs_fp), 'rt')
 
             # Assemble expected sequences, per-sample
-            exp_seqs = {r for r in itertools.zip_longest(*[exp_fh] * 4)}
+            exp_seqs = [r for r in itertools.zip_longest(*[exp_fh] * 4)]
 
             # Assemble observed sequences, per-sample
-            obs_seqs = {r for r in itertools.zip_longest(*[obs_fh] * 4)}
+            obs_seqs = [r for r in itertools.zip_longest(*[obs_fh] * 4)]
 
             # the number of output sequences is less than or equal to the
             # number of input sequences
             self.assertTrue(len(obs_seqs) <= len(exp_seqs))
 
             # is the observed set a subset of expected?
-            self.assertTrue(obs_seqs.issubset(exp_seqs))
+            self.assertTrue(set(obs_seqs).issubset(set(exp_seqs)))
 
             subsampled_sequence_ids.append([e[0] for e in obs_seqs])
 
