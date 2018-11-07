@@ -75,8 +75,8 @@ class SubsampleSingleTests(SubsampleTests):
         self.demux_data = transform(
             demuxed, to_type=SingleLanePerSampleSingleEndFastqDirFmt)
 
-    def test_no_subsample(self):
-        actual = subsample_single(self.demux_data, fraction=1.0)
+    def test_subsample(self):
+        actual = subsample_single(self.demux_data, fraction=0.5)
 
         obs_fqs = actual.sequences.iter_views(FastqGzFormat)
         exp_fqs = self.demux_data.sequences.iter_views(FastqGzFormat)
@@ -85,52 +85,23 @@ class SubsampleSingleTests(SubsampleTests):
             self._validate_fastq_subsampled(obs_fqs, exp_fqs, forward=True)
 
         self.assertEqual(obs_sample_count, 5)
-        self.assertEqual(len(fwd_subsampled_sequence_ids), 11)
 
-    def test_subsample(self):
-        actual = subsample_single(self.demux_data, fraction=0.5)
-
-        # five forward sample files
-        forward_fastq = [
-            view for path, view in actual.sequences.iter_views(FastqGzFormat)
-            if 'R1_001.fastq' in path.name]
-        self.assertEqual(len(forward_fastq), 5)
-
-        # FORWARD:
-        fwd_subsampled_sequences = 0
-        # sequences in sample1 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[0], self.sequences, [0, 5])
-
-        # sequences in sample2 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[1], self.sequences, [2, 4])
-
-        # sequences in sample3 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[2], self.sequences, [1, 3])
-
-        # sequences in sample4 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[3], self.sequences, [7, 10])
-
-        # sequences in sample5 are correct
-        fwd_subsampled_sequences += self._validate_fastq_subsampled(
-            forward_fastq[4], self.sequences, [6, 8, 9])
         # some sequences have been removed - this could occasionally fail,
         # but the frequency of that should be ~ 2 * 0.5 ** 11
-        self.assertTrue(0 < fwd_subsampled_sequences < 11)
+        self.assertTrue(0 < len(fwd_subsampled_sequence_ids) < 11)
 
     def test_correct_output_files_on_small_subsample(self):
         # some or all of the output files are likely to be empty, but they
         # should still be present and in the manifest
         actual = subsample_single(self.demux_data, fraction=0.00001)
 
-        # five forward sample files
-        forward_fastq = [
-            view for path, view in actual.sequences.iter_views(FastqGzFormat)
-            if 'R1_001.fastq' in path.name]
-        self.assertEqual(len(forward_fastq), 5)
+        obs_fqs = actual.sequences.iter_views(FastqGzFormat)
+        exp_fqs = self.demux_data.sequences.iter_views(FastqGzFormat)
+
+        _, obs_sample_count = self._validate_fastq_subsampled(obs_fqs, exp_fqs,
+                                                              forward=True)
+
+        self.assertEqual(obs_sample_count, 5)
 
 
 class SubsamplePairedTests(SubsampleTests):
