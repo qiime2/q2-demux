@@ -155,7 +155,7 @@ plugin.methods.register_function(
                                     PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
                                           inclusive_start=False,
-                                          inclusive_end=True)},
+                                          inclusive_end=False)},
     outputs=[
         ('subsampled_sequences', SampleData[SequencesWithQuality])
     ],
@@ -168,10 +168,13 @@ plugin.methods.register_function(
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
     },
-    name='Subsample single-end sequences.',
+    name='Subsample single-end sequences without replacement.',
     description=('Generate a random subsample of single-end sequences '
-                 'containing approximately the percent of sequences '
-                 'specified by the fraction parameter.')
+                 'containing approximately the fraction of input sequences '
+                 'specified by the fraction parameter. The number of output '
+                 'samples will always be equal to the number of input '
+                 'samples, even if some of those samples contain no '
+                 'sequences after subsampling.')
 )
 
 plugin.methods.register_function(
@@ -179,7 +182,7 @@ plugin.methods.register_function(
     inputs={'sequences': SampleData[PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
                                           inclusive_start=False,
-                                          inclusive_end=True)},
+                                          inclusive_end=False)},
     outputs=[
         ('subsampled_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
@@ -192,10 +195,13 @@ plugin.methods.register_function(
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
     },
-    name='Subsample paired-end sequences.',
+    name='Subsample paired-end sequences without replacement.',
     description=('Generate a random subsample of paired-end sequences '
-                 'containing approximately the percent of sequences '
-                 'specified by the fraction parameter.')
+                 'containing approximately the fraction of input sequences '
+                 'specified by the fraction parameter. The number of output '
+                 'samples will always be equal to the number of input '
+                 'samples, even if some of those samples contain no '
+                 'sequences after subsampling.')
 )
 
 importlib.import_module('q2_demux._transformer')
