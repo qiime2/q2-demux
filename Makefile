@@ -1,5 +1,7 @@
 .PHONY: all lint test test-cov viz-summarize install dev clean distclean
 
+PYTHON ?= python
+
 all: viz-summarize
 
 lint:
@@ -21,7 +23,7 @@ q2_demux/_summarize/assets/dist:
 viz-summarize: q2_demux/_summarize/assets/dist
 
 install: all
-	python setup.py install
+	$(PYTHON) setup.py install
 
 dev: all
 	pip install -e .
