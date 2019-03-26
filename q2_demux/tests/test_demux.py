@@ -25,7 +25,7 @@ from q2_demux._demux import (BarcodeSequenceFastqIterator,
                              BarcodePairedSequenceFastqIterator)
 from q2_demux import emp_single, emp_paired, summarize
 from q2_types.per_sample_sequences import (
-    FastqGzFormat, FastqManifestFormat, YamlFormat,
+    FastqGzFormat, FastqManifestFormat,
     SingleLanePerSampleSingleEndFastqDirFmt)
 from q2_demux._summarize._visualizer import _PlotQualView
 
@@ -269,11 +269,6 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                         'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
         self._compare_manifests(act_manifest, exp_manifest)
 
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     @mock.patch('q2_demux._demux.OPEN_FH_LIMIT', 3)
     def test_valid_small_open_fh_limit(self):
         self.test_valid()
@@ -341,11 +336,6 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                         'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
         self._compare_manifests(act_manifest, exp_manifest)
 
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
-
     def test_rev_comp_barcodes(self):
         barcodes = [('@s1/2 abc/2', 'TTTT', '+', 'YYYY'),
                     ('@s2/2 abc/2', 'TTAA', '+', 'PPPP'),
@@ -393,11 +383,6 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                         'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
                         'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
         self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
 
     def test_barcode_trimming(self):
         # these barcodes are longer then the ones in the mapping file, so
@@ -448,11 +433,6 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                         'sample5,sample5_4_L001_R1_001.fastq.gz,forward\n',
                         'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
         self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
 
 
 class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
@@ -575,11 +555,6 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                         'sample4,sample4_5_L001_R2_001.fastq.gz,reverse\n']
 
         self._compare_manifests(act_manifest, exp_manifest)
-
-        # metadata is correct
-        act_metadata = list(actual.metadata.view(YamlFormat).open())
-        exp_metadata = ["{phred-offset: 33}\n"]
-        self.assertEqual(act_metadata, exp_metadata)
 
     def test_valid(self):
         self.check_valid(self.bpsi, self.barcode_map)
