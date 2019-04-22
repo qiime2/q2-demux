@@ -5,6 +5,7 @@
 #
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
+
 """
 module provides golay encoding/decoding of DNA barcodes.
 may not be the same golay code as previously used.
@@ -45,6 +46,7 @@ TO DOs:
 * haven't tested on all 2**24 bitvectors, could do that to be thorough
 * test speed performance
 """
+
 import numpy as np
 import functools
 
@@ -113,15 +115,6 @@ class GolayDecoder(object):
             self.DEFAULT_SYNDROME_LUT[syn] = errvec
 
         self.BITS_TO_NT = {v: k for k, v in self.NT_TO_BITS.items()}
-
-    def get_invalid_golay_barcodes(self, seqs):
-        result = []
-        for e in seqs:
-            if len(e) != 12:
-                result.append(e)
-            elif self.decode(e)[1] > 0:
-                result.append(e)
-        return result
 
     # there are 4096 valid codes, to minimize kicking out valid ones let's
     # reasonably over estimate the cache. Overhead is small anyway.

@@ -70,6 +70,9 @@ class ECCTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "length 8nt.$"):
             golay.decode('ACGGTGAG')
 
+    def test_decode_unrecognized_nt(self):
+        self.assertEqual(golay.decode('XYZXYZXYZXYZ'), (None, 4))
+
     def test_G_H(self):
         """ generator and parity check matrices should be s.t. G dot H.T = zeros
         """
