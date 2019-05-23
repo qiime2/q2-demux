@@ -18,7 +18,6 @@ import pandas as pd
 import pandas.testing as pdt
 import skbio
 import qiime2
-import numpy as np
 import numpy.testing as npt
 
 from qiime2.plugin.testing import TestPluginBase
@@ -28,7 +27,8 @@ from q2_demux import emp_single, emp_paired, summarize
 from q2_types.per_sample_sequences import (
     FastqGzFormat, FastqManifestFormat,
     SingleLanePerSampleSingleEndFastqDirFmt)
-from q2_demux._summarize._visualizer import _PlotQualView
+from q2_demux._summarize._visualizer import (_PlotQualView,
+                                             _decode_qual_to_phred33)
 
 
 class BarcodeSequenceFastqIteratorTests(unittest.TestCase):
@@ -172,17 +172,12 @@ class BarcodeSequenceFastqIteratorTests(unittest.TestCase):
 
 
 class EmpTestingUtils:
-    def _decode_qual_to_phred(self, qual_str):
-        # this function is adapted from scikit-bio
-        qual = np.fromstring(qual_str, dtype=np.uint8) - 33
-        return qual
-
     def _compare_sequence_to_record(self, sequence, fields):
         header_line = ' '.join([sequence.metadata['id'],
                                 sequence.metadata['description']])
         self.assertEqual(fields[0][1:], header_line)
         self.assertEqual(fields[1], str(sequence))
-        npt.assert_array_equal(self._decode_qual_to_phred(fields[3]),
+        npt.assert_array_equal(_decode_qual_to_phred33(fields[3]),
                                sequence.positional_metadata['quality'])
 
     def _compare_manifests(self, act_manifest, exp_manifest):

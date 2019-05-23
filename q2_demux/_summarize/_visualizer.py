@@ -25,7 +25,7 @@ TEMPLATES = pkg_resources.resource_filename('q2_demux', '_summarize')
 
 def _decode_qual_to_phred33(qual_str):
     # this function is adapted from scikit-bio
-    qual = np.fromstring(qual_str, dtype=np.uint8) - 33
+    qual = np.frombuffer(qual_str.encode('ascii'), dtype=np.uint8) - 33
     return qual
 
 
