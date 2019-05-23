@@ -9,8 +9,10 @@
 import importlib
 
 from qiime2.plugin import (
-    Plugin, MetadataColumn, Categorical, Bool, Int, Float, Range, Citations
+    Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
+    Range, Citations, TypeMatch
 )
+
 from q2_types.sample_data import SampleData
 from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
@@ -226,6 +228,45 @@ plugin.methods.register_function(
                  'samples will always be equal to the number of input '
                  'samples, even if some of those samples contain no '
                  'sequences after subsampling.')
+)
+
+T = TypeMatch([SequencesWithQuality, PairedEndSequencesWithQuality,
+               JoinedSequencesWithQuality])
+plugin.methods.register_function(
+    function=q2_demux.filter_samples,
+    inputs={'demux': SampleData[T]},
+    parameters={'metadata': Metadata,
+                'where': Str,
+                'exclude_ids': Bool},
+    outputs=[
+        ('filtered_demux', SampleData[T])
+    ],
+    input_descriptions={
+        'demux': 'The demultiplexed data from which samples should be '
+        'filtered.'
+    },
+    parameter_descriptions={
+        'metadata': 'Sample metadata indicating which sample ids to filter. '
+                    'The optional `where` parameter may be used to filter ids '
+                    'based on specified conditions in the metadata. The '
+                    'optional `exclude_ids` parameter may be used to exclude '
+                    'the ids specified in the metadata from the filter.',
+        'where': 'Optional SQLite WHERE clause specifying sample metadata '
+                 'criteria that must be met to be included in the filtered '
+                 'data. If not provided, all samples in `metadata` that are '
+                 'also in the demultiplexed data will be retained.',
+        'exclude_ids': 'Defaults to False. If True, the samples selected by '
+                       'the `metadata` and optional `where` parameter will be '
+                       'excluded from the filtered data.',
+    },
+    output_descriptions={
+        'filtered_demux': 'Filtered demultiplexed data.'
+    },
+    name='Filter samples out of demultiplexed data.',
+    description='Filter samples indicated in given metadata out of '
+                'demultiplexed data. Specific samples can be further selected '
+                'with the WHERE clause, and the `exclude_ids` parameter '
+                'allows for filtering of all samples not specified.',
 )
 
 importlib.import_module('q2_demux._transformer')

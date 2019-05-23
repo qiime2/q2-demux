@@ -33,6 +33,10 @@ setup(
                            'data/single_sample_multiple_files/*',
                            'data/subsample_single_end/*',
                            'data/subsample_paired_end/*',
+                           'data/filter_samples_single_end/*',
+                           'data/filter_samples_single_end/dir_fmt/*',
+                           'data/filter_samples_paired_end/*',
+                           'data/filter_samples_paired_end/dir_fmt/*'
                            ],
         'q2_demux': ['_summarize/assets/*.html',
                      '_summarize/assets/dist/*',
