@@ -162,6 +162,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         quality_scores, min_seq_len = _subsample_single(sample_map)
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
+    if forward_scores.empty:
+        raise ValueError('Input data contains no sequences')
     forward_stats = _compute_stats_of_df(forward_scores)
     forward_stats.to_csv(os.path.join(output_dir,
                          'forward-seven-number-summaries.csv'),
