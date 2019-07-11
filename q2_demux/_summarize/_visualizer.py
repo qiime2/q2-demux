@@ -163,7 +163,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
     if forward_scores.empty:
-        raise ValueError('Input data contains no sequences')
+        raise ValueError('Input data contains no forward scores.')
     forward_stats = _compute_stats_of_df(forward_scores)
     forward_stats.to_csv(os.path.join(output_dir,
                          'forward-seven-number-summaries.csv'),
@@ -181,6 +181,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     reverse_length_table = None
     if paired:
         reverse_scores = pd.DataFrame(quality_scores['reverse'])
+        if reverse_scores.empty:
+            raise ValueError('Input data contains no reverse scores.')
         reverse_stats = _compute_stats_of_df(reverse_scores)
         reverse_stats.to_csv(os.path.join(output_dir,
                              'reverse-seven-number-summaries.csv'),
