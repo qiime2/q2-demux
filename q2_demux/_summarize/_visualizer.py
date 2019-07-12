@@ -122,7 +122,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
     fwd = manifest[manifest.direction == 'forward'].filename.tolist()
     rev = manifest[manifest.direction == 'reverse'].filename.tolist()
-    #raise ValueError(f'{len(fwd)} {len(rev)}')
 
     per_sample_fastq_counts = {}
     reads = rev if not fwd and rev else fwd
