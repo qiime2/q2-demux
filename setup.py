@@ -36,7 +36,13 @@ setup(
                            'data/filter_samples_single_end/*',
                            'data/filter_samples_single_end/dir_fmt/*',
                            'data/filter_samples_paired_end/*',
-                           'data/filter_samples_paired_end/dir_fmt/*'
+                           'data/filter_samples_paired_end/dir_fmt/*',
+                           'data/summarize_empty/*'
+                           'data/summarize_empty/empty_SampleDataSingleEnd/*',
+                           'data/summarize_empty/'
+                           'empty_SampleDataPairedEndForward/*',
+                           'data/summarize_empty/'
+                           'empty_SampleDataPairedEndReverse/*',
                            ],
         'q2_demux': ['_summarize/assets/*.html',
                      '_summarize/assets/dist/*',

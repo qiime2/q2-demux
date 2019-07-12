@@ -26,7 +26,8 @@ from q2_demux._demux import (BarcodeSequenceFastqIterator,
 from q2_demux import emp_single, emp_paired, summarize
 from q2_types.per_sample_sequences import (
     FastqGzFormat, FastqManifestFormat,
-    SingleLanePerSampleSingleEndFastqDirFmt)
+    SingleLanePerSampleSingleEndFastqDirFmt,
+    SingleLanePerSamplePairedEndFastqDirFmt)
 from q2_demux._summarize._visualizer import (_PlotQualView,
                                              _decode_qual_to_phred33)
 
@@ -1170,6 +1171,30 @@ class SummarizeTests(TestPluginBase):
                 payload = json.loads(json_)[0]
                 self.assertEqual(payload["minSeqLen"]["forward"], 3)
                 self.assertEqual(payload["minSeqLen"]["reverse"], 5)
+
+    def test_empty_single_end(self):
+        empty = SingleLanePerSampleSingleEndFastqDirFmt(
+            self.get_data_path('summarize_empty/empty_SampleDataSingleEnd'),
+            mode='r')
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaisesRegex(ValueError, 'no scores'):
+                summarize(output_dir, _PlotQualView(empty, paired=False), n=1)
+
+    def test_empty_paired_end_forward(self):
+        empty = SingleLanePerSamplePairedEndFastqDirFmt(
+            self.get_data_path(
+                'summarize_empty/empty_SampleDataPairedEndForward'), mode='r')
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaisesRegex(ValueError, 'no scores'):
+                summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
+
+    def test_empty_paired_end_reverse(self):
+        empty = SingleLanePerSamplePairedEndFastqDirFmt(
+            self.get_data_path(
+                'summarize_empty/empty_SampleDataPairedEndReverse'), mode='r')
+        with tempfile.TemporaryDirectory() as output_dir:
+            with self.assertRaisesRegex(ValueError, 'no scores'):
+                summarize(output_dir, _PlotQualView(empty, paired=True), n=2)
 
 
 if __name__ == '__main__':
