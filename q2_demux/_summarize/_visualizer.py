@@ -143,6 +143,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
                   header=True, index=True)
     sequence_count = result.sum()
 
+    if sequence_count == 0:
+        raise ValueError('No sequences present.')
     if n > sequence_count:
         n = sequence_count
         warnings.append('A subsample value was provided that is greater than '
@@ -162,8 +164,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         quality_scores, min_seq_len = _subsample_single(sample_map)
 
     forward_scores = pd.DataFrame(quality_scores['forward'])
-    if forward_scores.empty:
-        raise ValueError('Input data contains no scores.')
     forward_stats = _compute_stats_of_df(forward_scores)
     forward_stats.to_csv(os.path.join(output_dir,
                          'forward-seven-number-summaries.csv'),

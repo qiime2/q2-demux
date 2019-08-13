@@ -1177,7 +1177,7 @@ class SummarizeTests(TestPluginBase):
             self.get_data_path('summarize_empty/empty_single_end'),
             mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaisesRegex(ValueError, 'no scores'):
+            with self.assertRaisesRegex(ValueError, 'No sequences'):
                 summarize(output_dir, _PlotQualView(empty, paired=False), n=1)
 
     def test_empty_paired_end_forward(self):
@@ -1185,7 +1185,7 @@ class SummarizeTests(TestPluginBase):
             self.get_data_path(
                 'summarize_empty/empty_forward_in_paired_end'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaisesRegex(ValueError, 'no scores'):
+            with self.assertRaisesRegex(ValueError, 'No sequences'):
                 summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
 
     def test_empty_paired_end_reverse(self):
@@ -1193,7 +1193,7 @@ class SummarizeTests(TestPluginBase):
             self.get_data_path(
                 'summarize_empty/empty_reverse_in_paired_end'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaisesRegex(ValueError, 'no scores'):
+            with self.assertRaisesRegex(ValueError, 'No sequences'):
                 summarize(output_dir, _PlotQualView(empty, paired=True), n=2)
 
 
