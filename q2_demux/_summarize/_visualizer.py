@@ -142,9 +142,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     result.to_csv(os.path.join(output_dir, 'per-sample-fastq-counts.csv'),
                   header=True, index=True)
     sequence_count = result.sum()
-
-    if sequence_count == 0:
-        raise ValueError('No sequences present.')
     if n > sequence_count:
         n = sequence_count
         warnings.append('A subsample value was provided that is greater than '
@@ -163,30 +160,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         sample_map = [(file, link[file]) for file in link]
         quality_scores, min_seq_len = _subsample_single(sample_map)
 
-    forward_scores = pd.DataFrame(quality_scores['forward'])
-    forward_stats = _compute_stats_of_df(forward_scores)
-    forward_stats.to_csv(os.path.join(output_dir,
-                         'forward-seven-number-summaries.csv'),
-                         header=True, index=True)
-    forward_length_table = _build_seq_len_table(forward_scores)
-
-    if (forward_stats.loc['50%'] > 45).any():
-        dangers.append('Some of the PHRED quality values are out of range. '
-                       'This is likely because an incorrect PHRED offset '
-                       'was chosen on import of your raw data. You can learn '
-                       'how to choose your PHRED offset during import in the '
-                       'importing tutorial.')
-
-    # Required initilization for conditional display of the table
-    reverse_length_table = None
-    if paired:
-        reverse_scores = pd.DataFrame(quality_scores['reverse'])
-        reverse_stats = _compute_stats_of_df(reverse_scores)
-        reverse_stats.to_csv(os.path.join(output_dir,
-                             'reverse-seven-number-summaries.csv'),
-                             header=True, index=True)
-        reverse_length_table = _build_seq_len_table(reverse_scores)
-
     show_plot = len(fwd) > 1
     if show_plot:
         ax = sns.distplot(result, kde=False)
@@ -200,7 +173,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     html = q2templates.df_to_html(html_df, index=False)
     index = os.path.join(TEMPLATES, 'assets', 'index.html')
     overview_template = os.path.join(TEMPLATES, 'assets', 'overview.html')
-    quality_template = os.path.join(TEMPLATES, 'assets', 'quality-plot.html')
     context = {
         'result_data': {
             'min': result.min(),
@@ -209,20 +181,57 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
             'max': result.max(),
             'sum': sequence_count
         },
-        'forward_length_table': forward_length_table,
-        'reverse_length_table': reverse_length_table,
         'result': html,
         'n_samples': result.count(),
         'show_plot': show_plot,
         'paired': paired,
         'tabs': [{'title': 'Overview',
-                  'url': 'overview.html'},
-                 {'title': 'Interactive Quality Plot',
-                  'url': 'quality-plot.html'}],
+                  'url': 'overview.html'}],
         'dangers': dangers,
         'warnings': warnings,
     }
-    templates = [index, overview_template, quality_template]
+    templates = [index, overview_template]
+
+    forward_scores = pd.DataFrame(quality_scores['forward'])
+    if not forward_scores.empty:
+        forward_stats = _compute_stats_of_df(forward_scores)
+        forward_stats.to_csv(os.path.join(output_dir,
+                             'forward-seven-number-summaries.csv'),
+                             header=True, index=True)
+        forward_length_table = _build_seq_len_table(forward_scores)
+
+        if (forward_stats.loc['50%'] > 45).any():
+            dangers.append('Some of the PHRED quality values are out of '
+                           'range. This is likely because an incorrect PHRED '
+                           'offset was chosen on import of your raw data. You '
+                           'can learn how to choose your PHRED offset during '
+                           'import in the importing tutorial.')
+
+        templates.append(os.path.join(TEMPLATES, 'assets',
+                                      'quality-plot.html'))
+
+        context['forward_length_table'] = forward_length_table
+        context['tabs'].append({'title': 'Interactive Quality Plot',
+                               'url': 'quality-plot.html'})
+
+    # Required initilization for conditional display of the table
+    reverse_length_table = None
+    if paired:
+        reverse_scores = pd.DataFrame(quality_scores['reverse'])
+        if not reverse_scores.empty:
+            reverse_stats = _compute_stats_of_df(reverse_scores)
+            reverse_stats.to_csv(os.path.join(output_dir,
+                                 'reverse-seven-number-summaries.csv'),
+                                 header=True, index=True)
+            reverse_length_table = _build_seq_len_table(reverse_scores)
+            context['reverse_length_table'] = reverse_length_table
+            # If we have reverse reads and not forward reads (due to some sort
+            # of error) the quality template will still need to be added
+            quality_template = os.path.join(TEMPLATES, 'assets',
+                                            'quality-plot.html')
+            if quality_template not in templates:
+                templates.append(quality_template)
+
     q2templates.render(templates, output_dir, context=context)
 
     shutil.copytree(os.path.join(TEMPLATES, 'assets', 'dist'),
@@ -233,8 +242,9 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         json.dump({'n': int(n), 'totalSeqCount': int(sequence_count),
                    'minSeqLen': min_seq_len}, fh)
         fh.write(',')
-        forward_stats.to_json(fh)
-        if paired:
+        if not forward_scores.empty:
+            forward_stats.to_json(fh)
+        if paired and not reverse_scores.empty:
             fh.write(',')
             reverse_stats.to_json(fh)
         fh.write(');')

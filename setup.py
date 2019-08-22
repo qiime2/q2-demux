@@ -41,6 +41,7 @@ setup(
                            'data/summarize_empty/empty_single_end/*',
                            'data/summarize_empty/empty_forward_in_paired/*',
                            'data/summarize_empty/empty_reverse_in_paired/*',
+                           'data/summarize_empty/empty_paired_end/*'
                            ],
         'q2_demux': ['_summarize/assets/*.html',
                      '_summarize/assets/dist/*',
