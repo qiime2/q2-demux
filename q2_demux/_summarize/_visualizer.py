@@ -244,6 +244,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         fh.write(',')
         if not forward_scores.empty:
             forward_stats.to_json(fh)
+        else:
+            forward_scores.to_json(fh)
         if paired and not reverse_scores.empty:
             fh.write(',')
             reverse_stats.to_json(fh)
