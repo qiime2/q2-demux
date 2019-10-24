@@ -329,7 +329,9 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
         raise ValueError('No sequences were mapped to samples. Check that '
                          'your barcodes are in the correct orientation (see '
                          'the rev_comp_barcodes and/or '
-                         'rev_comp_mapping_barcodes options).')
+                         'rev_comp_mapping_barcodes options). If barcodes are '
+                         'NOT Golay format provide no_golay_error_correction '
+                         'parameter.')
 
     for fh in per_sample_fastqs.values():
         fh.close()
@@ -447,7 +449,9 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
         raise ValueError('No sequences were mapped to samples. Check that '
                          'your barcodes are in the correct orientation (see '
                          'the rev_comp_barcodes and/or '
-                         'rev_comp_mapping_barcodes options).')
+                         'rev_comp_mapping_barcodes options). If barcodes are '
+                         'NOT Golay format provide no_golay_error_correction '
+                         'parameter.')
 
     for fwd, rev in per_sample_fastqs.values():
         fwd.close()
