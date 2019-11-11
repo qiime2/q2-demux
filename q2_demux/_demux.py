@@ -330,8 +330,8 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
                          'your barcodes are in the correct orientation (see '
                          'the rev_comp_barcodes and/or '
                          'rev_comp_mapping_barcodes options). If barcodes are '
-                         'NOT Golay format provide no_golay_error_correction '
-                         'parameter.')
+                         'NOT Golay format set golay_error_correction '
+                         'to False.')
 
     for fh in per_sample_fastqs.values():
         fh.close()
@@ -450,8 +450,8 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
                          'your barcodes are in the correct orientation (see '
                          'the rev_comp_barcodes and/or '
                          'rev_comp_mapping_barcodes options). If barcodes are '
-                         'NOT Golay format provide no_golay_error_correction '
-                         'parameter.')
+                         'NOT Golay format set golay_error_correction '
+                         'to False.')
 
     for fwd, rev in per_sample_fastqs.values():
         fwd.close()
