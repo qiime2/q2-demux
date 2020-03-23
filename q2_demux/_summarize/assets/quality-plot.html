@@ -56,30 +56,33 @@
       Hover over a box to see the parametric seven-number summary of the quality scores at the corresponding position.
     </p>
   </div>
-  {% if paired %}
-  <div id="forwardContainer" class="col-xs-12 col-md-6">
+  {% set offset = '' if length_tables.forward and length_tables.reverse else 'col-md-offset-3' %}
+  {% if length_tables.forward %}
+  <div id="forwardContainer" class="col-xs-12 col-md-6 {{ offset }}">
     <h5 class="text-center">Forward Reads</h5>
   </div>
-  <div id="reverseContainer" class="col-xs-12 col-md-6">
+  {% endif %}
+  {% if length_tables.reverse %}
+  <div id="reverseContainer" class="col-xs-12 col-md-6 {{ offset }}">
     <h5 class="text-center">Reverse Reads</h5>
   </div>
-  {% else %}
-  <div id="forwardContainer" class="col-xs-12 col-md-6 col-md-offset-3"></div>
   {% endif %}
 </div>
 
 <div class="row">
   <div class="col-lg-6 col-lg-offset-3">
       <h1>Demultiplexed sequence length summary</h1>
-      {% set colsize = 6 if reverse_length_table else 12 %}
+      {% set colsize = 6 if length_tables.forward and length_tables.reverse else 12 %}
+      {% if length_tables.forward %}
       <div class="col-lg-{{ colsize }}">
           <h4>Forward Reads</h4>
-          {{ forward_length_table }}
+          {{ length_tables.forward }}
       </div>
-      {% if reverse_length_table %}
+      {% endif %}
+      {% if length_tables.reverse %}
       <div class="col-lg-{{ colsize }}">
           <h4>Reverse Reads</h4>
-          {{ reverse_length_table }}
+          {{ length_tables.reverse }}
       </div>
       {% endif %}
   </div>
