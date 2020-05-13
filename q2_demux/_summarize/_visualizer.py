@@ -7,7 +7,6 @@
 # ----------------------------------------------------------------------------
 
 # TODO:
-# - clean up unused functions
 # - clean up context and other state variables - I have a hunch we can consolidate
 # - fix "The minimum sequence length identified during subsampling was undefined bases"
 # - existing tests are broken
@@ -61,42 +60,6 @@ def _link_sample_n_to_file(file_records, counts, subsample_ns, direction):
                 results[filename].append(idx)
                 break
     return results
-
-
-# TODO: remove
-def _subsample_paired(fastq_map):
-    qual_sample = collections.defaultdict(list)
-    min_seq_len = {'forward': float('inf'), 'reverse': float('inf')}
-    for fwd, rev, index in fastq_map:
-        file_pair = zip(_read_fastq_seqs(fwd), _read_fastq_seqs(rev))
-        for i, (fseq, rseq) in enumerate(file_pair):
-            if i == index[0]:
-                min_seq_len['forward'] = min(min_seq_len['forward'],
-                                             len(fseq[1]))
-                min_seq_len['reverse'] = min(min_seq_len['reverse'],
-                                             len(rseq[1]))
-                qual_sample['forward'].append(_decode_qual_to_phred33(fseq[3]))
-                qual_sample['reverse'].append(_decode_qual_to_phred33(rseq[3]))
-                index.pop(0)
-                if len(index) == 0:
-                    break
-    return qual_sample, min_seq_len
-
-
-# TODO: remove
-def _subsample_single(fastq_map):
-    qual_sample = collections.defaultdict(list)
-    min_seq_len = {'forward': float('inf'), 'reverse': None}
-    for file, index in fastq_map:
-        for i, seq in enumerate(_read_fastq_seqs(file)):
-            if i == index[0]:
-                min_seq_len['forward'] = min(min_seq_len['forward'],
-                                             len(seq[1]))
-                qual_sample['forward'].append(_decode_qual_to_phred33(seq[3]))
-                index.pop(0)
-                if len(index) == 0:
-                    break
-    return qual_sample, min_seq_len
 
 
 def _subsample(fastq_map):
