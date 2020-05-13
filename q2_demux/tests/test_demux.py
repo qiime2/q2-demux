@@ -1074,8 +1074,9 @@ class SummarizeTests(TestPluginBase):
                     self.assertEqual(payload["totalSeqCount"], 4)
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertEqual(payload["minSeqLen"]["reverse"], None)
-                    # NEW TODO: Need to look at what is/was happening to n
-                    self.assertEqual(payload["n"], min(n, 4))
+                    self.assertEqual(payload["subsampleSize"]["forward"],
+                                     min(n, 4))
+                    self.assertEqual(payload["subsampleSize"]["reverse"], n)
 
     def test_inconsistent_sequence_length_paired(self):
         forward = [('@s1/1 abc/1', 'G', '+', 'Y'),
@@ -1113,8 +1114,10 @@ class SummarizeTests(TestPluginBase):
                     self.assertEqual(payload["totalSeqCount"], 4)
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
-                    # NEW TODO: Need to look at what is/was happening to n
-                    self.assertEqual(payload["n"], min(n, 4))
+                    self.assertEqual(payload["subsampleSize"]["forward"],
+                                     min(n, 4))
+                    self.assertEqual(payload["subsampleSize"]["reverse"],
+                                     min(n, 4))
 
     def test_sequence_length_uses_subsample_single(self):
         random.seed(6)  # Will select s1 and s2 which aren't the shortest ones

@@ -233,9 +233,12 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     shutil.copytree(os.path.join(TEMPLATES, 'assets', 'dist'),
                     os.path.join(output_dir, 'dist'))
 
+    subsample_size['forward'] = int(subsample_size['forward'])
+    subsample_size['reverse'] = int(subsample_size['reverse'])
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
         fh.write("app.init(")
-        json.dump({'n': int(n), 'totalSeqCount': int(sequence_count),
+        json.dump({'subsampleSize': subsample_size,
+                   'totalSeqCount': int(sequence_count),
                    'minSeqLen': min_seq_len}, fh)
         fh.write(',')
         if qual_stats['forward'] is not None and not \
