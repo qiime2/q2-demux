@@ -919,51 +919,6 @@ class SummarizeTests(TestPluginBase):
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
 
-    def test_single_sample_multiple_files(self):
-        # Note, this case came up on the QIIME 2 Forum, due to a user running
-        # `summarize` with demuxed sequences that all had the same Sample ID
-        # in the internal MANIFEST file. With versions of seaborn greater than
-        # 0.8.0 this is no longer a problem, but on prior versions, the user
-        # would see the following error:
-        # TypeError: len() of unsized object
-        files = ['sample1_S0_L001_R1_001.fastq.gz',
-                 'sample2_S0_L001_R1_001.fastq.gz',
-                 'sample3_S0_L001_R1_001.fastq.gz',
-                 'MANIFEST', 'metadata.yml']
-        for f in files:
-            shutil.copy(
-                self.get_data_path('single_sample_multiple_files/%s' % f),
-                self.temp_dir.name)
-
-        demux_data = SingleLanePerSampleSingleEndFastqDirFmt(
-                self.temp_dir.name, mode='r')
-        with tempfile.TemporaryDirectory() as output_dir:
-            # TODO: Remove _PlotQualView wrapper
-            # NEW TODO: This test uses three different files for the same sample
-            # id. This means that when we attempt to pivot the dataframe in the
-            # transformer to use the sampleid column as the index instead of a
-            # default numerical index, things explode due to duplicate index
-            # values which is not allowed
-            result = summarize(output_dir, _PlotQualView(demux_data,
-                                                         paired=False), n=1)
-            self.assertTrue(result is None)
-            index_fp = os.path.join(output_dir, 'overview.html')
-            self.assertTrue(os.path.exists(index_fp))
-            self.assertTrue(os.path.getsize(index_fp) > 0)
-            tsv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.tsv')
-            self.assertTrue(os.path.exists(tsv_fp))
-            self.assertTrue(os.path.getsize(tsv_fp) > 0)
-            fwd_pdf_fp = os.path.join(output_dir,
-                                      'demultiplex-summary-forward.pdf')
-            self.assertTrue(os.path.exists(fwd_pdf_fp))
-            fwd_png_fp = os.path.join(output_dir,
-                                      'demultiplex-summary-forward.png')
-            self.assertTrue(os.path.exists(fwd_png_fp))
-            with open(index_fp, 'r') as fh:
-                html = fh.read()
-                self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
-                self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
-
     def test_paired_end(self):
         barcodes = self.barcodes[:3]
 

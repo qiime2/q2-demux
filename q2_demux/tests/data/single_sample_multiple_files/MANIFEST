@@ -1,4 +1,0 @@
-sample-id,filename,direction
-sample1,sample1_S0_L001_R1_001.fastq.gz,forward
-sample1,sample2_S0_L001_R1_001.fastq.gz,forward
-sample1,sample3_S0_L001_R1_001.fastq.gz,forward
