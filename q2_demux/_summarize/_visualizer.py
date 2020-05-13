@@ -119,6 +119,9 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         'length_tables': {'forward': None, 'reverse': None},
     }
 
+    # NEW TODO: Either before we call this, or in the transformer this
+    # eventually calls, we need to do something to prevent the attempt to create
+    # three columns with the same index
     manifest = data.manifest.view(pd.DataFrame)
 
     directions = ['forward', 'reverse'] if paired else ['forward']

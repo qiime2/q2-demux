@@ -939,7 +939,11 @@ class SummarizeTests(TestPluginBase):
                 self.temp_dir.name, mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
-            # NEW TODO: Not sure what happened here
+            # NEW TODO: This test uses three different files for the same sample
+            # id. This means that when we attempt to pivot the dataframe in the
+            # transformer to use the sampleid column as the index instead of a
+            # default numerical index, things explode due to duplicate index
+            # values which is not allowed
             result = summarize(output_dir, _PlotQualView(demux_data,
                                                          paired=False), n=1)
             self.assertTrue(result is None)
