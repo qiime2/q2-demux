@@ -878,11 +878,10 @@ class SummarizeTests(TestPluginBase):
                 output_dir, 'forward-seven-number-summaries.tsv')
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
-            # NEW TODO: These tags are no longer found
             with open(index_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('<td>Minimum:</td><td>1</td>', html)
-                self.assertIn('<td>Maximum:</td><td>3</td>', html)
+                self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
+                self.assertIn('<th>Maximum</th>\n      <td>3</td>', html)
             with open(tsv_fp, 'r') as ch:
                 tsv = ch.read()
                 self.assertIn('sample_1', tsv)
@@ -915,11 +914,10 @@ class SummarizeTests(TestPluginBase):
             self.assertFalse(os.path.exists(pdf_fp))
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertFalse(os.path.exists(png_fp))
-            # NEW TODO: These tags are no longer found
             with open(index_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('<td>Minimum:</td><td>1</td>', html)
-                self.assertIn('<td>Maximum:</td><td>1</td>', html)
+                self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
+                self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
 
     def test_single_sample_multiple_files(self):
         # Note, this case came up on the QIIME 2 Forum, due to a user running
@@ -957,8 +955,8 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(png_fp))
             with open(index_fp, 'r') as fh:
                 html = fh.read()
-                self.assertIn('<td>Minimum:</td><td>1</td>', html)
-                self.assertIn('<td>Maximum:</td><td>1</td>', html)
+                self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
+                self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
 
     def test_paired_end(self):
         barcodes = self.barcodes[:3]
