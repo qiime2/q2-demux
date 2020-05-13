@@ -863,6 +863,7 @@ class SummarizeTests(TestPluginBase):
             index_fp = os.path.join(output_dir, 'overview.html')
             self.assertTrue(os.path.exists(index_fp))
             self.assertTrue(os.path.getsize(index_fp) > 0)
+            # NEW TODO: This doesn't get created anymore
             csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
             self.assertTrue(os.path.exists(csv_fp))
             self.assertTrue(os.path.getsize(csv_fp) > 0)
@@ -906,6 +907,7 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(index_fp))
             self.assertTrue(os.path.getsize(index_fp) > 0)
             csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
+            # NEW TODO: This path is no longer created
             self.assertTrue(os.path.exists(csv_fp))
             self.assertTrue(os.path.getsize(csv_fp) > 0)
             pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
@@ -937,6 +939,7 @@ class SummarizeTests(TestPluginBase):
                 self.temp_dir.name, mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
             # TODO: Remove _PlotQualView wrapper
+            # NEW TODO: Not so sure about this one
             result = summarize(output_dir, _PlotQualView(demux_data,
                                                          paired=False), n=1)
             self.assertTrue(result is None)
@@ -981,6 +984,9 @@ class SummarizeTests(TestPluginBase):
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
             qual_forward_fp = os.path.join(
                 output_dir, 'forward-seven-number-summaries.csv')
+            # NEW TODO: This path no longer exists. It looks like it should be
+            # created on `_visualizer.py` line 196, will have to determine why
+            # that isn't happening
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             qual_reverse_fp = os.path.join(
@@ -1069,8 +1075,9 @@ class SummarizeTests(TestPluginBase):
                                           '[').replace(');', ']')
                     payload = json.loads(json_)[0]
                     self.assertEqual(payload["totalSeqCount"], 4)
-                    self.assertIn(payload["minSeqLen"]["forward"], lengths_)
-                    self.assertEqual(payload["minSeqLen"]["reverse"], None)
+                    self.assertIn(payload["minSeqLen"], lengths_)
+                    # NEW TODO: Need to look at what is/was happening to n to
+                    # determine why this fails
                     self.assertEqual(payload["n"], min(n, 4))
 
     def test_inconsistent_sequence_length_paired(self):
@@ -1107,8 +1114,9 @@ class SummarizeTests(TestPluginBase):
                                           '[').replace(');', ']')
                     payload = json.loads(json_)[0]
                     self.assertEqual(payload["totalSeqCount"], 4)
-                    self.assertIn(payload["minSeqLen"]["forward"], lengths_)
-                    self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
+                    self.assertIn(payload["minSeqLen"], lengths_)
+                    # NEW TODO: Need to look at what is/was happening to n to
+                    # determine why this fails
                     self.assertEqual(payload["n"], min(n, 4))
 
     def test_sequence_length_uses_subsample_single(self):
@@ -1136,8 +1144,7 @@ class SummarizeTests(TestPluginBase):
                 json_ = jsonp.replace('app.init(',
                                       '[').replace(');', ']')
                 payload = json.loads(json_)[0]
-                self.assertEqual(payload["minSeqLen"]["forward"], 5)
-                self.assertEqual(payload["minSeqLen"]["reverse"], None)
+                self.assertEqual(payload["minSeqLen"], 5)
 
     def test_sequence_length_uses_subsample_paired(self):
         random.seed(6)  # Will select s1 and s2 which aren't the shortest pairs
@@ -1169,8 +1176,7 @@ class SummarizeTests(TestPluginBase):
                 json_ = jsonp.replace('app.init(',
                                       '[').replace(');', ']')
                 payload = json.loads(json_)[0]
-                self.assertEqual(payload["minSeqLen"]["forward"], 3)
-                self.assertEqual(payload["minSeqLen"]["reverse"], 5)
+                self.assertEqual(payload["minSeqLen"], 3)
 
     def test_empty_single_end(self):
         empty = SingleLanePerSampleSingleEndFastqDirFmt(
@@ -1184,6 +1190,8 @@ class SummarizeTests(TestPluginBase):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path('summarize_empty/empty_paired_end'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
+            # NEW TODO: This breaks in open complaining about filepath not
+            # being a valid datatype
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
         self.assertTrue(True)
@@ -1193,6 +1201,8 @@ class SummarizeTests(TestPluginBase):
             self.get_data_path(
                 'summarize_empty/empty_forward_in_paired_end'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
+            # NEW TODO: This breaks in open complaining about filepath not
+            # being a valid datatype
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
         self.assertTrue(True)
@@ -1202,6 +1212,8 @@ class SummarizeTests(TestPluginBase):
             self.get_data_path(
                 'summarize_empty/empty_reverse_in_paired_end'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
+            # NEW TODO: This breaks in open complaining about filepath not
+            # being a valid datatype
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
         self.assertTrue(True)
