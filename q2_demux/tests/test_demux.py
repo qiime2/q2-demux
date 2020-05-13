@@ -1203,7 +1203,6 @@ class SummarizeTests(TestPluginBase):
     def test_empty_paired_end(self):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path('summarize_empty/empty_paired_end'), mode='r')
-        # NEW TODO: Complaining in open about invalid path datatype
         with tempfile.TemporaryDirectory() as output_dir:
             # NEW TODO: This breaks in open complaining about filepath not
             # being a valid datatype
@@ -1215,7 +1214,6 @@ class SummarizeTests(TestPluginBase):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path(
                 'summarize_empty/empty_forward_in_paired_end'), mode='r')
-        # NEW TODO: Complaining in open about invalid path datatype
         with tempfile.TemporaryDirectory() as output_dir:
             # NEW TODO: This breaks in open complaining about filepath not
             # being a valid datatype
@@ -1227,7 +1225,6 @@ class SummarizeTests(TestPluginBase):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path(
                 'summarize_empty/empty_reverse_in_paired_end'), mode='r')
-        # NEW TODO: Complaining in open about invalid path datatype
         with tempfile.TemporaryDirectory() as output_dir:
             # NEW TODO: This breaks in open complaining about filepath not
             # being a valid datatype

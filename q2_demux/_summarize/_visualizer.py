@@ -120,6 +120,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     }
 
     manifest = data.manifest.view(pd.DataFrame)
+    # raise ValueError(manifest)
 
     directions = ['forward', 'reverse'] if paired else ['forward']
     file_records = {'forward': [], 'reverse': []}
@@ -133,6 +134,9 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         for direction in directions:
             count = 0
             filename = row[direction]
+            if type(filename) != str:
+                raise ValueError(filename)
+            # raise ValueError(type(filename))
             for seq in _read_fastq_seqs(filename):
                 count += 1
             per_sample_fastq_counts[direction][sample_id] = count
@@ -233,6 +237,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     shutil.copytree(os.path.join(TEMPLATES, 'assets', 'dist'),
                     os.path.join(output_dir, 'dist'))
 
+    # Must be python int not numpy int to be written to json
     subsample_size['forward'] = int(subsample_size['forward'])
     subsample_size['reverse'] = int(subsample_size['reverse'])
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
