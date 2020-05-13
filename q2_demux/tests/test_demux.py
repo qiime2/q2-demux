@@ -949,10 +949,12 @@ class SummarizeTests(TestPluginBase):
             tsv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.tsv')
             self.assertTrue(os.path.exists(tsv_fp))
             self.assertTrue(os.path.getsize(tsv_fp) > 0)
-            pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
-            self.assertTrue(os.path.exists(pdf_fp))
-            png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
-            self.assertTrue(os.path.exists(png_fp))
+            fwd_pdf_fp = os.path.join(output_dir,
+                                      'demultiplex-summary-forward.pdf')
+            self.assertTrue(os.path.exists(fwd_pdf_fp))
+            fwd_png_fp = os.path.join(output_dir,
+                                      'demultiplex-summary-forward.png')
+            self.assertTrue(os.path.exists(fwd_png_fp))
             with open(index_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
