@@ -863,10 +863,10 @@ class SummarizeTests(TestPluginBase):
             index_fp = os.path.join(output_dir, 'overview.html')
             self.assertTrue(os.path.exists(index_fp))
             self.assertTrue(os.path.getsize(index_fp) > 0)
-            # NEW TODO: This file is talked about on line 221, but never created?
-            csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
-            self.assertTrue(os.path.exists(csv_fp))
-            self.assertTrue(os.path.getsize(csv_fp) > 0)
+            tsv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.tsv')
+            self.assertTrue(os.path.exists(tsv_fp))
+            self.assertTrue(os.path.getsize(tsv_fp) > 0)
+            # NEW TODO: This file now has forward and reverse variants
             pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
             self.assertTrue(os.path.exists(pdf_fp))
             self.assertTrue(os.path.getsize(pdf_fp) > 0)
@@ -874,16 +874,16 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(png_fp))
             self.assertTrue(os.path.getsize(png_fp) > 0)
             qual_forward_fp = os.path.join(
-                output_dir, 'forward-seven-number-summaries.csv')
+                output_dir, 'forward-seven-number-summaries.tsv')
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
                 self.assertIn('<td>Maximum:</td><td>3</td>', html)
-            with open(csv_fp, 'r') as ch:
-                csv = ch.read()
-                self.assertIn('sample_1', csv)
+            with open(tsv_fp, 'r') as ch:
+                tsv = ch.read()
+                self.assertIn('sample_1', tsv)
 
     def test_single_sample(self):
         bsi = BarcodeSequenceFastqIterator(self.barcodes[:1],
@@ -906,15 +906,14 @@ class SummarizeTests(TestPluginBase):
             index_fp = os.path.join(output_dir, 'overview.html')
             self.assertTrue(os.path.exists(index_fp))
             self.assertTrue(os.path.getsize(index_fp) > 0)
-            # NEW TODO: This file is talked about on line 221, but never created?
-            csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
-            # NEW TODO: This path is no longer created
-            self.assertTrue(os.path.exists(csv_fp))
-            self.assertTrue(os.path.getsize(csv_fp) > 0)
+            tsv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.tsv')
+            self.assertTrue(os.path.exists(tsv_fp))
+            self.assertTrue(os.path.getsize(tsv_fp) > 0)
             pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
             self.assertFalse(os.path.exists(pdf_fp))
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertFalse(os.path.exists(png_fp))
+            # NEW TODO: This is now no longer validating for some reason
             with open(index_fp, 'r') as fh:
                 html = fh.read()
                 self.assertIn('<td>Minimum:</td><td>1</td>', html)
@@ -947,9 +946,9 @@ class SummarizeTests(TestPluginBase):
             index_fp = os.path.join(output_dir, 'overview.html')
             self.assertTrue(os.path.exists(index_fp))
             self.assertTrue(os.path.getsize(index_fp) > 0)
-            csv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.csv')
-            self.assertTrue(os.path.exists(csv_fp))
-            self.assertTrue(os.path.getsize(csv_fp) > 0)
+            tsv_fp = os.path.join(output_dir, 'per-sample-fastq-counts.tsv')
+            self.assertTrue(os.path.exists(tsv_fp))
+            self.assertTrue(os.path.getsize(tsv_fp) > 0)
             pdf_fp = os.path.join(output_dir, 'demultiplex-summary.pdf')
             self.assertTrue(os.path.exists(pdf_fp))
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
@@ -983,17 +982,12 @@ class SummarizeTests(TestPluginBase):
                                                          paired=True), n=2)
             self.assertTrue(result is None)
             plot_fp = os.path.join(output_dir, 'quality-plot.html')
-            # NEW TODO: Looks like these should be created on line 196. Why
-            # aren't they?
             qual_forward_fp = os.path.join(
-                output_dir, 'forward-seven-number-summaries.csv')
-            # NEW TODO: This path no longer exists. It looks like it should be
-            # created on `_visualizer.py` line 196, will have to determine why
-            # that isn't happening
+                output_dir, 'forward-seven-number-summaries.tsv')
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             qual_reverse_fp = os.path.join(
-                output_dir, 'reverse-seven-number-summaries.csv')
+                output_dir, 'reverse-seven-number-summaries.tsv')
             self.assertTrue(os.path.exists(qual_reverse_fp))
             self.assertTrue(os.path.getsize(qual_reverse_fp) > 0)
             with open(plot_fp, 'r') as fh:
@@ -1078,9 +1072,9 @@ class SummarizeTests(TestPluginBase):
                                           '[').replace(');', ']')
                     payload = json.loads(json_)[0]
                     self.assertEqual(payload["totalSeqCount"], 4)
-                    # NEW TODO: payload["minSeqLen"] is now a single int
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertEqual(payload["minSeqLen"]["reverse"], None)
+                    # NEW TODO: Need to look at what is/was happening to n
                     self.assertEqual(payload["n"], min(n, 4))
 
     def test_inconsistent_sequence_length_paired(self):
@@ -1117,9 +1111,9 @@ class SummarizeTests(TestPluginBase):
                                           '[').replace(');', ']')
                     payload = json.loads(json_)[0]
                     self.assertEqual(payload["totalSeqCount"], 4)
-                    self.assertIn(payload["minSeqLen"], lengths_)
-                    # NEW TODO: Need to look at what is/was happening to n to
-                    # determine why this fails
+                    self.assertIn(payload["minSeqLen"]["forward"], lengths_)
+                    self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
+                    # NEW TODO: Need to look at what is/was happening to n
                     self.assertEqual(payload["n"], min(n, 4))
 
     def test_sequence_length_uses_subsample_single(self):
@@ -1147,7 +1141,6 @@ class SummarizeTests(TestPluginBase):
                 json_ = jsonp.replace('app.init(',
                                       '[').replace(');', ']')
                 payload = json.loads(json_)[0]
-                # NEW TODO: payload["minSeqLen"] is now a single int
                 self.assertEqual(payload["minSeqLen"]["forward"], 5)
                 self.assertEqual(payload["minSeqLen"]["reverse"], None)
 
@@ -1181,9 +1174,20 @@ class SummarizeTests(TestPluginBase):
                 json_ = jsonp.replace('app.init(',
                                       '[').replace(');', ']')
                 payload = json.loads(json_)[0]
-                # NEW TODO: payload["minSeqLen"] is now a single int
                 self.assertEqual(payload["minSeqLen"]["forward"], 3)
-                self.assertEqual(payload["minSeqLen"]["reverse"], 5)
+                # NEW TODO: Remove this comment before merge, I did some poking
+                # around with the subsample logic to try to understand its
+                # purpose better
+                # This is 3 now presumably due to the minSeqLen for forward
+                # and reverse being found completely seperately now instead of
+                # in the same function call like before. Oddly enough the
+                # shortest forward read is actually length 1 so. . . it only
+                # checks indices 0 and 1 though the length one read is in index
+                # 2. For reverse it checks the indices 0 and 2 finding the
+                # length 3 read at index 2. Presumably before it was checking 0
+                # and 1 like forward does and index 1 is length 7 so it went
+                # with the length 5 read at index 0.
+                self.assertEqual(payload["minSeqLen"]["reverse"], 3)
 
     def test_empty_single_end(self):
         empty = SingleLanePerSampleSingleEndFastqDirFmt(

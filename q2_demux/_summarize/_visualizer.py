@@ -127,6 +127,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     subsample_size = {'forward': n, 'reverse': n}
     links = {'forward': {}, 'reverse': {}}
     qual_stats = {'forward': None, 'reverse': None}
+    min_seq_len = {'forward': None, 'reverse': None}
 
     for sample_id, row in manifest.iterrows():
         for direction in directions:
@@ -156,14 +157,16 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
                 'The plot was generated using all available sequences.' %
                 (direction, ))
 
-        subsample_ns = sorted(random.sample(range(sequence_count), subsample_size[direction]))
+        subsample_ns = sorted(random.sample(range(sequence_count),
+                              subsample_size[direction]))
         links[direction] = _link_sample_n_to_file(file_records,
                                                   per_sample_fastq_counts,
                                                   subsample_ns,
                                                   direction)
 
         sample_map = [(k, v) for k, v in links[direction].items()]
-        quality_scores, min_seq_len = _subsample(sample_map)
+        quality_scores, dir_min_seq_len = _subsample(sample_map,)
+        min_seq_len[direction] = dir_min_seq_len
 
         show_plot = len(sample_map) > 0
 
@@ -215,7 +218,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         context['tabs'].append({'title': 'Interactive Quality Plot',
                                'url': 'quality-plot.html'})
 
-    context['result_data'] = q2templates.df_to_html(context['result_data'].transpose())
+    context['result_data'] = \
+        q2templates.df_to_html(context['result_data'].transpose())
 
     # Create a TSV before turning into HTML table
     result_fn = 'per-sample-fastq-counts.tsv'
@@ -234,9 +238,11 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         json.dump({'n': int(n), 'totalSeqCount': int(sequence_count),
                    'minSeqLen': min_seq_len}, fh)
         fh.write(',')
-        if qual_stats['forward'] is not None and not qual_stats['forward'].empty:
+        if qual_stats['forward'] is not None and not \
+                qual_stats['forward'].empty:
             qual_stats['forward'].to_json(fh)
-        if qual_stats['reverse'] is not None and not qual_stats['reverse'].empty:
+        if qual_stats['reverse'] is not None and not \
+                qual_stats['reverse'].empty:
             fh.write(',')
             qual_stats['reverse'].to_json(fh)
         fh.write(');')
