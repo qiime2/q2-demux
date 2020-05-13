@@ -120,7 +120,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     }
 
     manifest = data.manifest.view(pd.DataFrame)
-    # raise ValueError(manifest)
 
     directions = ['forward', 'reverse'] if paired else ['forward']
     file_records = {'forward': [], 'reverse': []}
@@ -134,9 +133,13 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         for direction in directions:
             count = 0
             filename = row[direction]
+
+            # If we have an empty direction for a sample that will be a nan in
+            # the manifest. Skip that nan
             if type(filename) != str:
-                raise ValueError(filename)
-            # raise ValueError(type(filename))
+                if np.isnan(filename):
+                    continue
+
             for seq in _read_fastq_seqs(filename):
                 count += 1
             per_sample_fastq_counts[direction][sample_id] = count
