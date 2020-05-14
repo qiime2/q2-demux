@@ -11,7 +11,6 @@ import unittest.mock as mock
 import os.path
 import tempfile
 import json
-import shutil
 import random
 
 import pandas as pd
@@ -183,7 +182,7 @@ class EmpTestingUtils:
 
     def _compare_manifests(self, act_manifest, exp_manifest):
         # strip comment lines before comparing
-        act_manifest = [l for l in act_manifest if not l.startswith('#')]
+        act_manifest = [x for x in act_manifest if not x.startswith('#')]
         self.assertEqual(act_manifest, exp_manifest)
 
     def _validate_sample_fastq(self, fastq, sequences, indices):
