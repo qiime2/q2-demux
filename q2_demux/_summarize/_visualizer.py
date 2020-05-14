@@ -238,7 +238,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     shutil.copytree(os.path.join(TEMPLATES, 'assets', 'dist'),
                     os.path.join(output_dir, 'dist'))
 
-    raise ValueError(f'{qual_stats["forward"]}     {qual_stats["reverse"]}')
     # Must be python int not numpy int to be written to json
     subsample_size['forward'] = int(subsample_size['forward'])
     subsample_size['reverse'] = int(subsample_size['reverse'])
