@@ -7,7 +7,8 @@
 # ----------------------------------------------------------------------------
 
 # TODO:
-# - clean up context and other state variables - I have a hunch we can consolidate
+# - clean up context and other state variables
+#   I have a hunch we can consolidate
 # - think about new tests
 
 import collections

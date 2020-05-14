@@ -1138,18 +1138,6 @@ class SummarizeTests(TestPluginBase):
                                       '[').replace(');', ']')
                 payload = json.loads(json_)[0]
                 self.assertEqual(payload["minSeqLen"]["forward"], 3)
-                # NEW TODO: Remove this comment before merge, I did some poking
-                # around with the subsample logic to try to understand its
-                # purpose better
-                # This is 3 now presumably due to the minSeqLen for forward
-                # and reverse being found completely seperately now instead of
-                # in the same function call like before. Oddly enough the
-                # shortest forward read is actually length 1 so. . . it only
-                # checks indices 0 and 1 though the length one read is in index
-                # 2. For reverse it checks the indices 0 and 2 finding the
-                # length 3 read at index 2. Presumably before it was checking 0
-                # and 1 like forward does and index 1 is length 7 so it went
-                # with the length 5 read at index 0.
                 self.assertEqual(payload["minSeqLen"]["reverse"], 3)
 
     def test_empty_single_end(self):
