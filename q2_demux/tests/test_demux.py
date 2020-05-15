@@ -1084,7 +1084,9 @@ class SummarizeTests(TestPluginBase):
                                      min(n, 4))
 
     def test_sequence_length_uses_subsample_single(self):
-        random.seed(6)  # Will select s1 and s2 which aren't the shortest ones
+        # Will select s1 and s2 for forward and s1 and s3 for reverse which
+        # aren't the shortest ones
+        random.seed(6)
 
         sequences = [('@s1/1 abc/1', 'GGGGGGG', '+', 'YYYYYYY'),
                      ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
