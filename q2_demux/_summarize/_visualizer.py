@@ -6,11 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-# TODO:
-# - clean up context and other state variables
-#   I have a hunch we can consolidate
-# - think about new tests
-
 import collections
 import os
 import pkg_resources
@@ -124,6 +119,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     file_records = {'forward': [], 'reverse': []}
     per_sample_fastq_counts = {'forward': {}, 'reverse': {}}
     subsample_size = {'forward': n, 'reverse': n}
+    sequence_count = {'forward': None, 'reverse': None}
     links = {'forward': {}, 'reverse': {}}
     qual_stats = {'forward': None, 'reverse': None}
     min_seq_len = {'forward': None, 'reverse': None}
@@ -154,16 +150,16 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         result.index.name = 'sample ID'
         result.sort_values(inplace=True, ascending=False)
 
-        sequence_count = result.sum()
-        if subsample_size[direction] > sequence_count:
-            subsample_size[direction] = sequence_count
+        sequence_count[direction] = int(result.sum())
+        if subsample_size[direction] > sequence_count[direction]:
+            subsample_size[direction] = sequence_count[direction]
             context['warnings'].append(
                 'A subsample value was provided that is greater than the '
                 'amount of sequences across all samples for the %s reads. '
                 'The plot was generated using all available sequences.' %
                 (direction, ))
 
-        subsample_ns = sorted(random.sample(range(sequence_count),
+        subsample_ns = sorted(random.sample(range(sequence_count[direction]),
                               subsample_size[direction]))
         links[direction] = _link_sample_n_to_file(file_records,
                                                   per_sample_fastq_counts,
@@ -187,7 +183,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         fig.clear()
 
         df = pd.DataFrame([[result.min(), result.median(), result.mean(),
-                            result.max(), sequence_count]],
+                            result.max(), sequence_count[direction]]],
                           index=['%s reads' % (direction,)],
                           columns=summary_columns)
         context['result_data'] = context['result_data'].append(df)
@@ -239,20 +235,21 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
     shutil.copytree(os.path.join(TEMPLATES, 'assets', 'dist'),
                     os.path.join(output_dir, 'dist'))
 
-    # Must be python int not numpy int to be written to json
-    subsample_size['forward'] = int(subsample_size['forward'])
-    subsample_size['reverse'] = int(subsample_size['reverse'])
     with open(os.path.join(output_dir, 'data.jsonp'), 'w') as fh:
         fh.write("app.init(")
         json.dump({'subsampleSize': subsample_size,
-                   'totalSeqCount': int(sequence_count),
+                   'totalSeqCount': sequence_count,
                    'minSeqLen': min_seq_len}, fh)
-        fh.write(',')
+        fh.write(', ')
         if qual_stats['forward'] is not None and not \
                 qual_stats['forward'].empty:
             qual_stats['forward'].to_json(fh)
+        else:
+            fh.write('undefined')
+        fh.write(', ')
         if qual_stats['reverse'] is not None and not \
                 qual_stats['reverse'].empty:
-            fh.write(',')
             qual_stats['reverse'].to_json(fh)
+        else:
+            fh.write('undefined')
         fh.write(');')

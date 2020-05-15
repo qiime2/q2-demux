@@ -1028,10 +1028,12 @@ class SummarizeTests(TestPluginBase):
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
                     jsonp = fh.read()
-                    json_ = jsonp.replace('app.init(',
-                                          '[').replace(');', ']')
+                    json_ = jsonp.replace('app.init(', '[') \
+                                 .replace(');', ']') \
+                                 .replace('undefined', 'null')
                     payload = json.loads(json_)[0]
-                    self.assertEqual(payload["totalSeqCount"], 4)
+                    self.assertEqual(payload["totalSeqCount"],
+                                     {'forward': 4, 'reverse': None})
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertEqual(payload["minSeqLen"]["reverse"], None)
                     self.assertEqual(payload["subsampleSize"]["forward"],
@@ -1068,10 +1070,12 @@ class SummarizeTests(TestPluginBase):
                 plot_fp = os.path.join(output_dir, 'data.jsonp')
                 with open(plot_fp, 'r') as fh:
                     jsonp = fh.read()
-                    json_ = jsonp.replace('app.init(',
-                                          '[').replace(');', ']')
+                    json_ = jsonp.replace('app.init(', '[') \
+                                 .replace(');', ']') \
+                                 .replace('undefined', 'null')
                     payload = json.loads(json_)[0]
-                    self.assertEqual(payload["totalSeqCount"], 4)
+                    self.assertEqual(payload["totalSeqCount"],
+                                     {'forward': 4, 'reverse': 4})
                     self.assertIn(payload["minSeqLen"]["forward"], lengths_)
                     self.assertIn(payload["minSeqLen"]["reverse"], lengths_)
                     self.assertEqual(payload["subsampleSize"]["forward"],
@@ -1101,8 +1105,9 @@ class SummarizeTests(TestPluginBase):
             plot_fp = os.path.join(output_dir, 'data.jsonp')
             with open(plot_fp, 'r') as fh:
                 jsonp = fh.read()
-                json_ = jsonp.replace('app.init(',
-                                      '[').replace(');', ']')
+                json_ = jsonp.replace('app.init(', '[') \
+                             .replace(');', ']') \
+                             .replace('undefined', 'null')
                 payload = json.loads(json_)[0]
                 self.assertEqual(payload["minSeqLen"]["forward"], 5)
                 self.assertEqual(payload["minSeqLen"]["reverse"], None)

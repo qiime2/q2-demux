@@ -13,6 +13,7 @@ import { updateXTicks, addBrush } from './brush';
 
 const plot = (data, props, container, seqProps) => {
   const plotContainer = d3.select(container);
+  const direction = data.direction;
   const svg = plotContainer
     .append('svg')
       .attr('class', 'col-xs-12')
@@ -26,10 +27,10 @@ const plot = (data, props, container, seqProps) => {
     .attr('class', 'col-xs-12')
     .append('p')
       .attr('class', 'random-sampling')
-      .html(`These plots were generated using a random sampling of ${seqProps.n}
-             out of ${seqProps.totalSeqCount} sequences without replacement. The
+      .html(`These plots were generated using a random sampling of ${seqProps.subsampleSize[direction]}
+             out of ${seqProps.totalSeqCount[direction]} sequences without replacement. The
              minimum sequence length identified during subsampling was
-             ${seqProps.minSeqLen[data.direction]} bases. Outlier quality scores are not shown in box
+             ${seqProps.minSeqLen[direction]} bases. Outlier quality scores are not shown in box
              plots for clarity.`);
 
   const panel = plotContainer
@@ -84,7 +85,7 @@ const plot = (data, props, container, seqProps) => {
     .append('div')
       .attr('class', 'col-xs-12')
     .append('div')
-      .html(`<a href="${data.direction}-seven-number-summaries.tsv">Download ${data.direction} parametric seven-number summaries as TSV</a>`)
+      .html(`<a href="${direction}-seven-number-summaries.tsv">Download ${direction} parametric seven-number summaries as TSV</a>`)
 
   const maxX = d3.max(data, d => d[0]) + 1;
   const x0 = [0, maxX];
@@ -153,7 +154,9 @@ const plot = (data, props, container, seqProps) => {
 
 const initializePlot = (data, seqProps) => {
   const margin = { top: 10, right: 30, bottom: 30, left: 40 };
-  const width = d3.select('#forwardContainer').node().offsetWidth;
+  const fwdWidthNode = d3.select('#forwardContainer').node();
+  const revWidthNode = d3.select('#reverseContainer').node();
+  const width = fwdWidthNode ? fwdWidthNode.offsetWidth : revWidthNode.offsetWidth;
   const props = {
     margin,
     width: width - margin.left - margin.right,
