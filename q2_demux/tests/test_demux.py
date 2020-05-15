@@ -1149,6 +1149,37 @@ class SummarizeTests(TestPluginBase):
                 self.assertEqual(payload["minSeqLen"]["forward"], 3)
                 self.assertEqual(payload["minSeqLen"]["reverse"], 3)
 
+    def test_warnings_per_direction(self):
+        forward = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
+                   ('@s3/1 abc/1', 'A', '+', 'P'),
+                   ('@s4/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP')]
+        reverse = [('@s1/1 abc/1', 'AAAAA', '+', 'YYYYY'),
+                   ('@s2/1 abc/1', 'TTTTTTT', '+', 'PPPPPPP'),
+                   ('@s3/1 abc/1', 'GGG', '+', 'PPP'),
+                   ('@s4/1 abc/1', 'C', '+', 'P')]
+        bpsi = BarcodePairedSequenceFastqIterator(self.barcodes, forward,
+                                                  reverse)
+
+        barcode_map = pd.Series(
+            ['AAAA', 'AACC'], name='bc',
+            index=pd.Index(['sample1', 'sample2'], name='id')
+        )
+        barcode_map = qiime2.CategoricalMetadataColumn(barcode_map)
+
+        demux_data, ecc = emp_paired(bpsi, barcode_map,
+                                     golay_error_correction=False)
+
+        with tempfile.TemporaryDirectory() as output_dir:
+            summarize(output_dir, _PlotQualView(demux_data, paired=True), n=5)
+            index_fp = os.path.join(output_dir, 'quality-plot.html')
+            with open(index_fp, 'r') as fh:
+                html = fh.read()
+                self.assertIn('greater than the amount of sequences across all'
+                              ' samples for the forward reads', html)
+                self.assertIn('greater than the amount of sequences across all'
+                              ' samples for the reverse reads', html)
+
     def test_empty_single_end(self):
         empty = SingleLanePerSampleSingleEndFastqDirFmt(
             self.get_data_path('summarize_empty/empty_single_end'), mode='r')
