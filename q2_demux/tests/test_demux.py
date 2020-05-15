@@ -1113,7 +1113,9 @@ class SummarizeTests(TestPluginBase):
                 self.assertEqual(payload["minSeqLen"]["reverse"], None)
 
     def test_sequence_length_uses_subsample_paired(self):
-        random.seed(6)  # Will select s1 and s2 which aren't the shortest pairs
+        # Will select s1 and s2 for forward and S1 and S3 for reverse which
+        #  aren't the shortest pairs
+        random.seed(6)
 
         forward = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
                    ('@s2/1 abc/1', 'CCCCC', '+', 'PPPPP'),
