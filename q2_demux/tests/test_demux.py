@@ -1199,7 +1199,7 @@ class SummarizeTests(TestPluginBase):
     def test_empty_paired_end_forward(self):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path(
-                'summarize_empty/empty_forward_in_paired_end'), mode='r')
+                'summarize_empty/empty_forward_in_paired'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
@@ -1208,7 +1208,7 @@ class SummarizeTests(TestPluginBase):
     def test_empty_paired_end_reverse(self):
         empty = SingleLanePerSamplePairedEndFastqDirFmt(
             self.get_data_path(
-                'summarize_empty/empty_reverse_in_paired_end'), mode='r')
+                'summarize_empty/empty_reverse_in_paired'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
