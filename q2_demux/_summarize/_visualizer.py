@@ -115,7 +115,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
     manifest = data.manifest.view(pd.DataFrame)
 
-    directions = ['forward', 'reverse'] if paired else ['forward']
+    directions = list(manifest.columns)
     file_records = {'forward': [], 'reverse': []}
     per_sample_fastq_counts = {'forward': {}, 'reverse': {}}
     subsample_size = {'forward': n, 'reverse': n}
