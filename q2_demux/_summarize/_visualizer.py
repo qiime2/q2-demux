@@ -93,6 +93,7 @@ def _build_seq_len_table(qscores: pd.DataFrame) -> str:
 
 
 def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
+    acceptable_columns = frozenset(['forward', 'reverse'])
     paired = data.paired
     data = data.directory_format
     summary_columns = ['Minimum', 'Median', 'Mean', 'Maximum', 'Total']
@@ -115,7 +116,15 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
     manifest = data.manifest.view(pd.DataFrame)
 
-    directions = list(manifest.columns)
+    # This error shouldn't ever happen, so do we actually want to guard this?
+    columns = list(manifest.columns)
+    for column in columns:
+        if column not in acceptable_columns:
+            raise ValueError('Column name %s is not allowed. '
+                             'Allowed column names are %s.', column,
+                             acceptable_columns)
+
+    directions = columns
     file_records = {'forward': [], 'reverse': []}
     per_sample_fastq_counts = {'forward': {}, 'reverse': {}}
     subsample_size = {'forward': n, 'reverse': n}
