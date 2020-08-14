@@ -114,7 +114,10 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
         'length_tables': {'forward': None, 'reverse': None},
     }
 
-    manifest = data.manifest.view(pd.DataFrame)
+    if isinstance(data.manifest, pd.DataFrame):
+        manifest = data.manifest
+    else:
+        manifest = data.manifest.view(pd.DataFrame)
 
     # This error shouldn't ever happen, so do we actually want to guard this?
     columns = list(manifest.columns)
@@ -141,7 +144,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
             # If we have an empty direction for a sample that will be a nan in
             # the manifest. Skip that nan
             if type(filename) != str:
-                if np.isnan(filename):
+                if filename is None or np.isnan(filename):
                     continue
 
             for seq in _read_fastq_seqs(filename):
