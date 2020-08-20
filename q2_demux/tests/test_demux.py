@@ -1182,7 +1182,7 @@ class SummarizeTests(TestPluginBase):
                               ' samples for the reverse reads', html)
 
     def test_only_reverse_reads(self):
-        reverse = CasavaOneEightSingleLanePerSampleDirFmt(
+        reverse = SingleLanePerSampleSingleEndFastqDirFmt(
             self.get_data_path('reverse_only'), mode='r')
         with tempfile.TemporaryDirectory() as output_dir:
             summarize(output_dir, _PlotQualView(reverse, paired=False), n=1)
