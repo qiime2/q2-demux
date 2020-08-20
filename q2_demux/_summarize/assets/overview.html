@@ -1,11 +1,7 @@
 {% extends "tab-child.html" %}
 
 {% block content %}
-{% if paired %}
-    {% set directions = ['forward', 'reverse'] %}
-{% else %}
-    {% set directions = ['forward'] %} 
-{% endif %}
+{% set directions = ['forward', 'reverse'] %}
 
 <div class="row">
     <div class="col-lg-12">
@@ -29,7 +25,7 @@
                 {% endif %}
             </div>
         </div>
-    {% endfor %} 
+    {% endfor %}
 </div>
 
 <div class="row">
