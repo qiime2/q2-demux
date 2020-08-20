@@ -26,8 +26,7 @@ from q2_demux import emp_single, emp_paired, summarize
 from q2_types.per_sample_sequences import (
     FastqGzFormat, FastqManifestFormat,
     SingleLanePerSampleSingleEndFastqDirFmt,
-    SingleLanePerSamplePairedEndFastqDirFmt,
-    CasavaOneEightSingleLanePerSampleDirFmt)
+    SingleLanePerSamplePairedEndFastqDirFmt)
 from q2_demux._summarize._visualizer import (_PlotQualView,
                                              _decode_qual_to_phred33)
 
