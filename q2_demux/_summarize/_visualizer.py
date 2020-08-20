@@ -115,7 +115,6 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
     manifest = data.manifest.view(pd.DataFrame)
 
-    # This error shouldn't ever happen, so do we actually want to guard this?
     columns = list(manifest.columns)
 
     directions = columns
