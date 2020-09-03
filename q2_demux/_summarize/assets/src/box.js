@@ -16,7 +16,8 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
   const lightBlue = 'skyblue';
   const darkRed = '#a94442';
   const lightRed = '#ebccd1';
-  const minSeqLen = seqProps.minSeqLen[data.direction];
+  const direction = data.direction;
+  const minSeqLen = seqProps.minSeqLen[direction];
 
   const containerUpdate = svg.selectAll('.container')
     .data(data);
@@ -62,16 +63,17 @@ export default function plotBoxes(svg, data, x, y, seqProps) {
       if (inTheDangerZone) {
         seqLenNote = `This position (${position}) is greater than the minimum sequence length observed
                       during subsampling (${minSeqLen} bases). As a result, the plot at this position
-                      is not based on data from all of the sequences, so it should be interpreted with 
+                      is not based on data from all of the sequences, so it should be interpreted with
                       caution when compared to plots for other positions`;
       }
 
       plotContainer.select('.random-sampling')
         .classed('text-danger', inTheDangerZone)
         .html(`The plot at position ${position} was generated using a random
-               sampling of ${stats.count} out of ${seqProps.totalSeqCount} sequences
-               without replacement. ${seqLenNote}. Outlier quality scores are
-               not shown in box plots for clarity.`);
+               sampling of ${seqProps.subsampleSize[direction]} out of
+               ${seqProps.totalSeqCount[direction]} sequences without replacement.
+               ${seqLenNote}. Outlier quality scores are not shown in box plots
+               for clarity.`);
     });
 
   const centerUpdate = containers.selectAll('line.center').data(d => [d]);
