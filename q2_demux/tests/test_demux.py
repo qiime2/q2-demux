@@ -295,23 +295,24 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
         _, ecc = emp_single(self.bsi, self.barcode_map,
                             golay_error_correction=False)
         exp_errors = pd.DataFrame([
-            ['sample1', '@s1/2 abc/2',  'AAAA', None, None],
-            ['sample3', '@s2/2 abc/2',  'TTAA', None, None],
-            ['sample2', '@s3/2 abc/2',  'AACC', None, None],
-            ['sample3', '@s4/2 abc/2',  'TTAA', None, None],
-            ['sample2', '@s5/2 abc/2',  'AACC', None, None],
-            ['sample1', '@s6/2 abc/2',  'AAAA', None, None],
-            ['sample5', '@s7/2 abc/2',  'CGGC', None, None],
-            ['sample4', '@s8/2 abc/2',  'GGAA', None, None],
-            ['sample5', '@s9/2 abc/2',  'CGGC', None, None],
-            ['sample5', '@s10/2 abc/2', 'CGGC', None, None],
-            ['sample4', '@s11/2 abc/2', 'GGAA', None, None]
+            ['sample1', '@s1/2 abc/2',  'AAAA', 'None', 'None'],
+            ['sample3', '@s2/2 abc/2',  'TTAA', 'None', 'None'],
+            ['sample2', '@s3/2 abc/2',  'AACC', 'None', 'None'],
+            ['sample3', '@s4/2 abc/2',  'TTAA', 'None', 'None'],
+            ['sample2', '@s5/2 abc/2',  'AACC', 'None', 'None'],
+            ['sample1', '@s6/2 abc/2',  'AAAA', 'None', 'None'],
+            ['sample5', '@s7/2 abc/2',  'CGGC', 'None', 'None'],
+            ['sample4', '@s8/2 abc/2',  'GGAA', 'None', 'None'],
+            ['sample5', '@s9/2 abc/2',  'CGGC', 'None', 'None'],
+            ['sample5', '@s10/2 abc/2', 'CGGC', 'None', 'None'],
+            ['sample4', '@s11/2 abc/2', 'GGAA', 'None', 'None']
             ],
             columns=['sample', 'barcode-sequence-id',
                      'barcode-uncorrected', 'barcode-corrected',
                      'barcode-errors'],
-            index=pd.Index(['record-%02d' % i for i in range(1, 12)],
+            index=pd.Index(['record-%d' % i for i in range(1, 12)],
                            name='id'))
+        ecc = qiime2.Metadata.load(str(ecc)).to_dataframe()
         pdt.assert_frame_equal(ecc, exp_errors)
 
     def test_valid_with_barcode_errors(self):
@@ -359,7 +360,7 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
             ['sample2', '@s5/2 abc/2',  'ACACACTATGGC', 'ACACACTATGGC', 0],
             ['sample1', '@s6/2 abc/2',  'ACGATGCGACCA', 'ACGATGCGACCA', 0],
             ['sample5', '@s7/2 abc/2',  'CATTGTATCAAC', 'CATCGTATCAAC', 1],
-            [None,      '@s8/2 abc/2',  'CTAACGCAGGGG', None,           4],
+            ['None',    '@s8/2 abc/2',  'CTAACGCAGGGG', 'None',         4],
             ['sample5', '@s9/2 abc/2',  'CATCGTATCAAC', 'CATCGTATCAAC', 0],
             ['sample5', '@s10/2 abc/2', 'CATCGTATCAAC', 'CATCGTATCAAC', 0],
             ['sample4', '@s11/2 abc/2', 'CTAACGCAGTCA', 'CTAACGCAGTCA', 0]
@@ -367,8 +368,11 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
             columns=['sample', 'barcode-sequence-id',
                      'barcode-uncorrected', 'barcode-corrected',
                      'barcode-errors'],
-            index=pd.Index(['record-%02d' % i for i in range(1, 12)],
+            index=pd.Index(['record-%d' % i for i in range(1, 12)],
                            name='id'))
+        exp_errors['barcode-errors'] = \
+            exp_errors['barcode-errors'].astype(float)
+        error_detail = qiime2.Metadata.load(str(error_detail)).to_dataframe()
         pdt.assert_frame_equal(error_detail, exp_errors)
 
     @mock.patch('q2_demux._demux.OPEN_FH_LIMIT', 3)
@@ -707,7 +711,7 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                 ['sample2', '@s5/2 abc/2',  'ACACACTATGGC', 'ACACACTATGGC', 0],
                 ['sample1', '@s6/2 abc/2',  'ACGATGCGACCA', 'ACGATGCGACCA', 0],
                 ['sample5', '@s7/2 abc/2',  'CATTGTATCAAC', 'CATCGTATCAAC', 1],
-                [None,      '@s8/2 abc/2',  'CTAACGCAGGGG', None,           4],
+                ['None',    '@s8/2 abc/2',  'CTAACGCAGGGG', 'None',         4],
                 ['sample5', '@s9/2 abc/2',  'CATCGTATCAAC', 'CATCGTATCAAC', 0],
                 ['sample5', '@s10/2 abc/2', 'CATCGTATCAAC', 'CATCGTATCAAC', 0],
                 ['sample4', '@s11/2 abc/2', 'CTAACGCAGTCA', 'CTAACGCAGTCA', 0]
@@ -715,8 +719,11 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                 columns=['sample', 'barcode-sequence-id',
                          'barcode-uncorrected', 'barcode-corrected',
                          'barcode-errors'],
-                index=pd.Index(['record-%02d' % i for i in range(1, 12)],
+                index=pd.Index(['record-%d' % i for i in range(1, 12)],
                                name='id'))
+            exp_errors['barcode-errors'] = \
+                exp_errors['barcode-errors'].astype(float)
+            ecc = qiime2.Metadata.load(str(ecc)).to_dataframe()
             pdt.assert_frame_equal(ecc, exp_errors)
 
     def test_valid(self):
@@ -727,23 +734,24 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
         _, ecc = emp_paired(self.bpsi, self.barcode_map,
                             golay_error_correction=False)
         exp_errors = pd.DataFrame([
-            ['sample1', '@s1/2 abc/2',  'AAAA', None, None],
-            ['sample3', '@s2/2 abc/2',  'TTAA', None, None],
-            ['sample2', '@s3/2 abc/2',  'AACC', None, None],
-            ['sample3', '@s4/2 abc/2',  'TTAA', None, None],
-            ['sample2', '@s5/2 abc/2',  'AACC', None, None],
-            ['sample1', '@s6/2 abc/2',  'AAAA', None, None],
-            ['sample5', '@s7/2 abc/2',  'CGGC', None, None],
-            ['sample4', '@s8/2 abc/2',  'GGAA', None, None],
-            ['sample5', '@s9/2 abc/2',  'CGGC', None, None],
-            ['sample5', '@s10/2 abc/2', 'CGGC', None, None],
-            ['sample4', '@s11/2 abc/2', 'GGAA', None, None]
+            ['sample1', '@s1/2 abc/2',  'AAAA', 'None', 'None'],
+            ['sample3', '@s2/2 abc/2',  'TTAA', 'None', 'None'],
+            ['sample2', '@s3/2 abc/2',  'AACC', 'None', 'None'],
+            ['sample3', '@s4/2 abc/2',  'TTAA', 'None', 'None'],
+            ['sample2', '@s5/2 abc/2',  'AACC', 'None', 'None'],
+            ['sample1', '@s6/2 abc/2',  'AAAA', 'None', 'None'],
+            ['sample5', '@s7/2 abc/2',  'CGGC', 'None', 'None'],
+            ['sample4', '@s8/2 abc/2',  'GGAA', 'None', 'None'],
+            ['sample5', '@s9/2 abc/2',  'CGGC', 'None', 'None'],
+            ['sample5', '@s10/2 abc/2', 'CGGC', 'None', 'None'],
+            ['sample4', '@s11/2 abc/2', 'GGAA', 'None', 'None']
             ],
             columns=['sample', 'barcode-sequence-id',
                      'barcode-uncorrected', 'barcode-corrected',
                      'barcode-errors'],
-            index=pd.Index(['record-%02d' % i for i in range(1, 12)],
+            index=pd.Index(['record-%d' % i for i in range(1, 12)],
                            name='id'))
+        ecc = qiime2.Metadata.load(str(ecc)).to_dataframe()
         pdt.assert_frame_equal(ecc, exp_errors)
 
     def test_valid_with_barcode_errors(self):
