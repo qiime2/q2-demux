@@ -9,7 +9,6 @@
 from q2_types.per_sample_sequences import FastqGzFormat
 import qiime2.plugin.model as model
 from qiime2.plugin import ValidationError
-import qiime2
 
 
 # TODO: deprecate this and alias it
