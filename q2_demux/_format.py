@@ -71,16 +71,14 @@ class ErrorCorrectionDetailsFmt(model.TextFileFormat):
     }
 
     def _validate_(self, level):
-        try:
-            md = qiime2.Metadata.load(str(self))
-        except qiime2.metadata.MetadataFileError as md_exc:
-            raise ValidationError(md_exc) from md_exc
+        line = open(str(self)).readline()
+        if len(line.strip()) == 0:
+            raise ValidationError("Failed to locate header.")
 
+        header = set(line.strip().split('\t'))
         for column in sorted(self.METADATA_COLUMNS):
-            try:
-                md.get_column(column)
-            except ValueError as md_exc:
-                raise ValidationError(md_exc) from md_exc
+            if column not in header:
+                raise ValidationError(f"{column} is not a column")
 
 
 ErrorCorrectionDetailsDirFmt = model.SingleFileDirectoryFormat(
