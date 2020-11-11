@@ -76,7 +76,8 @@ plugin.methods.register_function(
     parameters={'barcodes': MetadataColumn[Categorical],
                 'golay_error_correction': Bool,
                 'rev_comp_barcodes': Bool,
-                'rev_comp_mapping_barcodes': Bool},
+                'rev_comp_mapping_barcodes': Bool,
+                'ignore_description_mismatch': Bool},
     outputs=[('per_sample_sequences', SampleData[SequencesWithQuality]),
              ('error_correction_details', ErrorCorrectionDetails)],
     input_descriptions={
@@ -91,7 +92,9 @@ plugin.methods.register_function(
                              'reverse complemented prior to demultiplexing.',
         'rev_comp_mapping_barcodes': 'If provided, the barcode sequences in '
                                      'the sample metadata will be reverse '
-                                     'complemented prior to demultiplexing.'
+                                     'complemented prior to demultiplexing.',
+        'ignore_description_mismatch': 'If True, ignore mismatches in '
+                                       'sequence record description fields.'
     },
     output_descriptions={
         'per_sample_sequences': 'The resulting demultiplexed sequences.',
@@ -115,7 +118,8 @@ plugin.methods.register_function(
     parameters={'barcodes': MetadataColumn[Categorical],
                 'golay_error_correction': Bool,
                 'rev_comp_barcodes': Bool,
-                'rev_comp_mapping_barcodes': Bool},
+                'rev_comp_mapping_barcodes': Bool,
+                'ignore_description_mismatch': Bool},
     outputs=[
         ('per_sample_sequences', SampleData[PairedEndSequencesWithQuality]),
         ('error_correction_details', ErrorCorrectionDetails),
@@ -132,7 +136,9 @@ plugin.methods.register_function(
                              'reverse complemented prior to demultiplexing.',
         'rev_comp_mapping_barcodes': 'If provided, the barcode sequences in '
                                      'the sample metadata will be reverse '
-                                     'complemented prior to demultiplexing.'
+                                     'complemented prior to demultiplexing.',
+        'ignore_description_mismatch': 'If True, ignore mismatches in '
+                                       'sequence record description fields.'
     },
     output_descriptions={
         'per_sample_sequences': 'The resulting demultiplexed sequences.',
