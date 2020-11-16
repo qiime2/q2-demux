@@ -93,7 +93,7 @@ plugin.methods.register_function(
         'rev_comp_mapping_barcodes': 'If provided, the barcode sequences in '
                                      'the sample metadata will be reverse '
                                      'complemented prior to demultiplexing.',
-        'ignore_description_mismatch': 'If True, ignore mismatches in '
+        'ignore_description_mismatch': 'If enabled, ignore mismatches in '
                                        'sequence record description fields.'
     },
     output_descriptions={
