@@ -120,9 +120,11 @@ def _maintain_open_fh_count(per_sample_fastqs, paired=False):
 
 
 class BarcodeSequenceFastqIterator(collections.abc.Iterable):
-    def __init__(self, barcode_generator, sequence_generator):
+    def __init__(self, barcode_generator, sequence_generator,
+                 ignore_description_mismatch=False):
         self.barcode_generator = barcode_generator
         self.sequence_generator = sequence_generator
+        self.ignore_description_mismatch = ignore_description_mismatch
 
     def __iter__(self):
         # Adapted from q2-types
@@ -146,34 +148,36 @@ class BarcodeSequenceFastqIterator(collections.abc.Iterable):
                     (_trim_id(barcode_header.id),
                      _trim_id(sequence_header.id)))
 
-            # if a description field is present, confirm that they're equal
-            if barcode_header.description is None and \
-               sequence_header.description is None:
-                pass
-            elif barcode_header.description is None:
-                raise ValueError(
-                    'Barcode header lines do not contain description fields '
-                    'but sequence header lines do.')
-            elif sequence_header.description is None:
-                raise ValueError(
-                    'Sequence header lines do not contain description fields '
-                    'but barcode header lines do.')
-            elif _trim_description(barcode_header.description) != \
-                    _trim_description(sequence_header.description):
-                raise ValueError(
-                    'Mismatched sequence descriptions: %s and %s' %
-                    (_trim_description(barcode_header.description),
-                     _trim_description(sequence_header.description)))
+            if not self.ignore_description_mismatch:
+                # if a description field is present, confirm that they're equal
+                if barcode_header.description is None and \
+                   sequence_header.description is None:
+                    pass
+                elif barcode_header.description is None:
+                    raise ValueError(
+                        'Barcode header lines do not contain description '
+                        'fields but sequence header lines do.')
+                elif sequence_header.description is None:
+                    raise ValueError(
+                        'Sequence header lines do not contain description '
+                        'fields but barcode header lines do.')
+                elif _trim_description(barcode_header.description) != \
+                        _trim_description(sequence_header.description):
+                    raise ValueError(
+                        'Mismatched sequence descriptions: %s and %s' %
+                        (_trim_description(barcode_header.description),
+                         _trim_description(sequence_header.description)))
 
             yield barcode_record, sequence_record
 
 
 class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
     def __init__(self, barcode_generator, forward_generator,
-                 reverse_generator):
+                 reverse_generator, ignore_description_mismatch=False):
         self.barcode_generator = barcode_generator
         self.forward_generator = forward_generator
         self.reverse_generator = reverse_generator
+        self.ignore_description_mismatch = ignore_description_mismatch
 
     def __iter__(self):
         # Adapted from q2-types
@@ -206,31 +210,32 @@ class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
                      _trim_id(forward_header.id),
                      _trim_id(reverse_header.id)))
 
-            # if a description field is present, confirm that they're equal
-            if barcode_header.description is None and \
-               forward_header.description is None and \
-               reverse_header.description is None:
-                pass
-            elif barcode_header.description is None:
-                raise ValueError(
-                    'Barcode header lines do not contain description fields '
-                    'but sequence header lines do.')
-            elif forward_header.description is None:
-                raise ValueError(
-                    'Forward-read header lines do not contain description '
-                    'fields but barcode header lines do.')
-            elif reverse_header.description is None:
-                raise ValueError(
-                    'Reverse-read header lines do not contain description '
-                    'fields but barcode header lines do.')
-            elif not (_trim_description(barcode_header.description) ==
-                      _trim_description(forward_header.description) ==
-                      _trim_description(reverse_header.description)):
-                raise ValueError(
-                    'Mismatched sequence descriptions: %s, %s, and %s' %
-                    (_trim_description(barcode_header.description),
-                     _trim_description(forward_header.description),
-                     _trim_description(reverse_header.description)))
+            if not self.ignore_description_mismatch:
+                # if a description field is present, confirm that they're equal
+                if barcode_header.description is None and \
+                   forward_header.description is None and \
+                   reverse_header.description is None:
+                    pass
+                elif barcode_header.description is None:
+                    raise ValueError(
+                        'Barcode header lines do not contain description '
+                        'fields but sequence header lines do.')
+                elif forward_header.description is None:
+                    raise ValueError(
+                        'Forward-read header lines do not contain description '
+                        'fields but barcode header lines do.')
+                elif reverse_header.description is None:
+                    raise ValueError(
+                        'Reverse-read header lines do not contain description '
+                        'fields but barcode header lines do.')
+                elif not (_trim_description(barcode_header.description) ==
+                          _trim_description(forward_header.description) ==
+                          _trim_description(reverse_header.description)):
+                    raise ValueError(
+                        'Mismatched sequence descriptions: %s, %s, and %s' %
+                        (_trim_description(barcode_header.description),
+                         _trim_description(forward_header.description),
+                         _trim_description(reverse_header.description)))
 
             yield barcode_record, forward_record, reverse_record
 
@@ -266,10 +271,11 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
                barcodes: qiime2.CategoricalMetadataColumn,
                golay_error_correction: bool = True,
                rev_comp_barcodes: bool = False,
-               rev_comp_mapping_barcodes: bool = False
+               rev_comp_mapping_barcodes: bool = False,
+               ignore_description_mismatch: bool = False
                ) -> (SingleLanePerSampleSingleEndFastqDirFmt,
                      ErrorCorrectionDetailsFmt):
-
+    seqs.ignore_description_mismatch = ignore_description_mismatch
     result = SingleLanePerSampleSingleEndFastqDirFmt()
     barcode_map, barcode_len = _make_barcode_map(
         barcodes, rev_comp_mapping_barcodes)
@@ -369,10 +375,11 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
                barcodes: qiime2.CategoricalMetadataColumn,
                golay_error_correction: bool = True,
                rev_comp_barcodes: bool = False,
-               rev_comp_mapping_barcodes: bool = False
+               rev_comp_mapping_barcodes: bool = False,
+               ignore_description_mismatch: bool = False
                ) -> (SingleLanePerSamplePairedEndFastqDirFmt,
                      ErrorCorrectionDetailsFmt):
-
+    seqs.ignore_description_mismatch = ignore_description_mismatch
     result = SingleLanePerSamplePairedEndFastqDirFmt()
     barcode_map, barcode_len = _make_barcode_map(
         barcodes, rev_comp_mapping_barcodes)

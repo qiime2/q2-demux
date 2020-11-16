@@ -105,6 +105,21 @@ class BarcodeSequenceFastqIteratorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             list(bsi)
 
+    def test_mismatch_description_override(self):
+        barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'AAAA', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'AACC', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'AACC', '+', 'PPPP')]
+
+        sequences = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                     ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                     ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                     ('@s4/1 abd/1', 'TTT', '+', 'PPP')]
+
+        bsi = BarcodeSequenceFastqIterator(barcodes, sequences,
+                                           ignore_description_mismatch=True)
+        self.assertEqual(len(list(bsi)), 4)
+
     def test_mismatched_handles_slashes_in_id(self):
         # mismatch is detected as being before the last slash, even if there
         # is more than one slash
@@ -798,6 +813,46 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
         barcodes = qiime2.CategoricalMetadataColumn(barcodes)
         self.check_valid(self.bpsi, barcodes, rev_comp_mapping_barcodes=True,
                          golay_error_correction=False)
+
+    def test_mismatched_description(self):
+        barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'AAAA', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'AACC', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'AACC', '+', 'PPPP')]
+
+        forward = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                   ('@s4/1 abd/1', 'TTT', '+', 'PPP')]
+
+        reverse = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                   ('@s4/1 abd/1', 'TTT', '+', 'PPP')]
+
+        bsi = BarcodePairedSequenceFastqIterator(barcodes, forward, reverse)
+        with self.assertRaises(ValueError):
+            list(bsi)
+
+    def test_mismatch_description_override(self):
+        barcodes = [('@s1/2 abc/2', 'AAAA', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'AAAA', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'AACC', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'AACC', '+', 'PPPP')]
+
+        forward = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                   ('@s4/1 abd/1', 'TTT', '+', 'PPP')]
+
+        reverse = [('@s1/1 abc/1', 'GGG', '+', 'YYY'),
+                   ('@s2/1 abc/1', 'CCC', '+', 'PPP'),
+                   ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
+                   ('@s4/1 abd/1', 'TTT', '+', 'PPP')]
+
+        bsi = BarcodePairedSequenceFastqIterator(barcodes, forward, reverse,
+                                                 ignore_description_mismatch=True)  # noqa
+        self.assertEqual(len(list(bsi)), 4)
 
     def test_rev_comp_barcodes(self):
         barcodes = [('@s1/2 abc/2', 'TTTT', '+', 'YYYY'),
