@@ -16,7 +16,7 @@ test-cov: all
 
 q2_demux/_summarize/assets/dist:
 	cd q2_demux/_summarize/assets && \
-	npm install && \
+	npm install --no-save && \
 	npm run build && \
 	cp licenses/* dist/
 
