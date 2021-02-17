@@ -51,4 +51,4 @@ jobs:
       with:
         package-name: q2-demux
         build-target: staging
-        additional-tests: py.test --pyargs q2_demux --capture=tee-sys
+        additional-tests: py.test --pyargs q2_demux
