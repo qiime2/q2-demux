@@ -52,3 +52,4 @@ jobs:
         package-name: q2-demux
         build-target: staging
         additional-tests: py.test --pyargs q2_demux
+        library-token: ${{ secrets.LIBRARY_TOKEN }}
