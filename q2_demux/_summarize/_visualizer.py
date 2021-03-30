@@ -174,7 +174,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
         show_plot = len(sample_map) > 0
 
-        ax = sns.distplot(result, kde=False, color='black')
+        ax = sns.histplot(result, kde=False, color='black')
         ax.set_xlabel('Number of sequences')
         ax.set_ylabel('Number of samples')
         fig = ax.get_figure()
