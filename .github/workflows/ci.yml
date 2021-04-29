@@ -51,5 +51,5 @@ jobs:
       with:
         package-name: q2-demux
         build-target: tested
-        # additional-tests: py.test --pyargs q2_demux
+        additional-tests: py.test --pyargs q2_demux
         library-token: ${{ secrets.LIBRARY_TOKEN }}
