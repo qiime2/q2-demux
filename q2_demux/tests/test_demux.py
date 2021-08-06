@@ -526,17 +526,17 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
         self._barcode_trimming(barcodes, False)
 
     def test_barcode_trimming_rev_comp_barcodes(self):
-        # NOTE: these barcodes are the
+        # NOTE: the 5th nucleotide in these barcodes should be trimmed off
         barcodes = [('@s1/2 abc/2', 'TTTTG', '+', 'YYYY'),
                     ('@s2/2 abc/2', 'TTAAG', '+', 'PPPP'),
-                    ('@s3/2 abc/2', 'GGTTC', '+', 'PPPP'),
-                    ('@s4/2 abc/2', 'TTAAC', '+', 'PPPP'),
-                    ('@s5/2 abc/2', 'GGTTT', '+', 'PPPP'),
-                    ('@s6/2 abc/2', 'TTTTC', '+', 'PPPP'),
-                    ('@s7/2 abc/2', 'GCCGT', '+', 'PPPP'),
-                    ('@s8/2 abc/2', 'TTCCT', '+', 'PPPP'),
-                    ('@s9/2 abc/2', 'GCCGT', '+', 'PPPP'),
-                    ('@s10/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'GGTTG', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'TTAAG', '+', 'PPPP'),
+                    ('@s5/2 abc/2', 'GGTTG', '+', 'PPPP'),
+                    ('@s6/2 abc/2', 'TTTTN', '+', 'PPPP'),
+                    ('@s7/2 abc/2', 'GCCGG', '+', 'PPPP'),
+                    ('@s8/2 abc/2', 'TTCCG', '+', 'PPPP'),
+                    ('@s9/2 abc/2', 'GCCGG', '+', 'PPPP'),
+                    ('@s10/2 abc/2', 'GCCGG', '+', 'PPPP'),
                     ('@s11/2 abc/2', 'TTCCG', '+', 'PPPP')]
         self._barcode_trimming(barcodes, True)
 
