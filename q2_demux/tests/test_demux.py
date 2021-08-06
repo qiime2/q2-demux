@@ -529,9 +529,9 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
         # NOTE: these barcodes are the
         barcodes = [('@s1/2 abc/2', 'TTTTG', '+', 'YYYY'),
                     ('@s2/2 abc/2', 'TTAAG', '+', 'PPPP'),
-                    ('@s3/2 abc/2', 'TTGGC', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'GGTTC', '+', 'PPPP'),
                     ('@s4/2 abc/2', 'TTAAC', '+', 'PPPP'),
-                    ('@s5/2 abc/2', 'TTGGT', '+', 'PPPP'),
+                    ('@s5/2 abc/2', 'GGTTT', '+', 'PPPP'),
                     ('@s6/2 abc/2', 'TTTTC', '+', 'PPPP'),
                     ('@s7/2 abc/2', 'GCCGT', '+', 'PPPP'),
                     ('@s8/2 abc/2', 'TTCCT', '+', 'PPPP'),
