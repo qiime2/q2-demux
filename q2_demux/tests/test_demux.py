@@ -908,6 +908,26 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
             barcodes, self.forward, self.reverse)
         self.check_valid(bpsi, self.barcode_map, golay_error_correction=False)
 
+    def test_barcode_trimming_rev_comp(self):
+        # these barcodes are longer then the ones in the mapping file.
+        # only the first barcode_length bases should be used when
+        # when reverse complementing
+        barcodes = [('@s1/2 abc/2', 'TTTTT', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'TTAAT', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'GGTTT', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'TTAAT', '+', 'PPPP'),
+                    ('@s5/2 abc/2', 'GGTTT', '+', 'PPPP'),
+                    ('@s6/2 abc/2', 'TTTTT', '+', 'PPPP'),
+                    ('@s7/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s8/2 abc/2', 'TTCCT', '+', 'PPPP'),
+                    ('@s9/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s10/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s11/2 abc/2', 'TTCCT', '+', 'PPPP')]
+        bpsi = BarcodePairedSequenceFastqIterator(
+            barcodes, self.forward, self.reverse)
+        self.check_valid(bpsi, self.barcode_map, golay_error_correction=False,
+                         rev_comp_barcodes=True)
+
 
 class SummarizeTests(TestPluginBase):
     package = 'q2_demux.tests'
