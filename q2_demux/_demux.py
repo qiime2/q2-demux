@@ -296,10 +296,10 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
     ec_details = ECDetails(ec_details_fmt)
 
     for i, (barcode_record, sequence_record) in enumerate(seqs, start=1):
-        barcode_read = barcode_record[1]
+        raw_barcode_read = barcode_record[1][:barcode_len]
         if rev_comp_barcodes:
-            barcode_read = str(skbio.DNA(barcode_read).reverse_complement())
-        raw_barcode_read = barcode_read[:barcode_len]
+            barcode_as_DNA = skbio.DNA(raw_barcode_read)
+            raw_barcode_read = str(barcode_as_DNA.reverse_complement())
 
         if golay_error_correction:
             # A three bit filter is implicitly used by the decoder. See Hamady
@@ -398,10 +398,10 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
 
     for i, record in enumerate(seqs, start=1):
         barcode_record, forward_record, reverse_record = record
-        barcode_read = barcode_record[1]
+        raw_barcode_read = barcode_record[1][:barcode_len]
         if rev_comp_barcodes:
-            barcode_read = str(skbio.DNA(barcode_read).reverse_complement())
-        raw_barcode_read = barcode_read[:barcode_len]
+            barcode_as_DNA = skbio.DNA(raw_barcode_read)
+            raw_barcode_read = str(barcode_as_DNA.reverse_complement())
 
         if golay_error_correction:
             # A three bit filter is implicitly used by the decoder. See Hamady

@@ -523,8 +523,27 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                     ('@s9/2 abc/2', 'CGGCG', '+', 'PPPP'),
                     ('@s10/2 abc/2', 'CGGCG', '+', 'PPPP'),
                     ('@s11/2 abc/2', 'GGAAG', '+', 'PPPP')]
+        self._barcode_trimming(barcodes, False)
+
+    def test_barcode_trimming_rev_comp_barcodes(self):
+        # NOTE: the 5th nucleotide in these barcodes should be trimmed off
+        barcodes = [('@s1/2 abc/2', 'TTTTG', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'TTAAG', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'GGTTG', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'TTAAG', '+', 'PPPP'),
+                    ('@s5/2 abc/2', 'GGTTG', '+', 'PPPP'),
+                    ('@s6/2 abc/2', 'TTTTN', '+', 'PPPP'),
+                    ('@s7/2 abc/2', 'GCCGG', '+', 'PPPP'),
+                    ('@s8/2 abc/2', 'TTCCG', '+', 'PPPP'),
+                    ('@s9/2 abc/2', 'GCCGG', '+', 'PPPP'),
+                    ('@s10/2 abc/2', 'GCCGG', '+', 'PPPP'),
+                    ('@s11/2 abc/2', 'TTCCG', '+', 'PPPP')]
+        self._barcode_trimming(barcodes, True)
+
+    def _barcode_trimming(self, barcodes, rev_comp_barcodes):
         bsi = BarcodeSequenceFastqIterator(barcodes, self.sequences)
         actual, ecc = emp_single(bsi, self.barcode_map,
+                                 rev_comp_barcodes=rev_comp_barcodes,
                                  golay_error_correction=False)
         output_fastq = list(actual.sequences.iter_views(FastqGzFormat))
         # five per-sample files were written
@@ -888,6 +907,26 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
         bpsi = BarcodePairedSequenceFastqIterator(
             barcodes, self.forward, self.reverse)
         self.check_valid(bpsi, self.barcode_map, golay_error_correction=False)
+
+    def test_barcode_trimming_rev_comp(self):
+        # these barcodes are longer then the ones in the mapping file.
+        # only the first barcode_length bases should be used when
+        # when reverse complementing
+        barcodes = [('@s1/2 abc/2', 'TTTTT', '+', 'YYYY'),
+                    ('@s2/2 abc/2', 'TTAAT', '+', 'PPPP'),
+                    ('@s3/2 abc/2', 'GGTTT', '+', 'PPPP'),
+                    ('@s4/2 abc/2', 'TTAAT', '+', 'PPPP'),
+                    ('@s5/2 abc/2', 'GGTTT', '+', 'PPPP'),
+                    ('@s6/2 abc/2', 'TTTTT', '+', 'PPPP'),
+                    ('@s7/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s8/2 abc/2', 'TTCCT', '+', 'PPPP'),
+                    ('@s9/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s10/2 abc/2', 'GCCGT', '+', 'PPPP'),
+                    ('@s11/2 abc/2', 'TTCCT', '+', 'PPPP')]
+        bpsi = BarcodePairedSequenceFastqIterator(
+            barcodes, self.forward, self.reverse)
+        self.check_valid(bpsi, self.barcode_map, golay_error_correction=False,
+                         rev_comp_barcodes=True)
 
 
 class SummarizeTests(TestPluginBase):
