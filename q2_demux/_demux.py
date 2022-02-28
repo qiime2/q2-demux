@@ -13,6 +13,7 @@ import collections
 import collections.abc
 import random
 import resource
+import re
 
 import skbio
 import psutil
@@ -251,7 +252,17 @@ def _make_barcode_map(barcodes, rev_comp_mapping_barcodes):
                              '%d != %d. Variable length barcodes are not '
                              'supported.' % (len(barcode), barcode_len))
         if rev_comp_mapping_barcodes:
-            barcode = str(skbio.DNA(barcode).reverse_complement())
+            try:
+                barcode = str(skbio.DNA(barcode).reverse_complement())
+            except ValueError as ve:
+                if re.match('^ValueError[(]"Invalid characters in sequence[.,'
+                            ' \n]*',
+                            ve.__repr__()):
+                    raise ValueError("Invalid characters found in specified "
+                                     "barcodes column within metadata file. "
+                                     "Please confirm that the column: '%s' "
+                                     "contains your per-sample barcodes."
+                                     % (barcodes.name))
         if barcode in barcode_map:
             raise ValueError('A duplicate barcode was detected. The barcode '
                              '%s was observed for samples %s and %s.'
