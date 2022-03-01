@@ -254,7 +254,7 @@ def _make_barcode_map(barcodes, rev_comp_mapping_barcodes):
         try:
             skbio.DNA(barcode)
         except ValueError as ve:
-            if re.match('^ValueError[(]"Invalid characters in sequence[.,'
+            if re.match(r'^ValueError\("Invalid characters in sequence[.,'
                         ' \n]*',
                         ve.__repr__()):
                 raise ValueError("Invalid characters found in specified "
