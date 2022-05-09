@@ -25,7 +25,7 @@ requirements:
     - python {{ python }}
     - pandas
     - numpy
-    - scikit-bio
+    - scikit-bio {{ scikit_bio }}
     - seaborn >=0.8.1
     - pyyaml
     - psutil
