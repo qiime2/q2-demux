@@ -23,9 +23,9 @@ requirements:
 
   run:
     - python {{ python }}
-    - pandas
+    - pandas {{ pandas }}
     - numpy
-    - scikit-bio
+    - scikit-bio {{ scikit_bio }}
     - seaborn >=0.8.1
     - pyyaml
     - psutil
