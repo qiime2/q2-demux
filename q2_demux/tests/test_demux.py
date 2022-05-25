@@ -579,6 +579,18 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                         'sample4,sample4_5_L001_R1_001.fastq.gz,forward\n']
         self._compare_manifests(act_manifest, exp_manifest)
 
+    def test_raise_error_invalid_sequence_column_characters(self):
+        bad_barcode_column = pd.Series(
+            ['HPillTS1F43', 'HPillTS1F44'], name='barcode-id',
+            index=pd.Index(['sample1', 'sample2'], name='sample-id'))
+
+        with self.assertRaisesRegex(ValueError, r"Invalid characters"):
+            emp_single(
+                self.bsi,
+                qiime2.CategoricalMetadataColumn(bad_barcode_column),
+                golay_error_correction=False,
+            )
+
 
 class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
     def setUp(self):
