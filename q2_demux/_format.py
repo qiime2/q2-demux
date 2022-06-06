@@ -70,7 +70,9 @@ class ErrorCorrectionDetailsFmt(model.TextFileFormat):
     }
 
     def _validate_(self, level):
-        line = open(str(self)).readline()
+        with open(str(self)) as fh:
+            line = fh.readline()
+
         if len(line.strip()) == 0:
             raise ValidationError("Failed to locate header.")
 
