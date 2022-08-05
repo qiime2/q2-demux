@@ -17,7 +17,7 @@ golay = GolayDecoder()
 
 class ECCTests(unittest.TestCase):
     def test_golay_module1(self):
-        """switching the last base, decode() should recover the original barcode
+        """switch the last base, decode() should recover the original barcode
         """
         sent = golay.encode([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0])
         rec = sent[:-1] + 'C'  # possible error here
@@ -74,7 +74,7 @@ class ECCTests(unittest.TestCase):
         self.assertEqual(golay.decode('XYZXYZXYZXYZ'), (None, 4))
 
     def test_G_H(self):
-        """ generator and parity check matrices should be s.t. G dot H.T = zeros
+        """generator and parity check matrices should be s.t. G dot H.T = zeros
         """
         chkmtx = (np.dot(golay.DEFAULT_G, golay.DEFAULT_H.T) % 2)
         self.assertTrue((chkmtx == 0).all())

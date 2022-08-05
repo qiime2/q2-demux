@@ -120,7 +120,7 @@ class GolayDecoder(object):
     # reasonably over estimate the cache. Overhead is small anyway.
     @functools.lru_cache(maxsize=8192)
     def decode(self, seq):
-        """Decodes a nucleotide string of 12 bases, using bitwise error checking
+        """Decode a nucleotide string of 12 bases, using bitwise error checking
 
         Parameters
         ----------
