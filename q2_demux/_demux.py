@@ -384,6 +384,8 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
 
     _write_metadata_yaml(result)
 
+    ec_details._fp.close()
+
     return result, ec_details_fmt
 
 
@@ -495,5 +497,7 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
     result.manifest.write_data(manifest, FastqManifestFormat)
 
     _write_metadata_yaml(result)
+
+    ec_details._fp.close()
 
     return result, ec_details_fmt
