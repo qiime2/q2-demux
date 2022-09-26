@@ -42,12 +42,18 @@ class ECDetails:
         self._fp = open(str(fmt), 'w')
         self._write_header()
 
+    def __enter__(self):
+        return self
+
     def write(self, parts):
         self._fp.write('\t'.join([str(part) for part in parts]))
         self._fp.write('\n')
 
     def _write_header(self):
         self.write(self.COLUMNS)
+
+    def __exit__(self, *args):
+        self._fp.close()
 
 
 def _read_fastq_seqs(filepath):
@@ -309,64 +315,65 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
     per_sample_fastqs = {}
 
     ec_details_fmt = ErrorCorrectionDetailsFmt()
-    ec_details = ECDetails(ec_details_fmt)
+    with ECDetails(ec_details_fmt) as ec_details:
 
-    for i, (barcode_record, sequence_record) in enumerate(seqs, start=1):
-        raw_barcode_read = barcode_record[1][:barcode_len]
-        if rev_comp_barcodes:
-            barcode_as_DNA = skbio.DNA(raw_barcode_read)
-            raw_barcode_read = str(barcode_as_DNA.reverse_complement())
+        for i, (barcode_record, sequence_record) in enumerate(seqs, start=1):
+            raw_barcode_read = barcode_record[1][:barcode_len]
+            if rev_comp_barcodes:
+                barcode_as_DNA = skbio.DNA(raw_barcode_read)
+                raw_barcode_read = str(barcode_as_DNA.reverse_complement())
 
-        if golay_error_correction:
-            # A three bit filter is implicitly used by the decoder. See Hamady
-            # and Knight 2009 Genome Research for the justification:
-            #
-            # https://genome.cshlp.org/content/19/7/1141.full
-            #
-            # Specifically that "...Golay codes of 12 bases can correct all
-            # triple-bit errors and detect all quadruple-bit errors."
-            barcode_read, ecc_errors = decoder.decode(raw_barcode_read)
-            golay_stats = [barcode_read, ecc_errors]
-        else:
-            barcode_read = raw_barcode_read
-            golay_stats = [None, None]
+            if golay_error_correction:
+                # A three bit filter is implicitly used by the decoder. See
+                # Hamady and Knight 2009 Genome Research for the justification:
+                #
+                # https://genome.cshlp.org/content/19/7/1141.full
+                #
+                # Specifically that "...Golay codes of 12 bases can correct all
+                # triple-bit errors and detect all quadruple-bit errors."
+                barcode_read, ecc_errors = decoder.decode(raw_barcode_read)
+                golay_stats = [barcode_read, ecc_errors]
+            else:
+                barcode_read = raw_barcode_read
+                golay_stats = [None, None]
 
-        sample_id = barcode_map.get(barcode_read)
+            sample_id = barcode_map.get(barcode_read)
 
-        record = [
-            f'record-{i}',
-            sample_id,
-            barcode_record[0],
-            raw_barcode_read,
-        ]
-        ec_details.write(record + golay_stats)
+            record = [
+                f'record-{i}',
+                sample_id,
+                barcode_record[0],
+                raw_barcode_read,
+            ]
+            ec_details.write(record + golay_stats)
 
-        if sample_id is None:
-            continue
+            if sample_id is None:
+                continue
 
-        if sample_id not in per_sample_fastqs:
-            # The barcode id, lane number and read number are not relevant
-            # here. We might ultimately want to use a dir format other than
-            # SingleLanePerSampleSingleEndFastqDirFmt which doesn't care
-            # about this information. Similarly, the direction of the read
-            # isn't relevant here anymore.
-            barcode_id = len(per_sample_fastqs) + 1
-            path = result.sequences.path_maker(sample_id=sample_id,
-                                               barcode_id=barcode_id,
-                                               lane_number=1,
-                                               read_number=1)
-            _maintain_open_fh_count(per_sample_fastqs)
-            per_sample_fastqs[sample_id] = gzip.open(str(path), mode='a')
-            manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name, 'forward'))
+            if sample_id not in per_sample_fastqs:
+                # The barcode id, lane number and read number are not relevant
+                # here. We might ultimately want to use a dir format other than
+                # SingleLanePerSampleSingleEndFastqDirFmt which doesn't care
+                # about this information. Similarly, the direction of the read
+                # isn't relevant here anymore.
+                barcode_id = len(per_sample_fastqs) + 1
+                path = result.sequences.path_maker(sample_id=sample_id,
+                                                   barcode_id=barcode_id,
+                                                   lane_number=1,
+                                                   read_number=1)
+                _maintain_open_fh_count(per_sample_fastqs)
+                per_sample_fastqs[sample_id] = gzip.open(str(path), mode='a')
+                manifest_fh.write('%s,%s,%s\n' % (sample_id, path.name,
+                                                  'forward'))
 
-        if per_sample_fastqs[sample_id].closed:
-            _maintain_open_fh_count(per_sample_fastqs)
-            per_sample_fastqs[sample_id] = gzip.open(
-                per_sample_fastqs[sample_id].name, mode='a')
+            if per_sample_fastqs[sample_id].closed:
+                _maintain_open_fh_count(per_sample_fastqs)
+                per_sample_fastqs[sample_id] = gzip.open(
+                    per_sample_fastqs[sample_id].name, mode='a')
 
-        fastq_lines = '\n'.join(sequence_record) + '\n'
-        fastq_lines = fastq_lines.encode('utf-8')
-        per_sample_fastqs[sample_id].write(fastq_lines)
+            fastq_lines = '\n'.join(sequence_record) + '\n'
+            fastq_lines = fastq_lines.encode('utf-8')
+            per_sample_fastqs[sample_id].write(fastq_lines)
 
     if len(per_sample_fastqs) == 0:
         raise ValueError('No sequences were mapped to samples. Check that '
@@ -383,8 +390,6 @@ def emp_single(seqs: BarcodeSequenceFastqIterator,
     result.manifest.write_data(manifest, FastqManifestFormat)
 
     _write_metadata_yaml(result)
-
-    ec_details._fp.close()
 
     return result, ec_details_fmt
 
@@ -412,74 +417,74 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
     per_sample_fastqs = {}
 
     ec_details_fmt = ErrorCorrectionDetailsFmt()
-    ec_details = ECDetails(ec_details_fmt)
+    with ECDetails(ec_details_fmt) as ec_details:
 
-    for i, record in enumerate(seqs, start=1):
-        barcode_record, forward_record, reverse_record = record
-        raw_barcode_read = barcode_record[1][:barcode_len]
-        if rev_comp_barcodes:
-            barcode_as_DNA = skbio.DNA(raw_barcode_read)
-            raw_barcode_read = str(barcode_as_DNA.reverse_complement())
+        for i, record in enumerate(seqs, start=1):
+            barcode_record, forward_record, reverse_record = record
+            raw_barcode_read = barcode_record[1][:barcode_len]
+            if rev_comp_barcodes:
+                barcode_as_DNA = skbio.DNA(raw_barcode_read)
+                raw_barcode_read = str(barcode_as_DNA.reverse_complement())
 
-        if golay_error_correction:
-            # A three bit filter is implicitly used by the decoder. See Hamady
-            # and Knight 2009 Genome Research for the justification:
-            #
-            # https://genome.cshlp.org/content/19/7/1141.full
-            #
-            # Specifically that "...Golay codes of 12 bases can correct all
-            # triple-bit errors and detect all quadruple-bit errors."
-            barcode_read, ecc_errors = decoder.decode(raw_barcode_read)
-            golay_stats = [barcode_read, ecc_errors]
-        else:
-            barcode_read = raw_barcode_read
-            golay_stats = [None, None]
+            if golay_error_correction:
+                # A three bit filter is implicitly used by the decoder. See
+                # Hamady and Knight 2009 Genome Research for the justification:
+                #
+                # https://genome.cshlp.org/content/19/7/1141.full
+                #
+                # Specifically that "...Golay codes of 12 bases can correct all
+                # triple-bit errors and detect all quadruple-bit errors."
+                barcode_read, ecc_errors = decoder.decode(raw_barcode_read)
+                golay_stats = [barcode_read, ecc_errors]
+            else:
+                barcode_read = raw_barcode_read
+                golay_stats = [None, None]
 
-        sample_id = barcode_map.get(barcode_read)
+            sample_id = barcode_map.get(barcode_read)
 
-        record = [
-            f'record-{i}',
-            sample_id,
-            barcode_record[0],
-            raw_barcode_read,
-        ]
-        ec_details.write(record + golay_stats)
+            record = [
+                f'record-{i}',
+                sample_id,
+                barcode_record[0],
+                raw_barcode_read,
+            ]
+            ec_details.write(record + golay_stats)
 
-        if sample_id is None:
-            continue
+            if sample_id is None:
+                continue
 
-        if sample_id not in per_sample_fastqs:
-            barcode_id = len(per_sample_fastqs) + 1
-            fwd_path = result.sequences.path_maker(sample_id=sample_id,
-                                                   barcode_id=barcode_id,
-                                                   lane_number=1,
-                                                   read_number=1)
-            rev_path = result.sequences.path_maker(sample_id=sample_id,
-                                                   barcode_id=barcode_id,
-                                                   lane_number=1,
-                                                   read_number=2)
+            if sample_id not in per_sample_fastqs:
+                barcode_id = len(per_sample_fastqs) + 1
+                fwd_path = result.sequences.path_maker(sample_id=sample_id,
+                                                       barcode_id=barcode_id,
+                                                       lane_number=1,
+                                                       read_number=1)
+                rev_path = result.sequences.path_maker(sample_id=sample_id,
+                                                       barcode_id=barcode_id,
+                                                       lane_number=1,
+                                                       read_number=2)
 
-            _maintain_open_fh_count(per_sample_fastqs, paired=True)
-            per_sample_fastqs[sample_id] = (
-                gzip.open(str(fwd_path), mode='a'),
-                gzip.open(str(rev_path), mode='a')
-            )
-            manifest_fh.write('%s,%s,%s\n' % (sample_id, fwd_path.name,
-                                              'forward'))
-            manifest_fh.write('%s,%s,%s\n' % (sample_id, rev_path.name,
-                                              'reverse'))
+                _maintain_open_fh_count(per_sample_fastqs, paired=True)
+                per_sample_fastqs[sample_id] = (
+                    gzip.open(str(fwd_path), mode='a'),
+                    gzip.open(str(rev_path), mode='a')
+                )
+                manifest_fh.write('%s,%s,%s\n' % (sample_id, fwd_path.name,
+                                                  'forward'))
+                manifest_fh.write('%s,%s,%s\n' % (sample_id, rev_path.name,
+                                                  'reverse'))
 
-        if per_sample_fastqs[sample_id][0].closed:
-            _maintain_open_fh_count(per_sample_fastqs, paired=True)
+            if per_sample_fastqs[sample_id][0].closed:
+                _maintain_open_fh_count(per_sample_fastqs, paired=True)
+                fwd, rev = per_sample_fastqs[sample_id]
+                per_sample_fastqs[sample_id] = (
+                    gzip.open(fwd.name, mode='a'),
+                    gzip.open(rev.name, mode='a')
+                )
+
             fwd, rev = per_sample_fastqs[sample_id]
-            per_sample_fastqs[sample_id] = (
-                gzip.open(fwd.name, mode='a'),
-                gzip.open(rev.name, mode='a')
-            )
-
-        fwd, rev = per_sample_fastqs[sample_id]
-        fwd.write(('\n'.join(forward_record) + '\n').encode('utf-8'))
-        rev.write(('\n'.join(reverse_record) + '\n').encode('utf-8'))
+            fwd.write(('\n'.join(forward_record) + '\n').encode('utf-8'))
+            rev.write(('\n'.join(reverse_record) + '\n').encode('utf-8'))
 
     if len(per_sample_fastqs) == 0:
         raise ValueError('No sequences were mapped to samples. Check that '
@@ -497,7 +502,5 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
     result.manifest.write_data(manifest, FastqManifestFormat)
 
     _write_metadata_yaml(result)
-
-    ec_details._fp.close()
 
     return result, ec_details_fmt
