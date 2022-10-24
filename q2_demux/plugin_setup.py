@@ -109,7 +109,7 @@ plugin.methods.register_function(
                  'Project (EMP) amplicon sequencing protocol. Details about '
                  'this protocol can be found at '
                  'http://www.earthmicrobiome.org/protocols-and-standards/'),
-    examples = {'demux': ex.emp_single},
+    examples={'demux': ex.emp_single},
     citations=[
         citations['hamady2008'],
         citations['hamady2009']]
@@ -182,7 +182,7 @@ plugin.visualizers.register_function(
     description=('Summarize counts per sample for all samples, and generate '
                  'interactive positional quality plots based on `n` randomly '
                  'selected sequences.'),
-    examples = {'demux': ex.summarize}
+    examples={'demux': ex.summarize}
 )
 
 plugin.methods.register_function(

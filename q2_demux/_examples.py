@@ -6,23 +6,19 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import os
-from importlib_metadata import metadata
-import pkg_resources
 
-import qiime2
+emp_seq_url = 'https://docs.qiime2.org/{epoch}/data/tutorials/' \
+              'moving-pictures/emp-single-end-sequences.qza'
 
-emp_seq_url='https://docs.qiime2.org/2022.8/data/tutorials/' \
-'moving-pictures/emp-single-end-sequences.qza'
+demux_url = 'https://docs.qiime2.org/{epoch}/data/tutorials/' \
+            'moving-pictures/demux.qza'
 
-demux_url='https://docs.qiime2.org/2022.8/data/tutorials/' \
-'moving-pictures/demux.qza'
+metadata_url = 'https://data.qiime2.org/{epoch}/tutorials/' \
+               'moving-pictures/sample_metadata.tsv'
 
-metadata_url='https://data.qiime2.org/2022.8/tutorials/' \
-'moving-pictures/sample_metadata.tsv'
 
 def md_column_factory(use):
-    metadata = use.init_metadata_from_url('sample_metadata',metadata_url)
+    metadata = use.init_metadata_from_url('sample_metadata', metadata_url)
     metadata_column = (metadata.value).get_column('barcode-sequence')
     return metadata_column
 
@@ -35,7 +31,7 @@ def emp_single(use):
         use.UsageAction('demux', 'emp_single'),
         use.UsageInputs(
             seqs=sequences,
-            barcodes =metadata
+            barcodes=metadata
             ),
         use.UsageOutputNames(
             per_sample_sequences='demux',
@@ -45,6 +41,7 @@ def emp_single(use):
 
     demux.assert_output_type('SampleData[SequencesWithQuality]')
     correction_details.assert_output_type('ErrorCorrectionDetails')
+
 
 def summarize(use):
     demux = use.init_artifact_from_url('demux', demux_url)
@@ -60,4 +57,3 @@ def summarize(use):
     )
 
     viz.assert_output_type('Visualization')
-
