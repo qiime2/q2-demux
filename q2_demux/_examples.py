@@ -20,7 +20,7 @@ metadata_url = 'https://data.qiime2.org/{epoch}/tutorials/' \
 def md_column_factory(use):
     metadata = use.init_metadata_from_url('sample_metadata', metadata_url)
     metadata_column = use.get_metadata_column('metadata_column',
-                                             'barcode-sequence', metadata)
+                                              'barcode-sequence', metadata)
     print(type(metadata_column))
 
     return metadata_column
