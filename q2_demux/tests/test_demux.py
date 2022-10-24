@@ -20,6 +20,7 @@ import qiime2
 import numpy.testing as npt
 
 from qiime2.plugin.testing import TestPluginBase
+import q2_demux
 from q2_demux._demux import (BarcodeSequenceFastqIterator,
                              BarcodePairedSequenceFastqIterator)
 from q2_demux import emp_single, emp_paired, summarize
@@ -30,7 +31,10 @@ from q2_types.per_sample_sequences import (
 from q2_demux._summarize._visualizer import (_PlotQualView,
                                              _decode_qual_to_phred33)
 
-
+class TestBase(TestPluginBase):
+    package = 'q2_demux.tests'
+    def test_examples(self):
+        self.execute_examples()
 class BarcodeSequenceFastqIteratorTests(unittest.TestCase):
 
     def test_valid(self):
@@ -1335,7 +1339,6 @@ class SummarizeTests(TestPluginBase):
             summarize(output_dir, _PlotQualView(empty, paired=True), n=1)
         # Checkpoint assertion
         self.assertTrue(True)
-
 
 if __name__ == '__main__':
     unittest.main()
