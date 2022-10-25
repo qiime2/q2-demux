@@ -28,7 +28,8 @@ def md_column_factory(use):
 
 def emp_single(use):
     sequences = use.init_artifact_from_url('sequences', emp_seq_url)
-    metadata = md_column_factory(use)
+    metadata = use.init_metadata_from_url('sample_metadata', metadata_url,
+                                          'barcode-sequence')
 
     demux, correction_details = use.action(
         use.UsageAction('demux', 'emp_single'),
