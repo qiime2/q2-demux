@@ -31,6 +31,13 @@ from q2_demux._summarize._visualizer import (_PlotQualView,
                                              _decode_qual_to_phred33)
 
 
+class TestBase(TestPluginBase):
+    package = 'q2_demux.tests'
+
+    def test_examples(self):
+        self.execute_examples()
+
+
 class BarcodeSequenceFastqIteratorTests(unittest.TestCase):
 
     def test_valid(self):

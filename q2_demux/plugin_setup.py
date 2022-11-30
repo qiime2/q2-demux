@@ -25,6 +25,8 @@ from ._format import (EMPMultiplexedDirFmt, ErrorCorrectionDetailsDirFmt,
                       EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
                       EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
 
+import q2_demux._examples as ex
+
 citations = Citations.load('citations.bib', package='q2_demux')
 
 plugin = Plugin(
@@ -107,6 +109,7 @@ plugin.methods.register_function(
                  'Project (EMP) amplicon sequencing protocol. Details about '
                  'this protocol can be found at '
                  'http://www.earthmicrobiome.org/protocols-and-standards/'),
+    examples={'demux': ex.emp_single},
     citations=[
         citations['hamady2008'],
         citations['hamady2009']]
@@ -178,7 +181,8 @@ plugin.visualizers.register_function(
     name='Summarize counts per sample.',
     description=('Summarize counts per sample for all samples, and generate '
                  'interactive positional quality plots based on `n` randomly '
-                 'selected sequences.')
+                 'selected sequences.'),
+    examples={'demux': ex.summarize}
 )
 
 plugin.methods.register_function(
