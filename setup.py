@@ -42,7 +42,7 @@ setup(
                            'data/summarize_empty/empty_forward_in_paired/*',
                            'data/summarize_empty/empty_reverse_in_paired/*',
                            'data/summarize_empty/empty_paired_end/*',
-                           'data/reverse_only/*'
+                           'data/reverse_only/*',
                            'data/*'
                            ],
         'q2_demux': ['_summarize/assets/*.html',
