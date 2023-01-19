@@ -6,9 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import qiime2
-
-
 emp_seq_url = ('https://data.qiime2.org/usage-examples/'
                'moving-pictures/emp-single-end-sequences.qza')
 
