@@ -6,16 +6,13 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import qiime2
-
-
 emp_seq_url = ('https://data.qiime2.org/usage-examples/'
                'moving-pictures/emp-single-end-sequences.qza')
 
 demux_url = 'https://data.qiime2.org/usage-examples/moving-pictures/demux.qza'
 
-metadata_url = (f'https://data.qiime2.org/{qiime2.__release__}/tutorials/'
-                'moving-pictures/sample_metadata.tsv')
+metadata_url = ('https://data.qiime2.org/usage-examples/moving-pictures/'
+                'sample-metadata.tsv')
 
 
 def emp_single(use):
