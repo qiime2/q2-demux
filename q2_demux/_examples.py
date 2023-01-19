@@ -11,8 +11,8 @@ emp_seq_url = ('https://data.qiime2.org/usage-examples/'
 
 demux_url = 'https://data.qiime2.org/usage-examples/moving-pictures/demux.qza'
 
-metadata_url = ('https://data.qiime2.org/usage-examples/tutorials/'
-                'moving-pictures/sample_metadata.tsv')
+metadata_url = ('https://data.qiime2.org/usage-examples/moving-pictures/'
+                'sample_metadata.tsv')
 
 
 def emp_single(use):
