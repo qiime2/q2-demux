@@ -10,7 +10,7 @@ import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
-    Range, Citations, TypeMatch
+    Collection, Range, Citations, TypeMatch
 )
 
 from q2_types.sample_data import SampleData
@@ -158,6 +158,27 @@ plugin.methods.register_function(
     citations=[
         citations['hamady2008'],
         citations['hamady2009']]
+)
+
+plugin.methods.register_function(
+    function=q2_demux.partition_samples_single,
+    inputs={'demux': SampleData[SequencesWithQuality]},
+    parameters={},
+    outputs=[
+        ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
+    ],
+    input_descriptions={
+        'demux': 'The demux to partition.'
+    },
+    output_descriptions={
+        'partitioned_demux': 'The partitioned demux'
+    },
+    name='Split demuxed data into partitions.',
+    description=('Demultiplex sequence data (i.e., map barcode reads to '
+                 'sample ids) for data generated with the Earth Microbiome '
+                 'Project (EMP) amplicon sequencing protocol. Details about '
+                 'this protocol can be found at '
+                 'http://www.earthmicrobiome.org/protocols-and-standards/'),
 )
 
 plugin.visualizers.register_function(
