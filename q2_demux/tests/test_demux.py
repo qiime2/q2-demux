@@ -22,7 +22,8 @@ import numpy.testing as npt
 from qiime2.plugin.testing import TestPluginBase
 from q2_demux._demux import (BarcodeSequenceFastqIterator,
                              BarcodePairedSequenceFastqIterator)
-from q2_demux import emp_single, emp_paired, summarize
+from q2_demux import (emp_single, partition_samples_single, emp_paired,
+                      summarize)
 from q2_types.per_sample_sequences import (
     FastqGzFormat, FastqManifestFormat,
     SingleLanePerSampleSingleEndFastqDirFmt,
@@ -597,6 +598,32 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                 qiime2.CategoricalMetadataColumn(bad_barcode_column),
                 golay_error_correction=False,
             )
+
+    def test_partition(self):
+        demux, _ = emp_single(self.bsi, self.barcode_map,
+                              golay_error_correction=False)
+
+        partition = partition_samples_single(demux)
+
+        exp_samples = ('sample1_1_L001_R1_001.fastq.gz',
+                       'sample2_3_L001_R1_001.fastq.gz',
+                       'sample3_2_L001_R1_001.fastq.gz',
+                       'sample4_5_L001_R1_001.fastq.gz',
+                       'sample5_4_L001_R1_001.fastq.gz')
+        exp_indices = ([0, 5], [2, 4], [1, 3], [7, 10], [6, 8, 9])
+
+        for idx, (id, sample) in enumerate(partition.items()):
+            self.assertEqual(id, f'sample{idx + 1}')
+
+            act_manifest = \
+                list(sample.manifest.view(FastqManifestFormat).open())
+            exp_manifest = ['sample-id,filename,direction\n',
+                            f'sample{idx + 1},{exp_samples[idx]},forward\n']
+            self._compare_manifests(act_manifest, exp_manifest)
+
+            output_fastq = list(sample.sequences.iter_views(FastqGzFormat))
+            self._validate_sample_fastq(
+                output_fastq[0][1].open(), self.sequences, exp_indices[idx])
 
 
 class EmpPairedTests(unittest.TestCase, EmpTestingUtils):

@@ -531,7 +531,7 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
             '# direction is not meaningful in this file as these\n')
         manifest_fh.write('# data may be derived from forward, reverse, or \n')
         manifest_fh.write('# joined reads\n')
-        manifest_fh.write('%s,%s,%s\n' % (id, out_path, 'forward'))
+        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name, 'forward'))
 
         manifest_fh.close()
         result.manifest.write_data(manifest, FastqManifestFormat)
