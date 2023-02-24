@@ -27,6 +27,7 @@ from q2_types.per_sample_sequences import (
     FastqManifestFormat, YamlFormat)
 from ._ecc import GolayDecoder
 from ._format import ErrorCorrectionDetailsFmt
+from qiime2.util import duplicate
 
 
 FastqHeader = collections.namedtuple('FastqHeader', ['id', 'description'])
@@ -515,18 +516,13 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
 
     for sample in df.iterrows():
         id = sample[0]
-        path = sample[1]['forward']
-        base_path = os.path.basename(path)
+        in_path = sample[1]['forward']
+        artifact_name = os.path.basename(in_path)
+
         result = SingleLanePerSampleSingleEndFastqDirFmt()
-        out_path = os.path.join(result.path, base_path)
+        out_path = os.path.join(result.path, artifact_name)
 
-        in_fh = gzip.open(str(path), mode='r')
-        _in = in_fh.read()
-        in_fh.close()
-
-        out_fh = gzip.open(str(out_path), mode='a')
-        out_fh.write(_in)
-        out_fh.close()
+        duplicate(in_path, out_path)
 
         manifest = FastqManifestFormat()
         manifest_fh = manifest.open()
@@ -535,7 +531,7 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
             '# direction is not meaningful in this file as these\n')
         manifest_fh.write('# data may be derived from forward, reverse, or \n')
         manifest_fh.write('# joined reads\n')
-        manifest_fh.write('%s,%s,%s\n' % (id, path, 'forward'))
+        manifest_fh.write('%s,%s,%s\n' % (id, out_path, 'forward'))
 
         manifest_fh.close()
         result.manifest.write_data(manifest, FastqManifestFormat)
