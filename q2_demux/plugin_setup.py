@@ -171,14 +171,11 @@ plugin.methods.register_function(
         'demux': 'The demux to partition.'
     },
     output_descriptions={
-        'partitioned_demux': 'The partitioned demux'
+        'partitioned_demux': 'The demux partitioned into samples.'
     },
     name='Split demuxed data into partitions.',
-    description=('Demultiplex sequence data (i.e., map barcode reads to '
-                 'sample ids) for data generated with the Earth Microbiome '
-                 'Project (EMP) amplicon sequencing protocol. Details about '
-                 'this protocol can be found at '
-                 'http://www.earthmicrobiome.org/protocols-and-standards/'),
+    description=('Partition demultiplexed single end sequences into '
+                 'individual samples.'),
 )
 
 plugin.visualizers.register_function(
