@@ -178,6 +178,25 @@ plugin.methods.register_function(
                  'individual samples.'),
 )
 
+plugin.methods.register_function(
+    function=q2_demux.partition_samples_paired,
+    inputs={'demux': SampleData[PairedEndSequencesWithQuality]},
+    parameters={},
+    outputs=[
+        ('partitioned_demux',
+         Collection[SampleData[PairedEndSequencesWithQuality]]),
+    ],
+    input_descriptions={
+        'demux': 'The demux to partition.'
+    },
+    output_descriptions={
+        'partitioned_demux': 'The demux partitioned into samples.'
+    },
+    name='Split demuxed data into partitions.',
+    description=('Partition demultiplexed paired end sequences into '
+                 'individual samples.'),
+)
+
 plugin.visualizers.register_function(
     function=q2_demux.summarize,
     inputs={'data':

@@ -539,3 +539,37 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
         collection[id] = result
 
     return collection
+
+
+def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt
+                             ) -> SingleLanePerSamplePairedEndFastqDirFmt:
+    collection = {}
+    df = demux.manifest.view(pd.DataFrame)
+
+    for sample in df.iterrows():
+        result = SingleLanePerSampleSingleEndFastqDirFmt()
+        id = sample[0]
+
+        in_path_fwd = sample[1]['forward']
+        artifact_name_fwd = os.path.basename(in_path_fwd)
+        out_path_fwd = os.path.join(result.path, artifact_name_fwd)
+
+        in_path_rev = sample[1]['reverse']
+        artifact_name_rev = os.path.basename(in_path_rev)
+        out_path_rev = os.path.join(result.path, artifact_name_rev)
+
+        duplicate(in_path_fwd, out_path_fwd)
+        duplicate(in_path_rev, out_path_rev)
+
+        manifest = FastqManifestFormat()
+        manifest_fh = manifest.open()
+        manifest_fh.write('sample-id,filename,direction\n')
+        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name_fwd, 'forward'))
+        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name_rev, 'reverse'))
+
+        manifest_fh.close()
+        result.manifest.write_data(manifest, FastqManifestFormat)
+        _write_metadata_yaml(result)
+        collection[id] = result
+
+    return collection
