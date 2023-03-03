@@ -525,15 +525,15 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
         duplicate(in_path, out_path)
 
         manifest = FastqManifestFormat()
-        manifest_fh = manifest.open()
-        manifest_fh.write('sample-id,filename,direction\n')
-        manifest_fh.write(
-            '# direction is not meaningful in this file as these\n')
-        manifest_fh.write('# data may be derived from forward, reverse, or \n')
-        manifest_fh.write('# joined reads\n')
-        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name, 'forward'))
+        with manifest.open() as manifest_fh:
+            manifest_fh.write('sample-id,filename,direction\n')
+            manifest_fh.write(
+                '# direction is not meaningful in this file as these\n')
+            manifest_fh.write(
+                '# data may be derived from forward, reverse, or \n')
+            manifest_fh.write('# joined reads\n')
+            manifest_fh.write('%s,%s,%s\n' % (id, artifact_name, 'forward'))
 
-        manifest_fh.close()
         result.manifest.write_data(manifest, FastqManifestFormat)
         _write_metadata_yaml(result)
         collection[id] = result
@@ -562,12 +562,13 @@ def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt
         duplicate(in_path_rev, out_path_rev)
 
         manifest = FastqManifestFormat()
-        manifest_fh = manifest.open()
-        manifest_fh.write('sample-id,filename,direction\n')
-        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name_fwd, 'forward'))
-        manifest_fh.write('%s,%s,%s\n' % (id, artifact_name_rev, 'reverse'))
+        with manifest.open() as manifest_fh:
+            manifest_fh.write('sample-id,filename,direction\n')
+            manifest_fh.write(
+                '%s,%s,%s\n' % (id, artifact_name_fwd, 'forward'))
+            manifest_fh.write(
+                '%s,%s,%s\n' % (id, artifact_name_rev, 'reverse'))
 
-        manifest_fh.close()
         result.manifest.write_data(manifest, FastqManifestFormat)
         _write_metadata_yaml(result)
         collection[id] = result
