@@ -35,8 +35,14 @@ setup(
                            'data/subsample_paired_end/*',
                            'data/filter_samples_single_end/*',
                            'data/filter_samples_single_end/dir_fmt/*',
+                           'data/filter_samples_single_end_numeric_ids/*',
+                           'data/filter_samples_single_end_numeric_ids/'
+                           'dir_fmt/*',
                            'data/filter_samples_paired_end/*',
                            'data/filter_samples_paired_end/dir_fmt/*',
+                           'data/filter_samples_paired_end_numeric_ids/*'
+                           'data/filter_samples_paired_end_numeric_ids/'
+                           'dir_fmt/*',
                            'data/summarize_empty/*',
                            'data/summarize_empty/empty_single_end/*',
                            'data/summarize_empty/empty_forward_in_paired/*',

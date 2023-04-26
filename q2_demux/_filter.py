@@ -30,6 +30,13 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata,
     if not ids_to_keep:
         raise ValueError('No filtering requested.')
     manifest = samples.manifest.view(pd.DataFrame)
+    # The ids we read out of the metadata are strings, so we need to make sure
+    # the manifest is indexed on strings. If we didn't do this, you could not
+    # use numbers as ids because they would be read from the metadata as
+    # strings, but the manifest's index would be numeric. This would lead to
+    # errors when we do manifest.loc[id] because we would be using a string
+    # index into a numeric dataframe.
+    manifest.index = manifest.index.astype(str)
 
     if exclude_ids:
         ids_to_keep = set(manifest.index) - set(ids_to_keep)

@@ -72,6 +72,25 @@ class FilterSamplesTests(TestPluginBase):
                                      where, False)
             self._assert_single_contains(dir_fmt, exp)
 
+    def test_filter_single_all_numeric(self):
+        data_single = SingleLanePerSampleSingleEndFastqDirFmt(
+            self.get_data_path(
+                'filter_samples_single_end_numeric_ids/dir_fmt'), mode='r')
+        sample_single = _PlotQualView(data_single, False)
+
+        md_single_all = Metadata.load(
+            self.get_data_path(
+                'filter_samples_single_end_numeric_ids/filter_all.tsv'))
+
+        exps = [(None, ['1', '2']),
+                ("Study='A'", ['1']),
+                ("Study='B'", ['2']),
+                ("Study='A' OR Study='B'", ['1', '2'])]
+        for (where, exp) in exps:
+            dir_fmt = filter_samples(sample_single, md_single_all,
+                                     where, False)
+            self._assert_single_contains(dir_fmt, exp)
+
     def test_filter_single_all_exclude(self):
         exps = [(None, []),
                 ("Study='A'", ['sample2']),
@@ -155,6 +174,25 @@ class FilterSamplesTests(TestPluginBase):
             dir_fmt = filter_samples(self.sample_paired, self.md_paired_all,
                                      where, False)
             self._assert_paired_contains(dir_fmt, exp)
+
+    def test_filter_paied_all_numeric(self):
+        data_paired = SingleLanePerSamplePairedEndFastqDirFmt(
+            self.get_data_path(
+                'filter_samples_paired_end_numeric_ids/dir_fmt'), mode='r')
+        sample_paired = _PlotQualView(data_paired, False)
+
+        md_paired_all = Metadata.load(
+            self.get_data_path(
+                'filter_samples_paired_end_numeric_ids/filter_all.tsv'))
+
+        exps = [(None, ['1', '2']),
+                ("Study='A'", ['1']),
+                ("Study='B'", ['2']),
+                ("Study='A' OR Study='B'", ['1', '2'])]
+        for (where, exp) in exps:
+            dir_fmt = filter_samples(sample_paired, md_paired_all,
+                                     where, False)
+            self._assert_single_contains(dir_fmt, exp)
 
     def test_filter_paired_all_exclude(self):
         exps = [(None, []),
