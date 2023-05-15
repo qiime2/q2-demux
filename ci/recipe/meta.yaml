@@ -38,9 +38,6 @@ requirements:
     - q2-types {{ qiime2_epoch }}.*
 
 test:
-  commands:
-    - py.test --pyargs q2_demux  
-
   requires:
     - qiime2 >={{ qiime2 }}
     - q2templates >={{ q2templates }}
@@ -50,6 +47,9 @@ test:
   imports:
     - q2_demux
     - qiime2.plugins.demux
+
+  commands:
+    - py.test --pyargs q2_demux  
 
 about:
   home: https://qiime2.org
