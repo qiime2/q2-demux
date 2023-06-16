@@ -547,7 +547,7 @@ def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt
     df = demux.manifest.view(pd.DataFrame)
 
     for sample in df.iterrows():
-        result = SingleLanePerSampleSingleEndFastqDirFmt()
+        result = SingleLanePerSamplePairedEndFastqDirFmt()
         id = sample[0]
 
         in_path_fwd = sample[1]['forward']
