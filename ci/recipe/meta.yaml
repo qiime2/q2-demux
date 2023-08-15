@@ -48,6 +48,9 @@ test:
     - q2_demux
     - qiime2.plugins.demux
 
+  commands:
+    - py.test --pyargs q2_demux  
+
 about:
   home: https://qiime2.org
   license: BSD-3-Clause
