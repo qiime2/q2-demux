@@ -168,12 +168,13 @@ plugin.methods.register_function(
         ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
     ],
     input_descriptions={
-        'demux': 'The demux to partition.'
+        'demux': 'The demultiplexed sequences to partition.'
     },
     output_descriptions={
-        'partitioned_demux': 'The demux partitioned into samples.'
+        'partitioned_demux': 'The demultiplexed sequences partitioned into '
+        'samples.'
     },
-    name='Split demuxed data into partitions.',
+    name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed single end sequences into '
                  'individual samples.'),
 )
@@ -187,12 +188,13 @@ plugin.methods.register_function(
          Collection[SampleData[PairedEndSequencesWithQuality]]),
     ],
     input_descriptions={
-        'demux': 'The demux to partition.'
+        'demux': 'The demultiplexed sequences to partition.'
     },
     output_descriptions={
-        'partitioned_demux': 'The demux partitioned into samples.'
+        'partitioned_demux': 'The demultiplexed sequences partitioned into '
+        'samples.'
     },
-    name='Split demuxed data into partitions.',
+    name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed paired end sequences into '
                  'individual samples.'),
 )
