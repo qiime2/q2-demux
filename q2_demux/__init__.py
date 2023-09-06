@@ -11,10 +11,12 @@ from ._subsample import subsample_single, subsample_paired
 from ._summarize import summarize
 from ._filter import filter_samples
 from ._version import get_versions
+from ._tabulate_counts import tabulate_counts
 
 
 __version__ = get_versions()['version']
 del get_versions
 
 __all__ = ['emp_single', 'emp_paired', 'summarize',
-           'subsample_single', 'subsample_paired', 'filter_samples']
+           'subsample_single', 'subsample_paired', 'filter_samples',
+           'tabulate_counts']

@@ -10,10 +10,11 @@ import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
-    Range, Citations, TypeMatch
+    Range, Citations, TypeMatch, List
 )
 
 from q2_types.sample_data import SampleData
+from q2_types.metadata import ImmutableMetadata
 from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
     JoinedSequencesWithQuality)
@@ -183,6 +184,25 @@ plugin.visualizers.register_function(
                  'interactive positional quality plots based on `n` randomly '
                  'selected sequences.'),
     examples={'demux': ex.summarize}
+)
+
+plugin.methods.register_function(
+    function=q2_demux.tabulate_counts,
+    inputs={'sequences':
+            List[SampleData[SequencesWithQuality |
+                            PairedEndSequencesWithQuality |
+                            JoinedSequencesWithQuality]]},
+    parameters={},
+    outputs=[
+        ('counts', ImmutableMetadata)
+    ],
+    input_descriptions={
+        'sequences': 'One or more collections of demultiplexed sequences.'
+    },
+    parameter_descriptions={},
+    name='Tabulate counts per sample',
+    description=('Generate a per-sample count of sequence reads.'),
+    examples={}
 )
 
 plugin.methods.register_function(
