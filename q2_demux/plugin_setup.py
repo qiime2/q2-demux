@@ -187,7 +187,7 @@ plugin.visualizers.register_function(
 )
 
 plugin.methods.register_function(
-    function=q2_demux.tabulate_counts,
+    function=q2_demux.tabulate_read_counts,
     inputs={'sequences':
             List[SampleData[SequencesWithQuality |
                             PairedEndSequencesWithQuality |

@@ -17,8 +17,8 @@ from q2_types.per_sample_sequences import (
 from q2_demux._demux import _read_fastq_seqs
 
 
-def tabulate_counts(sequences: SingleLanePerSampleSingleEndFastqDirFmt
-                    ) -> qiime2.Metadata:
+def tabulate_read_counts(sequences: SingleLanePerSampleSingleEndFastqDirFmt
+                         ) -> qiime2.Metadata:
     result = {}
 
     for e in sequences:
