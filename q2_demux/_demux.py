@@ -519,7 +519,7 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     partitioned_df = _check_partition(df, num_partitions)
 
     if partitioned_df is not None:
-        for i, _df in enumerate(partitioned_df):
+        for i, _df in enumerate(partitioned_df, 1):
             result = SingleLanePerSampleSingleEndFastqDirFmt()
             manifest = FastqManifestFormat()
             manifest_string = ''
@@ -569,7 +569,7 @@ def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
     partitioned_df = _check_partition(df, num_partitions)
 
     if partitioned_df is not None:
-        for i, _df in enumerate(partitioned_df):
+        for i, _df in enumerate(partitioned_df, 1):
             result = SingleLanePerSamplePairedEndFastqDirFmt()
             manifest = FastqManifestFormat()
             manifest_string = ''
