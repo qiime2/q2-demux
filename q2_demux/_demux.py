@@ -626,7 +626,7 @@ def _check_partition(df, num_partitions):
             warnings.warn("You have requested more partitions"
                           f" '{num_partitions}' than you have samples"
                           f" '{num_samples}'. Your data will be partitioned by"
-                          " sample into '{num_samples}'  partitions.")
+                          f" sample into '{num_samples}'  partitions.")
         else:
             return np.array_split(df, num_partitions)
 
