@@ -163,12 +163,16 @@ plugin.methods.register_function(
 plugin.methods.register_function(
     function=q2_demux.partition_samples_single,
     inputs={'demux': SampleData[SequencesWithQuality]},
-    parameters={},
+    parameters={'num_partitions': Int % Range(1, None)},
     outputs=[
         ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
     ],
     input_descriptions={
         'demux': 'The demultiplexed sequences to partition.'
+    },
+    parameter_descriptions={
+        'num_partitions': 'The number of partitions to split the demux into.'
+                          ' Defaults to partioning into individual samples.'
     },
     output_descriptions={
         'partitioned_demux': 'The demultiplexed sequences partitioned into '
@@ -176,13 +180,13 @@ plugin.methods.register_function(
     },
     name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed single end sequences into '
-                 'individual samples.'),
+                 'individual samples or the number of partitions specified.'),
 )
 
 plugin.methods.register_function(
     function=q2_demux.partition_samples_paired,
     inputs={'demux': SampleData[PairedEndSequencesWithQuality]},
-    parameters={},
+    parameters={'num_partitions': Int % Range(1, None)},
     outputs=[
         ('partitioned_demux',
          Collection[SampleData[PairedEndSequencesWithQuality]]),
@@ -190,13 +194,17 @@ plugin.methods.register_function(
     input_descriptions={
         'demux': 'The demultiplexed sequences to partition.'
     },
+    parameter_descriptions={
+        'num_partitions': 'The number of partitions to split the demux into.'
+                          ' Defaults to partioning into individual samples.'
+    },
     output_descriptions={
         'partitioned_demux': 'The demultiplexed sequences partitioned into '
         'samples.'
     },
     name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed paired end sequences into '
-                 'individual samples.'),
+                 'individual samples or the number of partitions specified.'),
 )
 
 plugin.visualizers.register_function(

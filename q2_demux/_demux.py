@@ -15,9 +15,11 @@ import random
 import resource
 import re
 import os
+import warnings
 
 import skbio
 import psutil
+import numpy as np
 import pandas as pd
 
 import qiime2
@@ -509,68 +511,136 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
     return result, ec_details_fmt
 
 
-def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt
+def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt,
+                             num_partitions: int = None
                              ) -> SingleLanePerSampleSingleEndFastqDirFmt:
     collection = {}
     df = demux.manifest.view(pd.DataFrame)
+    partitioned_df = _check_partition(df, num_partitions)
 
-    for sample in df.iterrows():
-        id = sample[0]
-        in_path = sample[1]['forward']
-        artifact_name = os.path.basename(in_path)
+    if partitioned_df is not None:
+        for i, _df in enumerate(partitioned_df):
+            result = SingleLanePerSampleSingleEndFastqDirFmt()
+            manifest = FastqManifestFormat()
+            manifest_string = ''
 
-        result = SingleLanePerSampleSingleEndFastqDirFmt()
-        out_path = os.path.join(result.path, artifact_name)
+            for sample in _df.iterrows():
+                manifest_string += _partition_single_helper(sample, result)
 
-        duplicate(in_path, out_path)
+            _partition_write_manifest(manifest, manifest_string)
 
-        manifest = FastqManifestFormat()
-        with manifest.open() as manifest_fh:
-            manifest_fh.write('sample-id,filename,direction\n')
-            manifest_fh.write(
-                '# direction is not meaningful in this file as these\n')
-            manifest_fh.write(
-                '# data may be derived from forward, reverse, or \n')
-            manifest_fh.write('# joined reads\n')
-            manifest_fh.write('%s,%s,%s\n' % (id, artifact_name, 'forward'))
+            result.manifest.write_data(manifest, FastqManifestFormat)
+            _write_metadata_yaml(result)
+            collection[i] = result
+    else:
+        for sample in df.iterrows():
+            _id = sample[0]
 
-        result.manifest.write_data(manifest, FastqManifestFormat)
-        _write_metadata_yaml(result)
-        collection[id] = result
+            result = SingleLanePerSampleSingleEndFastqDirFmt()
+            manifest = FastqManifestFormat()
+            manifest_string = ''
+
+            manifest_string += _partition_single_helper(sample, result)
+            _partition_write_manifest(manifest, manifest_string)
+
+            result.manifest.write_data(manifest, FastqManifestFormat)
+            _write_metadata_yaml(result)
+            collection[_id] = result
 
     return collection
 
 
-def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt
+def _partition_single_helper(sample, result):
+    _id = sample[0]
+    in_path = sample[1]['forward']
+
+    artifact_name = os.path.basename(in_path)
+    out_path = os.path.join(result.path, artifact_name)
+    duplicate(in_path, out_path)
+
+    return '%s,%s,%s\n' % (_id, artifact_name, 'forward')
+
+
+def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
+                             num_partitions: int = None
                              ) -> SingleLanePerSamplePairedEndFastqDirFmt:
     collection = {}
     df = demux.manifest.view(pd.DataFrame)
+    partitioned_df = _check_partition(df, num_partitions)
 
-    for sample in df.iterrows():
-        result = SingleLanePerSamplePairedEndFastqDirFmt()
-        id = sample[0]
+    if partitioned_df is not None:
+        for i, _df in enumerate(partitioned_df):
+            result = SingleLanePerSamplePairedEndFastqDirFmt()
+            manifest = FastqManifestFormat()
+            manifest_string = ''
 
-        in_path_fwd = sample[1]['forward']
-        artifact_name_fwd = os.path.basename(in_path_fwd)
-        out_path_fwd = os.path.join(result.path, artifact_name_fwd)
+            for sample in _df.iterrows():
+                manifest_string += _partition_paired_helper(sample, result)
 
-        in_path_rev = sample[1]['reverse']
-        artifact_name_rev = os.path.basename(in_path_rev)
-        out_path_rev = os.path.join(result.path, artifact_name_rev)
+            _partition_write_manifest(manifest, manifest_string, paired=True)
 
-        duplicate(in_path_fwd, out_path_fwd)
-        duplicate(in_path_rev, out_path_rev)
+            result.manifest.write_data(manifest, FastqManifestFormat)
+            _write_metadata_yaml(result)
+            collection[i] = result
+    else:
+        for sample in df.iterrows():
+            _id = sample[0]
 
-        manifest = FastqManifestFormat()
-        with manifest.open() as manifest_fh:
-            manifest_fh.write('sample-id,filename,direction\n')
-            manifest_fh.write(
-                '%s,%s,%s\n' % (id, artifact_name_fwd, 'forward'))
-            manifest_fh.write(
-                '%s,%s,%s\n' % (id, artifact_name_rev, 'reverse'))
+            result = SingleLanePerSamplePairedEndFastqDirFmt()
+            manifest = FastqManifestFormat()
+            manifest_string = ''
 
-        result.manifest.write_data(manifest, FastqManifestFormat)
-        _write_metadata_yaml(result)
-        collection[id] = result
+            manifest_string += _partition_paired_helper(sample, result)
+            _partition_write_manifest(manifest, manifest_string, paired=True)
+
+            result.manifest.write_data(manifest, FastqManifestFormat)
+            _write_metadata_yaml(result)
+            collection[_id] = result
 
     return collection
+
+
+def _partition_paired_helper(sample, result):
+    _id = sample[0]
+
+    in_path_fwd = sample[1]['forward']
+    artifact_name_fwd = os.path.basename(in_path_fwd)
+    out_path_fwd = os.path.join(result.path, artifact_name_fwd)
+
+    in_path_rev = sample[1]['reverse']
+    artifact_name_rev = os.path.basename(in_path_rev)
+    out_path_rev = os.path.join(result.path, artifact_name_rev)
+
+    duplicate(in_path_fwd, out_path_fwd)
+    duplicate(in_path_rev, out_path_rev)
+
+    return '%s,%s,%s\n%s,%s,%s\n' % (_id, artifact_name_fwd, 'forward',
+                                     _id, artifact_name_rev, 'reverse')
+
+
+def _check_partition(df, num_partitions):
+    num_samples = df.shape[0]
+
+    if num_partitions is not None:
+        if num_partitions > num_samples:
+            warnings.warn("You have requested more partitions"
+                          f" '{num_partitions}' than you have samples"
+                          f" '{num_samples}'. Your data will be partitioned by"
+                          " sample into '{num_samples}'  partitions.")
+        else:
+            return np.array_split(df, num_partitions)
+
+
+def _partition_write_manifest(manifest, manifest_string, paired=False):
+    header_string = 'sample-id,filename,direction\n'
+
+    if not paired:
+        header_string += \
+            ('# direction is not meaningful in this file as these\n'
+             '# data may be derived from forward, reverse, or \n'
+             '# joined reads\n')
+
+    manifest_string = header_string + manifest_string
+
+    with manifest.open() as manifest_fh:
+        manifest_fh.write(manifest_string)
