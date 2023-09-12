@@ -553,10 +553,10 @@ def _partition_helper(demux, num_partitions):
     if num_partitions is not None:
         if num_partitions >= num_samples:
             warnings.warn("You have requested a number of partitions"
-                          f" '{num_partitions}' that is greter than or equal"
+                          f" '{num_partitions}' that is greater than or equal"
                           f" your number of samples '{num_samples}.' Your"
                           " data will be partitioned by sample into"
-                          f" '{num_samples}'  partitions.")
+                          f" '{num_samples}' partitions.")
         else:
             partitioned_df = np.array_split(df, num_partitions)
 
