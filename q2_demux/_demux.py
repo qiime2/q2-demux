@@ -514,34 +514,67 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
 def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                              num_partitions: int = None
                              ) -> SingleLanePerSampleSingleEndFastqDirFmt:
+    return _partition_helper(demux, num_partitions)
+
+
+def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
+                             num_partitions: int = None
+                             ) -> SingleLanePerSamplePairedEndFastqDirFmt:
+    return _partition_helper(demux, num_partitions)
+
+
+def _partition_helper(demux, num_partitions):
+    """ Deal with partitioning logic that is the same regardless of single or
+        paired.
+    """
+    # Determine if we are in the single or paired end case
+    result_class = type(demux)
+
+    if result_class is SingleLanePerSampleSingleEndFastqDirFmt:
+        partition_helper = _partition_single_helper
+    elif result_class is SingleLanePerSamplePairedEndFastqDirFmt:
+        partition_helper = _partition_paired_helper
+    else:
+        raise ValueError(f"Invlaid type '{result_class}' passed to"
+                         " _partition_helper. Valid types are"
+                         " 'SingleLanePerSampleSingleEndFastqDirFMt' and"
+                         " 'SingleLanePerSamplePairedEndFastqDirFmt'")
+
+    # Determine if we are in the defined number of partitions or the split by
+    # sample case
     collection = {}
     df = demux.manifest.view(pd.DataFrame)
     partitioned_df = _check_partition(df, num_partitions)
 
+    # In the case where we have a specified number of partitions, we simply
+    # number the partitions
     if partitioned_df is not None:
+        # Start indexing at 1 for the benefit of the end user
         for i, _df in enumerate(partitioned_df, 1):
-            result = SingleLanePerSampleSingleEndFastqDirFmt()
+            result = result_class()
             manifest = FastqManifestFormat()
             manifest_string = ''
 
             for sample in _df.iterrows():
-                manifest_string += _partition_single_helper(sample, result)
+                manifest_string += partition_helper(sample, result)
 
-            _partition_write_manifest(manifest, manifest_string)
+            _partition_write_manifest(manifest, manifest_string, paired=True)
 
             result.manifest.write_data(manifest, FastqManifestFormat)
             _write_metadata_yaml(result)
             collection[i] = result
+    # In the case where we are partitioning by sample, we name the partitions
+    # after the sample they hold.
     else:
         for sample in df.iterrows():
             _id = sample[0]
 
-            result = SingleLanePerSampleSingleEndFastqDirFmt()
+            result = result_class()
             manifest = FastqManifestFormat()
             manifest_string = ''
 
-            manifest_string += _partition_single_helper(sample, result)
-            _partition_write_manifest(manifest, manifest_string)
+            manifest_string += partition_helper(sample, result)
+            _partition_write_manifest(manifest, manifest_string, paired=True)
 
             result.manifest.write_data(manifest, FastqManifestFormat)
             _write_metadata_yaml(result)
@@ -550,7 +583,27 @@ def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt,
     return collection
 
 
+def _check_partition(df, num_partitions):
+    """ Determine if they have requested a number of partitions equal to or
+        greter than the number of samples. If they have then partition by
+        sample and warn them about it.
+    """
+    num_samples = df.shape[0]
+
+    if num_partitions is not None:
+        if num_partitions >= num_samples:
+            warnings.warn("You have requested a number of partitions"
+                          f" '{num_partitions}' that is greter than or equal"
+                          f" your number of samples '{num_samples}.' Your"
+                          " data will be partitioned by sample into"
+                          f" '{num_samples}'  partitions.")
+        else:
+            return np.array_split(df, num_partitions)
+
+
 def _partition_single_helper(sample, result):
+    """ Deal with duplicating single end samples.
+    """
     _id = sample[0]
     in_path = sample[1]['forward']
 
@@ -561,46 +614,9 @@ def _partition_single_helper(sample, result):
     return '%s,%s,%s\n' % (_id, artifact_name, 'forward')
 
 
-def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
-                             num_partitions: int = None
-                             ) -> SingleLanePerSamplePairedEndFastqDirFmt:
-    collection = {}
-    df = demux.manifest.view(pd.DataFrame)
-    partitioned_df = _check_partition(df, num_partitions)
-
-    if partitioned_df is not None:
-        for i, _df in enumerate(partitioned_df, 1):
-            result = SingleLanePerSamplePairedEndFastqDirFmt()
-            manifest = FastqManifestFormat()
-            manifest_string = ''
-
-            for sample in _df.iterrows():
-                manifest_string += _partition_paired_helper(sample, result)
-
-            _partition_write_manifest(manifest, manifest_string, paired=True)
-
-            result.manifest.write_data(manifest, FastqManifestFormat)
-            _write_metadata_yaml(result)
-            collection[i] = result
-    else:
-        for sample in df.iterrows():
-            _id = sample[0]
-
-            result = SingleLanePerSamplePairedEndFastqDirFmt()
-            manifest = FastqManifestFormat()
-            manifest_string = ''
-
-            manifest_string += _partition_paired_helper(sample, result)
-            _partition_write_manifest(manifest, manifest_string, paired=True)
-
-            result.manifest.write_data(manifest, FastqManifestFormat)
-            _write_metadata_yaml(result)
-            collection[_id] = result
-
-    return collection
-
-
 def _partition_paired_helper(sample, result):
+    """ Deal with duplicating paired end samples.
+    """
     _id = sample[0]
 
     in_path_fwd = sample[1]['forward']
@@ -618,20 +634,9 @@ def _partition_paired_helper(sample, result):
                                      _id, artifact_name_rev, 'reverse')
 
 
-def _check_partition(df, num_partitions):
-    num_samples = df.shape[0]
-
-    if num_partitions is not None:
-        if num_partitions > num_samples:
-            warnings.warn("You have requested more partitions"
-                          f" '{num_partitions}' than you have samples"
-                          f" '{num_samples}'. Your data will be partitioned by"
-                          f" sample into '{num_samples}'  partitions.")
-        else:
-            return np.array_split(df, num_partitions)
-
-
 def _partition_write_manifest(manifest, manifest_string, paired=False):
+    """ Assemble the manifest as a string then write it in one write.
+    """
     header_string = 'sample-id,filename,direction\n'
 
     if not paired:

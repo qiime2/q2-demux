@@ -673,7 +673,7 @@ class EmpSingleTests(unittest.TestCase, EmpTestingUtils):
                               golay_error_correction=False)
 
         with self.assertWarnsRegex(
-                UserWarning, "You have requested more.*100.*5.*5"):
+                UserWarning, "You have requested a number of.*100.*5.*5"):
             partition = partition_samples_single(demux, 100)
 
         exp_samples = ('sample1_1_L001_R1_001.fastq.gz',
@@ -1174,7 +1174,7 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                               golay_error_correction=False)
 
         with self.assertWarnsRegex(
-                UserWarning, "You have requested more.*100.*5.*5"):
+                UserWarning, "You have requested a number of.*100.*5.*5"):
             partition = partition_samples_paired(demux, 100)
 
         exp_samples_fwd = ('sample1_1_L001_R1_001.fastq.gz',
