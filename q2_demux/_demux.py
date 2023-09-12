@@ -514,41 +514,32 @@ def emp_paired(seqs: BarcodePairedSequenceFastqIterator,
 def partition_samples_single(demux: SingleLanePerSampleSingleEndFastqDirFmt,
                              num_partitions: int = None
                              ) -> SingleLanePerSampleSingleEndFastqDirFmt:
-    return _partition_helper(demux, num_partitions)
+    return _partition_helper(demux, num_partitions, paired=False)
 
 
 def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
                              num_partitions: int = None
                              ) -> SingleLanePerSamplePairedEndFastqDirFmt:
-    return _partition_helper(demux, num_partitions)
+    return _partition_helper(demux, num_partitions, paired=True)
 
 
-def _partition_helper(demux, num_partitions):
+def _partition_helper(demux, num_partitions, paired):
     """ Deal with partitioning logic that is the same regardless of single or
         paired.
     """
-    # Determine if we are in the single or paired end case
-    result_class = type(demux)
-
-    if result_class is SingleLanePerSampleSingleEndFastqDirFmt:
-        partition_helper = _partition_single_helper
-    elif result_class is SingleLanePerSamplePairedEndFastqDirFmt:
-        partition_helper = _partition_paired_helper
-    else:
-        raise ValueError(f"Invlaid type '{result_class}' passed to"
-                         " _partition_helper. Valid types are"
-                         " 'SingleLanePerSampleSingleEndFastqDirFMt' and"
-                         " 'SingleLanePerSamplePairedEndFastqDirFmt'")
-
-    # Determine if we are in the defined number of partitions or the split by
-    # sample case
-    collection = {}
+    partitioned_demux = {}
     df = demux.manifest.view(pd.DataFrame)
-    partitioned_df = None
+
+    # Adjust based on if we are in the single or paired end case
+    if paired:
+        result_class = SingleLanePerSamplePairedEndFastqDirFmt
+    else:
+        result_class = SingleLanePerSampleSingleEndFastqDirFmt
 
     # Determine if they have requested a number of partitions equal to or
     # greater than the number of samples. If they have then partition by sample
     # and warn them about it otherwise partition as requested.
+    partitioned_df = None
     num_samples = df.shape[0]
     if num_partitions is not None:
         if num_partitions >= num_samples:
@@ -566,82 +557,71 @@ def _partition_helper(demux, num_partitions):
         # Start indexing at 1 for the benefit of the end user
         for i, _df in enumerate(partitioned_df, 1):
             result = result_class()
-            manifest = FastqManifestFormat()
+
             manifest_string = ''
-
             for sample in _df.iterrows():
-                manifest_string += partition_helper(sample, result)
+                sample_id = sample[0]
 
-            _partition_write_manifest(manifest, manifest_string, paired=True)
+                manifest_string += _partition_duplicate(
+                    sample, sample_id, result, 'forward')
+                if paired:
+                    manifest_string += _partition_duplicate(
+                        sample, sample_id, result, 'reverse')
 
+            manifest = _partition_write_manifest(manifest_string, paired)
             result.manifest.write_data(manifest, FastqManifestFormat)
+
             _write_metadata_yaml(result)
-            collection[i] = result
+            partitioned_demux[i] = result
     # In the case where we are partitioning by sample, we name the partitions
     # after the sample they hold.
     else:
         for sample in df.iterrows():
-            _id = sample[0]
-
+            sample_id = sample[0]
             result = result_class()
-            manifest = FastqManifestFormat()
-            manifest_string = ''
 
-            manifest_string += partition_helper(sample, result)
-            _partition_write_manifest(manifest, manifest_string, paired=True)
+            manifest_string = _partition_duplicate(
+                sample, sample_id, result, 'forward')
+            if paired:
+                manifest_string += _partition_duplicate(
+                    sample, sample_id, result, 'reverse')
 
+            manifest = _partition_write_manifest(manifest_string, paired)
             result.manifest.write_data(manifest, FastqManifestFormat)
+
             _write_metadata_yaml(result)
-            collection[_id] = result
+            partitioned_demux[sample_id] = result
 
-    return collection
+    return partitioned_demux
 
 
-def _partition_single_helper(sample, result):
-    """ Deal with duplicating single end samples.
+def _partition_duplicate(sample, sample_id, result, direction):
+    """ Duplicate the given direction of the sample into the result and return
+        the corresponding line for the manifest.
     """
-    _id = sample[0]
-    in_path = sample[1]['forward']
+    in_path = sample[1][direction]
 
     artifact_name = os.path.basename(in_path)
     out_path = os.path.join(result.path, artifact_name)
     duplicate(in_path, out_path)
 
-    return '%s,%s,%s\n' % (_id, artifact_name, 'forward')
+    return '%s,%s,%s\n' % (sample_id, artifact_name, direction)
 
 
-def _partition_paired_helper(sample, result):
-    """ Deal with duplicating paired end samples.
-    """
-    _id = sample[0]
-
-    in_path_fwd = sample[1]['forward']
-    artifact_name_fwd = os.path.basename(in_path_fwd)
-    out_path_fwd = os.path.join(result.path, artifact_name_fwd)
-
-    in_path_rev = sample[1]['reverse']
-    artifact_name_rev = os.path.basename(in_path_rev)
-    out_path_rev = os.path.join(result.path, artifact_name_rev)
-
-    duplicate(in_path_fwd, out_path_fwd)
-    duplicate(in_path_rev, out_path_rev)
-
-    return '%s,%s,%s\n%s,%s,%s\n' % (_id, artifact_name_fwd, 'forward',
-                                     _id, artifact_name_rev, 'reverse')
-
-
-def _partition_write_manifest(manifest, manifest_string, paired=False):
+def _partition_write_manifest(manifest_string, paired):
     """ Assemble the manifest as a string then write it in one write.
     """
-    header_string = 'sample-id,filename,direction\n'
+    manifest = FastqManifestFormat()
 
+    header_string = 'sample-id,filename,direction\n'
     if not paired:
         header_string += \
             ('# direction is not meaningful in this file as these\n'
              '# data may be derived from forward, reverse, or \n'
              '# joined reads\n')
-
     manifest_string = header_string + manifest_string
 
     with manifest.open() as manifest_fh:
         manifest_fh.write(manifest_string)
+
+    return manifest
