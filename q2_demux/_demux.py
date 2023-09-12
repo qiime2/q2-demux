@@ -544,7 +544,21 @@ def _partition_helper(demux, num_partitions):
     # sample case
     collection = {}
     df = demux.manifest.view(pd.DataFrame)
-    partitioned_df = _check_partition(df, num_partitions)
+    partitioned_df = None
+
+    # Determine if they have requested a number of partitions equal to or
+    # greater than the number of samples. If they have then partition by sample
+    # and warn them about it otherwise partition as requested.
+    num_samples = df.shape[0]
+    if num_partitions is not None:
+        if num_partitions >= num_samples:
+            warnings.warn("You have requested a number of partitions"
+                          f" '{num_partitions}' that is greter than or equal"
+                          f" your number of samples '{num_samples}.' Your"
+                          " data will be partitioned by sample into"
+                          f" '{num_samples}'  partitions.")
+        else:
+            partitioned_df = np.array_split(df, num_partitions)
 
     # In the case where we have a specified number of partitions, we simply
     # number the partitions
@@ -581,24 +595,6 @@ def _partition_helper(demux, num_partitions):
             collection[_id] = result
 
     return collection
-
-
-def _check_partition(df, num_partitions):
-    """ Determine if they have requested a number of partitions equal to or
-        greter than the number of samples. If they have then partition by
-        sample and warn them about it.
-    """
-    num_samples = df.shape[0]
-
-    if num_partitions is not None:
-        if num_partitions >= num_samples:
-            warnings.warn("You have requested a number of partitions"
-                          f" '{num_partitions}' that is greter than or equal"
-                          f" your number of samples '{num_samples}.' Your"
-                          " data will be partitioned by sample into"
-                          f" '{num_samples}'  partitions.")
-        else:
-            return np.array_split(df, num_partitions)
 
 
 def _partition_single_helper(sample, result):
