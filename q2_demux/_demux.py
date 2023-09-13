@@ -536,61 +536,46 @@ def _partition_helper(demux, num_partitions, paired):
     else:
         result_class = SingleLanePerSampleSingleEndFastqDirFmt
 
-    # Determine if they have requested a number of partitions equal to or
-    # greater than the number of samples. If they have then partition by sample
-    # and warn them about it otherwise partition as requested.
-    partitioned_df = None
+    # Determine if they have requested a number of partitions greater than the
+    # number of samples. If they have then partition by sample and warn them
+    # about it otherwise partition as requested.
     num_samples = df.shape[0]
-    if num_partitions is not None:
-        if num_partitions >= num_samples:
-            warnings.warn("You have requested a number of partitions"
-                          f" '{num_partitions}' that is greater than or equal"
-                          f" your number of samples '{num_samples}.' Your"
-                          " data will be partitioned by sample into"
-                          f" '{num_samples}' partitions.")
-        else:
-            partitioned_df = np.array_split(df, num_partitions)
+    # Make sure we are partitioning on samples if no number of partitions or
+    # too many partitions specified
+    if num_partitions is None:
+        num_partitions = num_samples
+    elif num_partitions > num_samples:
+        warnings.warn("You have requested a number of partitions"
+                      f" '{num_partitions}' that is greater than your number"
+                      f" of samples '{num_samples}.' Your data will be"
+                      f" partitioned by sample into '{num_samples}'"
+                      " partitions.")
+        num_partitions = num_samples
 
-    # In the case where we have a specified number of partitions, we simply
-    # number the partitions
-    if partitioned_df is not None:
-        # Start indexing at 1 for the benefit of the end user
-        for i, _df in enumerate(partitioned_df, 1):
-            result = result_class()
+    partitioned_df = np.array_split(df, num_partitions)
+    for i, _df in enumerate(partitioned_df, 1):
+        result = result_class()
 
-            manifest_string = ''
-            for sample in _df.iterrows():
-                sample_id = sample[0]
-
-                manifest_string += _partition_duplicate(
-                    sample, sample_id, result, 'forward')
-                if paired:
-                    manifest_string += _partition_duplicate(
-                        sample, sample_id, result, 'reverse')
-
-            manifest = _partition_write_manifest(manifest_string, paired)
-            result.manifest.write_data(manifest, FastqManifestFormat)
-
-            _write_metadata_yaml(result)
-            partitioned_demux[i] = result
-    # In the case where we are partitioning by sample, we name the partitions
-    # after the sample they hold.
-    else:
-        for sample in df.iterrows():
+        manifest_string = ''
+        for sample in _df.iterrows():
             sample_id = sample[0]
-            result = result_class()
 
-            manifest_string = _partition_duplicate(
-                sample, sample_id, result, 'forward')
+            manifest_string += _partition_duplicate(
+                    sample, sample_id, result, 'forward')
             if paired:
                 manifest_string += _partition_duplicate(
                     sample, sample_id, result, 'reverse')
 
-            manifest = _partition_write_manifest(manifest_string, paired)
-            result.manifest.write_data(manifest, FastqManifestFormat)
+        manifest = _partition_write_manifest(manifest_string, paired)
+        result.manifest.write_data(manifest, FastqManifestFormat)
+        _write_metadata_yaml(result)
 
-            _write_metadata_yaml(result)
+        # If we have one sample per partition we name the partitions after the
+        # samples. Otherwise we number them
+        if num_partitions == num_samples:
             partitioned_demux[sample_id] = result
+        else:
+            partitioned_demux[i] = result
 
     return partitioned_demux
 
