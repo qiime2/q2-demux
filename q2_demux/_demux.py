@@ -524,8 +524,8 @@ def partition_samples_paired(demux: SingleLanePerSamplePairedEndFastqDirFmt,
 
 
 def _partition_helper(demux, num_partitions, paired):
-    """ Deal with partitioning logic that is the same regardless of single or
-        paired.
+    """ Deal with partitioning logic that is largely the same regardless of
+        single or paired.
     """
     partitioned_demux = {}
     df = demux.manifest.view(pd.DataFrame)
@@ -536,12 +536,10 @@ def _partition_helper(demux, num_partitions, paired):
     else:
         result_class = SingleLanePerSampleSingleEndFastqDirFmt
 
-    # Determine if they have requested a number of partitions greater than the
-    # number of samples. If they have then partition by sample and warn them
-    # about it otherwise partition as requested.
-    num_samples = df.shape[0]
     # Make sure we are partitioning on samples if no number of partitions or
-    # too many partitions specified
+    # too many partitions specified and warn if they specified too many
+    # partitions
+    num_samples = df.shape[0]
     if num_partitions is None:
         num_partitions = num_samples
     elif num_partitions > num_samples:
