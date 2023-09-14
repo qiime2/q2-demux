@@ -527,14 +527,11 @@ def _partition_helper(demux, num_partitions, paired):
     """ Deal with partitioning logic that is largely the same regardless of
         single or paired.
     """
+    # Adjust based on if we are in the single or paired end case
+    result_class = type(demux)
+
     partitioned_demux = {}
     df = demux.manifest.view(pd.DataFrame)
-
-    # Adjust based on if we are in the single or paired end case
-    if paired:
-        result_class = SingleLanePerSamplePairedEndFastqDirFmt
-    else:
-        result_class = SingleLanePerSampleSingleEndFastqDirFmt
 
     # Make sure we are partitioning on samples if no number of partitions or
     # too many partitions specified and warn if they specified too many
@@ -592,7 +589,7 @@ def _partition_duplicate(sample, sample_id, result, direction):
 
 
 def _partition_write_manifest(manifest_string, paired):
-    """ Assemble the manifest as a string then write it in one write.
+    """ Add header to manifest then write to file.
     """
     manifest = FastqManifestFormat()
 

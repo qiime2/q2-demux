@@ -160,6 +160,12 @@ plugin.methods.register_function(
         citations['hamady2009']]
 )
 
+demux_description = 'The demultiplexed sequences to partition'
+num_partitions_description = 'The number of partitions to split the' \
+                             ' demultiplexed sequences into. Defaults to' \
+                             ' partitioning into individual samples'
+partitioned_demux_description = 'The partitioned demultiplexed sequences.'
+
 plugin.methods.register_function(
     function=q2_demux.partition_samples_single,
     inputs={'demux': SampleData[SequencesWithQuality]},
@@ -168,15 +174,13 @@ plugin.methods.register_function(
         ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
     ],
     input_descriptions={
-        'demux': 'The demultiplexed sequences to partition.'
+        'demux': demux_description
     },
     parameter_descriptions={
-        'num_partitions': 'The number of partitions to split the demux into.'
-                          ' Defaults to partioning into individual samples.'
+        'num_partitions': num_partitions_description
     },
     output_descriptions={
-        'partitioned_demux': 'The demultiplexed sequences partitioned into '
-        'samples.'
+        'partitioned_demux': partitioned_demux_description
     },
     name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed single end sequences into '
@@ -192,15 +196,13 @@ plugin.methods.register_function(
          Collection[SampleData[PairedEndSequencesWithQuality]]),
     ],
     input_descriptions={
-        'demux': 'The demultiplexed sequences to partition.'
+        'demux': demux_description
     },
     parameter_descriptions={
-        'num_partitions': 'The number of partitions to split the demux into.'
-                          ' Defaults to partioning into individual samples.'
+        'num_partitions': num_partitions_description
     },
     output_descriptions={
-        'partitioned_demux': 'The demultiplexed sequences partitioned into '
-        'samples.'
+        'partitioned_demux': partitioned_demux_description
     },
     name='Split demultiplexed sequence data into partitions.',
     description=('Partition demultiplexed paired end sequences into '
