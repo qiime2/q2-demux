@@ -133,7 +133,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
 
             # If we have an empty direction for a sample that will be a nan in
             # the manifest. Skip that nan
-            if isinstance(filename, str):
+            if type(filename) is not str:
                 if filename is None or np.isnan(filename):
                     continue
 
