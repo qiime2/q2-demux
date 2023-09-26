@@ -255,7 +255,7 @@ class BarcodePairedSequenceFastqIterator(collections.abc.Iterable):
 def _make_barcode_map(barcodes, rev_comp_mapping_barcodes):
     barcode_map = {}
     barcode_len = None
-    for sample_id, barcode in barcodes.to_series().iteritems():
+    for sample_id, barcode in barcodes.to_series().items():
         if barcode_len is None:
             barcode_len = len(barcode)
         elif len(barcode) != barcode_len:
