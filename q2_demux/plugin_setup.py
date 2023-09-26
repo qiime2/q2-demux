@@ -160,10 +160,10 @@ plugin.methods.register_function(
         citations['hamady2009']]
 )
 
-demux_description = 'The demultiplexed sequences to partition'
+demux_description = 'The demultiplexed sequences to partition.'
 num_partitions_description = 'The number of partitions to split the' \
                              ' demultiplexed sequences into. Defaults to' \
-                             ' partitioning into individual samples'
+                             ' partitioning into individual samples.'
 partitioned_demux_description = 'The partitioned demultiplexed sequences.'
 
 plugin.methods.register_function(
