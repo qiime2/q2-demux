@@ -188,7 +188,8 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
                             result.max(), sequence_count[direction]]],
                           index=['%s reads' % (direction,)],
                           columns=summary_columns)
-        context['result_data'] = context['result_data'].append(df)
+        context['result_data'] = pd.concat([context['result_data'], df],
+                                           axis=1)
 
         html_df = result.to_frame()
         context['result'] = context['result'].join(html_df, how='outer')

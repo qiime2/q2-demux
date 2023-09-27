@@ -10,7 +10,7 @@ import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
-    Range, Citations, TypeMatch, List
+    List, Collection, Range, Citations, TypeMatch
 )
 
 from q2_types.sample_data import SampleData
@@ -159,6 +159,55 @@ plugin.methods.register_function(
     citations=[
         citations['hamady2008'],
         citations['hamady2009']]
+)
+
+demux_description = 'The demultiplexed sequences to partition.'
+num_partitions_description = 'The number of partitions to split the' \
+                             ' demultiplexed sequences into. Defaults to' \
+                             ' partitioning into individual samples.'
+partitioned_demux_description = 'The partitioned demultiplexed sequences.'
+
+plugin.methods.register_function(
+    function=q2_demux.partition_samples_single,
+    inputs={'demux': SampleData[SequencesWithQuality]},
+    parameters={'num_partitions': Int % Range(1, None)},
+    outputs=[
+        ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
+    ],
+    input_descriptions={
+        'demux': demux_description
+    },
+    parameter_descriptions={
+        'num_partitions': num_partitions_description
+    },
+    output_descriptions={
+        'partitioned_demux': partitioned_demux_description
+    },
+    name='Split demultiplexed sequence data into partitions.',
+    description=('Partition demultiplexed single end sequences into '
+                 'individual samples or the number of partitions specified.'),
+)
+
+plugin.methods.register_function(
+    function=q2_demux.partition_samples_paired,
+    inputs={'demux': SampleData[PairedEndSequencesWithQuality]},
+    parameters={'num_partitions': Int % Range(1, None)},
+    outputs=[
+        ('partitioned_demux',
+         Collection[SampleData[PairedEndSequencesWithQuality]]),
+    ],
+    input_descriptions={
+        'demux': demux_description
+    },
+    parameter_descriptions={
+        'num_partitions': num_partitions_description
+    },
+    output_descriptions={
+        'partitioned_demux': partitioned_demux_description
+    },
+    name='Split demultiplexed sequence data into partitions.',
+    description=('Partition demultiplexed paired end sequences into '
+                 'individual samples or the number of partitions specified.'),
 )
 
 plugin.visualizers.register_function(
