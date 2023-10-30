@@ -1269,6 +1269,13 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
+                # Checks for NaNs present in any of the tables in the
+                # overview.html
+                tables = pd.read_html(fh)
+                for df in tables:
+                    self.assertFalse(df.isnull().values.any())
+
+                fh.seek(0)
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>3</td>', html)
