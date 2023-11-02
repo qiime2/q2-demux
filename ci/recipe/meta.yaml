@@ -36,6 +36,7 @@ requirements:
     - qiime2 {{ qiime2_epoch }}.*
     - q2templates {{ qiime2_epoch }}.*
     - q2-types {{ qiime2_epoch }}.*
+    - lxml
 
 test:
   requires:
@@ -49,7 +50,7 @@ test:
     - qiime2.plugins.demux
 
   commands:
-    - py.test --pyargs q2_demux  
+    - py.test --pyargs q2_demux
 
 about:
   home: https://qiime2.org
