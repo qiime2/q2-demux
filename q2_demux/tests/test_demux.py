@@ -20,6 +20,7 @@ import qiime2
 import numpy.testing as npt
 
 from qiime2.plugin.testing import TestPluginBase
+from qiime2.core.testing.util import assert_no_nans_in_tables
 from q2_demux._demux import (BarcodeSequenceFastqIterator,
                              BarcodePairedSequenceFastqIterator)
 from q2_demux import (emp_single, emp_paired, partition_samples_single,
@@ -1233,16 +1234,6 @@ class SummarizeTests(TestPluginBase):
                           ('@s3/1 abc/1', 'AAA', '+', 'PPP'),
                           ('@s4/1 abc/1', 'TTT', '+', 'PPP')]
 
-    def assert_no_nans_in_tables(self, fh):
-        '''
-        Checks for NaNs present in any of the tables in the indicated file then
-        resets to the head of the file
-        '''
-        tables = pd.read_html(fh)
-        for df in tables:
-            self.assertFalse(df.isnull().values.any())
-        fh.seek(0)
-
     def test_basic(self):
         bsi = BarcodeSequenceFastqIterator(self.barcodes, self.sequences)
 
@@ -1279,7 +1270,7 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
-                self.assert_no_nans_in_tables(fh)
+                assert_no_nans_in_tables(fh)
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>3</td>', html)
@@ -1316,7 +1307,7 @@ class SummarizeTests(TestPluginBase):
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertFalse(os.path.exists(png_fp))
             with open(index_fp, 'r') as fh:
-                self.assert_no_nans_in_tables(fh)
+                assert_no_nans_in_tables(fh)
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
