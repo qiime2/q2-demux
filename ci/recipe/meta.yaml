@@ -43,6 +43,9 @@ test:
     - q2templates >={{ q2templates }}
     - q2-types >={{ q2_types }}
     - pytest
+    # lxml is needed due to this framework change that's used in demux tests:
+    # https://github.com/qiime2/qiime2/pull/735
+    - lxml
 
   imports:
     - q2_demux
