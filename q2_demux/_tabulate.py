@@ -14,7 +14,7 @@ import qiime2
 from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt)
 
-from q2_demux._demux import _read_fastq_seqs
+from q2_types.feature_data._util import _read_fastq_seqs
 
 
 def tabulate_read_counts(sequences: SingleLanePerSampleSingleEndFastqDirFmt

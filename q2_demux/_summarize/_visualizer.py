@@ -17,7 +17,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
-from q2_demux._demux import _read_fastq_seqs
+from q2_types.feature_data._util import _read_fastq_seqs
 import q2templates
 
 TEMPLATES = pkg_resources.resource_filename('q2_demux', '_summarize')

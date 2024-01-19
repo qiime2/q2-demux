@@ -17,15 +17,11 @@ from q2_types.sample_data import SampleData
 from q2_types.metadata import ImmutableMetadata
 from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
-    JoinedSequencesWithQuality)
+    JoinedSequencesWithQuality, RawSequences,
+    EMPSingleEndSequences, EMPPairedEndSequences,
+    ErrorCorrectionDetails)
 
 import q2_demux
-from ._type import (RawSequences, EMPSingleEndSequences, EMPPairedEndSequences,
-                    ErrorCorrectionDetails)
-from ._format import (EMPMultiplexedDirFmt, ErrorCorrectionDetailsDirFmt,
-                      EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
-                      EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
-
 import q2_demux._examples as ex
 
 citations = Citations.load('citations.bib', package='q2_demux')
@@ -41,34 +37,6 @@ plugin = Plugin(
     short_description='Plugin for demultiplexing & viewing sequence quality.'
 )
 
-plugin.register_semantic_types(
-    RawSequences, EMPSingleEndSequences, EMPPairedEndSequences,
-    ErrorCorrectionDetails)
-
-plugin.register_formats(EMPMultiplexedDirFmt, ErrorCorrectionDetailsDirFmt,
-                        EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
-                        EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
-
-# TODO: remove when aliasing exists
-plugin.register_semantic_type_to_format(
-    RawSequences,
-    artifact_format=EMPSingleEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    EMPSingleEndSequences,
-    artifact_format=EMPSingleEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    EMPPairedEndSequences,
-    artifact_format=EMPPairedEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    ErrorCorrectionDetails,
-    artifact_format=ErrorCorrectionDetailsDirFmt
-)
 
 plugin.methods.register_function(
     function=q2_demux.emp_single,
