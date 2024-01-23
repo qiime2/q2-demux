@@ -49,7 +49,7 @@ test:
     - qiime2.plugins.demux
 
   commands:
-    - py.test --pyargs q2_demux  
+    - py.test --pyargs q2_demux
 
 about:
   home: https://qiime2.org

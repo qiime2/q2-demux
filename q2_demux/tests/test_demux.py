@@ -19,10 +19,11 @@ import skbio
 import qiime2
 import numpy.testing as npt
 
-from qiime2.plugin.testing import TestPluginBase
 from q2_types.feature_data._transformer import (
     BarcodeSequenceFastqIterator,
     BarcodePairedSequenceFastqIterator)
+from qiime2.plugin.testing import TestPluginBase, assert_no_nans_in_tables
+
 from q2_demux import (emp_single, emp_paired, partition_samples_single,
                       partition_samples_paired, summarize)
 from q2_types.per_sample_sequences import (
@@ -1115,6 +1116,7 @@ class SummarizeTests(TestPluginBase):
             self.assertTrue(os.path.exists(qual_forward_fp))
             self.assertTrue(os.path.getsize(qual_forward_fp) > 0)
             with open(index_fp, 'r') as fh:
+                assert_no_nans_in_tables(fh)
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>3</td>', html)
@@ -1151,6 +1153,7 @@ class SummarizeTests(TestPluginBase):
             png_fp = os.path.join(output_dir, 'demultiplex-summary.png')
             self.assertFalse(os.path.exists(png_fp))
             with open(index_fp, 'r') as fh:
+                assert_no_nans_in_tables(fh)
                 html = fh.read()
                 self.assertIn('<th>Minimum</th>\n      <td>1</td>', html)
                 self.assertIn('<th>Maximum</th>\n      <td>1</td>', html)
