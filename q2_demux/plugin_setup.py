@@ -317,5 +317,3 @@ plugin.methods.register_function(
                 'with the WHERE clause, and the `exclude_ids` parameter '
                 'allows for filtering of all samples not specified.',
 )
-
-
