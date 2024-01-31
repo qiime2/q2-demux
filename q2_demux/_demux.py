@@ -24,8 +24,8 @@ import qiime2
 from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt,
-    FastqManifestFormat, YamlFormat, ErrorCorrectionDetailsFmt,
-    )
+    FastqManifestFormat, YamlFormat)
+from q2_types.multiplexed_sequences import ErrorCorrectionDetailsFmt
 from q2_types.feature_data import (
     BarcodeSequenceFastqIterator, BarcodePairedSequenceFastqIterator
 )

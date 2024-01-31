@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
@@ -17,9 +16,12 @@ from q2_types.sample_data import SampleData
 from q2_types.metadata import ImmutableMetadata
 from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
-    JoinedSequencesWithQuality, RawSequences,
-    EMPSingleEndSequences, EMPPairedEndSequences,
-    ErrorCorrectionDetails)
+    JoinedSequencesWithQuality)
+
+from q2_types.multiplexed_sequences import (RawSequences,
+                                            EMPSingleEndSequences,
+                                            EMPPairedEndSequences,
+                                            ErrorCorrectionDetails)
 
 import q2_demux
 import q2_demux._examples as ex
@@ -316,4 +318,4 @@ plugin.methods.register_function(
                 'allows for filtering of all samples not specified.',
 )
 
-importlib.import_module('q2_demux._transformer')
+
