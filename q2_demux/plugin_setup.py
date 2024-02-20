@@ -6,7 +6,6 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
@@ -19,13 +18,12 @@ from q2_types.per_sample_sequences import (
     SequencesWithQuality, PairedEndSequencesWithQuality,
     JoinedSequencesWithQuality)
 
-import q2_demux
-from ._type import (RawSequences, EMPSingleEndSequences, EMPPairedEndSequences,
-                    ErrorCorrectionDetails)
-from ._format import (EMPMultiplexedDirFmt, ErrorCorrectionDetailsDirFmt,
-                      EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
-                      EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
+from q2_types.multiplexed_sequences import (RawSequences,
+                                            EMPSingleEndSequences,
+                                            EMPPairedEndSequences,
+                                            ErrorCorrectionDetails)
 
+import q2_demux
 import q2_demux._examples as ex
 
 citations = Citations.load('citations.bib', package='q2_demux')
@@ -41,34 +39,6 @@ plugin = Plugin(
     short_description='Plugin for demultiplexing & viewing sequence quality.'
 )
 
-plugin.register_semantic_types(
-    RawSequences, EMPSingleEndSequences, EMPPairedEndSequences,
-    ErrorCorrectionDetails)
-
-plugin.register_formats(EMPMultiplexedDirFmt, ErrorCorrectionDetailsDirFmt,
-                        EMPSingleEndDirFmt, EMPSingleEndCasavaDirFmt,
-                        EMPPairedEndDirFmt, EMPPairedEndCasavaDirFmt)
-
-# TODO: remove when aliasing exists
-plugin.register_semantic_type_to_format(
-    RawSequences,
-    artifact_format=EMPSingleEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    EMPSingleEndSequences,
-    artifact_format=EMPSingleEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    EMPPairedEndSequences,
-    artifact_format=EMPPairedEndDirFmt
-)
-
-plugin.register_semantic_type_to_format(
-    ErrorCorrectionDetails,
-    artifact_format=ErrorCorrectionDetailsDirFmt
-)
 
 plugin.methods.register_function(
     function=q2_demux.emp_single,
@@ -347,5 +317,3 @@ plugin.methods.register_function(
                 'with the WHERE clause, and the `exclude_ids` parameter '
                 'allows for filtering of all samples not specified.',
 )
-
-importlib.import_module('q2_demux._transformer')

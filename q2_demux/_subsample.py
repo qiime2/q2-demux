@@ -17,7 +17,7 @@ from q2_types.per_sample_sequences import (
     SingleLanePerSamplePairedEndFastqDirFmt,
     CasavaOneEightSingleLanePerSampleDirFmt)
 
-from q2_demux._demux import _read_fastq_seqs
+from q2_types.feature_data._util import _read_fastq_seqs
 
 
 def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,

@@ -6,13 +6,13 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from ._demux import (emp_single, emp_paired, partition_samples_single,
-                     partition_samples_paired)
-from ._subsample import subsample_single, subsample_paired
-from ._summarize import summarize
-from ._filter import filter_samples
-from ._version import get_versions
-from ._tabulate import tabulate_read_counts
+from q2_demux._demux import (emp_single, emp_paired, partition_samples_single,
+                             partition_samples_paired)
+from q2_demux._subsample import subsample_single, subsample_paired
+from q2_demux._summarize import summarize
+from q2_demux._filter import filter_samples
+from q2_demux._version import get_versions
+from q2_demux._tabulate import tabulate_read_counts
 
 
 __version__ = get_versions()['version']
