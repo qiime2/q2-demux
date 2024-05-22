@@ -17,7 +17,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
-from q2_demux._demux import _read_fastq_seqs
+from q2_types.feature_data._util import (_read_fastq_seqs, _PlotQualView)
 import q2templates
 
 TEMPLATES = pkg_resources.resource_filename('q2_demux', '_summarize')
@@ -27,17 +27,6 @@ def _decode_qual_to_phred33(qual_str):
     # this function is adapted from scikit-bio
     qual = np.frombuffer(qual_str.encode('ascii'), dtype=np.uint8) - 33
     return qual
-
-
-# TODO: Remove _PlotQualView once QIIME 2 #220 completed
-class _PlotQualView:
-    """
-    A very simple pass-through view which is made up of a single-end or
-    paired-end directory format with a bool indicating if single or paired.
-    """
-    def __init__(self, directory_format, paired):
-        self.directory_format = directory_format
-        self.paired = paired
 
 
 def _link_sample_n_to_file(file_records, counts, subsample_ns, direction):
