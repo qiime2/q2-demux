@@ -16,5 +16,9 @@ export const init = (seqProps, fwdScores = undefined, revScores = undefined) => 
   if (revScores) {
     qualScores.reverse = Object.keys(revScores).map(key => [+key + 1, revScores[key]]);
   }
+
+  console.log('fwdScores', fwdScores, 'revScores', revScores);
+  console.log('keys mapped', Object.keys(fwdScores).map(key => [+key + 1, fwdScores[key]]));
+
   initializePlot(qualScores, seqProps);
 };

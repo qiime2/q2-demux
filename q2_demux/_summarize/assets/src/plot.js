@@ -88,8 +88,10 @@ const plot = (data, props, container, seqProps) => {
       .html(`<a href="${direction}-seven-number-summaries.tsv">Download ${direction} parametric seven-number summaries as TSV</a>`)
 
   const maxX = d3.max(data, d => d[0]) + 1;
+  let maxY = d3.max(data, d => d[1]['98%']);
+  maxY = Math.ceil(maxY / 5) * 5;
   const x0 = [0, maxX];
-  const y0 = [0, 45];
+  const y0 = [0, maxY];
   const x = d3.scaleLinear()
     .domain(x0)
     .range([props.margin.left, props.width]);
