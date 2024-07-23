@@ -17,7 +17,8 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 
-from q2_types.feature_data._util import (_read_fastq_seqs, _PlotQualView)
+from .._util import read_fastq_seqs
+from ..types import _PlotQualView
 import q2templates
 
 TEMPLATES = pkg_resources.resource_filename('q2_demux', '_summarize')
@@ -49,7 +50,7 @@ def _subsample(fastq_map):
     qual_sample = []
     min_seq_len = float('inf')
     for file, index in fastq_map:
-        for i, seq in enumerate(_read_fastq_seqs(file)):
+        for i, seq in enumerate(read_fastq_seqs(file)):
             if i == index[0]:
                 min_seq_len = min(min_seq_len, len(seq[1]))
                 qual_sample.append(_decode_qual_to_phred33(seq[3]))
@@ -126,7 +127,7 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
                 if filename is None or np.isnan(filename):
                     continue
 
-            for seq in _read_fastq_seqs(filename):
+            for seq in read_fastq_seqs(filename):
                 count += 1
             per_sample_fastq_counts[direction][sample_id] = count
             file_records[direction].append({

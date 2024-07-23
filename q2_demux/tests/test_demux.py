@@ -19,7 +19,7 @@ import skbio
 import qiime2
 import numpy.testing as npt
 
-from q2_types.feature_data._transformer import (
+from q2_types.multiplexed_sequences import (
     BarcodeSequenceFastqIterator,
     BarcodePairedSequenceFastqIterator)
 from qiime2.plugin.testing import TestPluginBase, assert_no_nans_in_tables

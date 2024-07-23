@@ -14,7 +14,7 @@ import qiime2
 from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt)
 
-from q2_types.feature_data._util import _read_fastq_seqs
+from ._util import read_fastq_seqs
 
 
 def tabulate_read_counts(sequences: SingleLanePerSampleSingleEndFastqDirFmt
@@ -33,7 +33,7 @@ def tabulate_read_counts(sequences: SingleLanePerSampleSingleEndFastqDirFmt
                                "Sample ids must be unique across inputs.")
             fwd_name = os.path.basename(fwd_path)
             fwd_path = str(e.path / fwd_name)
-            for fwd_rec in _read_fastq_seqs(fwd_path):
+            for fwd_rec in read_fastq_seqs(fwd_path):
                 read_count += 1
             result[sample_id] = read_count
 

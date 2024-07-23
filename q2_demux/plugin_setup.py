@@ -6,6 +6,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import importlib
 
 from qiime2.plugin import (
     Plugin, Metadata, MetadataColumn, Categorical, Bool, Str, Int, Float,
@@ -317,3 +318,5 @@ plugin.methods.register_function(
                 'with the WHERE clause, and the `exclude_ids` parameter '
                 'allows for filtering of all samples not specified.',
 )
+
+importlib.import_module('q2_demux.types._deferred_setup')
