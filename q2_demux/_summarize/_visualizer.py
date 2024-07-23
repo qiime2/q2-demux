@@ -195,13 +195,16 @@ def summarize(output_dir: str, data: _PlotQualView, n: int = 10000) -> None:
             length_table = _build_seq_len_table(scores)
             qual_stats[direction] = stats
 
-            if (stats.loc['50%'] > 45).any():
+            if (stats.loc['2%'] > 31).all():
                 context['dangers'].append(
-                    'Some of the %s PHRED quality values are out of range. '
-                    'This is likely because an incorrect PHRED offset was '
-                    'chosen on import of your raw data. You can learn how '
-                    'to choose your PHRED offset during import in the '
-                    'importing tutorial.' % (direction, ))
+                    'Unusually high quality scores were detected. The 2nd '
+                    'percentile score is greater than 31 in all positions. '
+                    'This could indicate that PHRED64 sequences were '
+                    'imported as PHRED33 sequences, or simply that the '
+                    'quality scores are unusually high. '
+                    'You can learn how to choose your PHRED offset during '
+                    'import in the importing tutorial if necessary.'
+                )
 
             context['length_tables'][direction] = length_table
 
