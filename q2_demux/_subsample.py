@@ -17,7 +17,7 @@ from q2_types.per_sample_sequences import (
     SingleLanePerSamplePairedEndFastqDirFmt,
     CasavaOneEightSingleLanePerSampleDirFmt)
 
-from q2_types.feature_data._util import _read_fastq_seqs
+from ._util import read_fastq_seqs
 
 
 def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
@@ -31,7 +31,7 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
         fwd_path_in = str(sequences.path / fwd_name)
         fwd_path_out = str(result.path / fwd_name)
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
-            for fwd_rec in _read_fastq_seqs(fwd_path_in):
+            for fwd_rec in read_fastq_seqs(fwd_path_in):
                 if random.random() <= fraction:
                     fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
 
@@ -53,8 +53,8 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
         rev_path_out = str(result.path / rev_name)
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             with gzip.open(str(rev_path_out), mode='w') as rev:
-                file_pair = zip(_read_fastq_seqs(fwd_path_in),
-                                _read_fastq_seqs(rev_path_in))
+                file_pair = zip(read_fastq_seqs(fwd_path_in),
+                                read_fastq_seqs(rev_path_in))
                 for fwd_rec, rev_rec in file_pair:
                     if random.random() <= fraction:
                         fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))

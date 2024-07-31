@@ -25,9 +25,9 @@ from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt,
     FastqManifestFormat, YamlFormat)
-from q2_types.multiplexed_sequences import ErrorCorrectionDetailsFmt
-from q2_types.feature_data import (
-    BarcodeSequenceFastqIterator, BarcodePairedSequenceFastqIterator
+from q2_types.multiplexed_sequences import (
+    ErrorCorrectionDetailsFmt, BarcodeSequenceFastqIterator,
+    BarcodePairedSequenceFastqIterator
 )
 
 from ._ecc import GolayDecoder
