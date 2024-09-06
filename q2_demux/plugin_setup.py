@@ -138,12 +138,13 @@ num_partitions_description = 'The number of partitions to split the' \
                              ' partitioning into individual samples.'
 partitioned_demux_description = 'The partitioned demultiplexed sequences.'
 
+T = TypeMatch([SequencesWithQuality, JoinedSequencesWithQuality])
 plugin.methods.register_function(
     function=q2_demux.partition_samples_single,
-    inputs={'demux': SampleData[SequencesWithQuality]},
+    inputs={'demux': SampleData[T]},
     parameters={'num_partitions': Int % Range(1, None)},
     outputs=[
-        ('partitioned_demux', Collection[SampleData[SequencesWithQuality]]),
+        ('partitioned_demux', Collection[SampleData[T]]),
     ],
     input_descriptions={
         'demux': demux_description
