@@ -23,7 +23,7 @@ q2_demux/_summarize/assets/dist:
 viz-summarize: q2_demux/_summarize/assets/dist
 
 install: all
-	$(PYTHON) setup.py install
+	$(PYTHON) -m pip install -v .
 
 dev: all
 	pip install -e .
