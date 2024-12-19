@@ -11,9 +11,7 @@ from q2_demux._demux import (emp_single, emp_paired, partition_samples_single,
 from q2_demux._subsample import subsample_single, subsample_paired
 from q2_demux._summarize import summarize
 from q2_demux._filter import filter_samples
-from q2_demux._version import get_versions
 from q2_demux._tabulate import tabulate_read_counts
-
 
 try:
     from ._version import __version__
