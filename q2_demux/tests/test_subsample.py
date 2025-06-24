@@ -8,6 +8,7 @@
 import itertools
 import gzip
 import unittest
+import os
 
 from qiime2.plugin.testing import TestPluginBase
 from qiime2.plugin.util import transform
@@ -21,6 +22,10 @@ from q2_demux import subsample_single, subsample_paired
 class SubsampleTests(TestPluginBase):
     # this functionality is derived from test_demux.EmpTestingUtils
     package = 'q2_demux.tests'
+
+    def __init__(self, methodName: str = "runTest"):
+        super().__init__(methodName)
+        self.demux_data = None
 
     def _get_total_sequence_count(self, seq_ids):
         return len(list(itertools.chain(*seq_ids)))
@@ -100,6 +105,41 @@ class SubsampleSingleTests(SubsampleTests):
 
         self.assertEqual(obs_sample_count, 5)
 
+    def test_subsample_single_drop_empty_reads_all(self):
+        path = self.get_data_path('subsample_data_test_single')
+        view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
+
+        actual = subsample_single(view, fraction=0.0, drop_empty=True)
+
+        path = actual.path
+        mf_path = actual.path / 'MANIFEST'
+        self.assertEqual(os.listdir(path), ['MANIFEST'])
+        with open(mf_path, mode='r') as mf:
+            lines = mf.readlines()
+        print(lines)
+        self.assertEqual(len(lines), 1)
+
+    def test_subsample_single_drop_empty_reads_some(self):
+        path = self.get_data_path('subsample_data_test_single')
+        view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_single(view, fraction=0.1, drop_empty=True)
+
+        path = dropped_some.path
+        file_path = 'sample-short_S2_L001_R1_001.fastq.gz'
+        act_path = os.path.join(path, file_path)
+        self.assertFalse(os.path.exists(act_path))
+
+        mf_path = path / 'MANIFEST'
+        with open(mf_path, mode='r') as mf:
+            lines = mf.readlines()
+        print(lines)
+        self.assertTrue(mf_path.exists())
+        self.assertTrue(any('sample-long_S1_L001_R1_001.fastq.gz'
+                            in line for line in lines))
+        self.assertFalse(any('sample-short_S2_L001_R1_001.fastq.gz'
+                             in line for line in lines))
+
 
 class SubsamplePairedTests(SubsampleTests):
 
@@ -152,6 +192,48 @@ class SubsamplePairedTests(SubsampleTests):
 
         self.assertEqual(fwd_obs_sample_count, 5)
         self.assertEqual(rev_obs_sample_count, 5)
+
+    def test_subsample_paired_drop_empty_reads_all(self):
+        path = self.get_data_path('subsample_data_test_paired')
+        view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
+
+        actual = subsample_paired(view, fraction=0.0, drop_empty=True)
+
+        path = actual.path
+        mf_path = actual.path / 'MANIFEST'
+        self.assertEqual(os.listdir(path), ['MANIFEST'])
+        with open(mf_path, mode='r') as mf:
+            lines = mf.readlines()
+        print(lines)
+        self.assertEqual(len(lines), 1)
+
+    def test_subsample_paired_drop_empty_reads_some(self):
+        path = self.get_data_path('subsample_data_test_paired')
+        view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_paired(view, fraction=0.1, drop_empty=True)
+
+        path = dropped_some.path
+        file_path = 'sample2_2_L001_R1_001.fastq.gz'
+        act_path = os.path.join(path, file_path)
+        self.assertFalse(os.path.exists(act_path))
+        file_path_reverse = 'sample2_2_L001_R2_001.fastq.gz'
+        act_path_reverse = os.path.join(path, file_path_reverse)
+        self.assertFalse(os.path.exists(act_path_reverse))
+
+        mf_path = path / 'MANIFEST'
+        with open(mf_path, mode='r') as mf:
+            lines = mf.readlines()
+        print(lines)
+        self.assertTrue(mf_path.exists())
+        self.assertTrue(any('sample1_1_L001_R1_001.fastq.gz'
+                            in line for line in lines))
+        self.assertTrue(any('sample1_1_L001_R2_001.fastq.gz'
+                            in line for line in lines))
+        self.assertFalse(any('sample2_2_L001_R1_001.fastq.gz'
+                             in line for line in lines))
+        self.assertFalse(any('sample2_2_L001_R2_001.fastq.gz'
+                             in line for line in lines))
 
 
 if __name__ == '__main__':

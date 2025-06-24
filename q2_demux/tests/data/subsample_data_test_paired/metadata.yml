@@ -1,0 +1,2 @@
+format: SingleLanePerSamplePairedEndFastqDirFmt
+type: SampleData[SequencesWithQuality]
