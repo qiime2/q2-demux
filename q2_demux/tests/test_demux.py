@@ -905,7 +905,7 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                            'sample3_2_L001_R1_001.fastq.gz',
                            'sample4_5_L001_R1_001.fastq.gz',
                            'sample5_4_L001_R1_001.fastq.gz')
-        exp_samples_rev = ('sample1_1_L001_R2_001.fastq.fastq.gz',
+        exp_samples_rev = ('sample1_1_L001_R2_001.fastq.gz',
                            'sample2_3_L001_R2_001.fastq.gz',
                            'sample3_2_L001_R2_001.fastq.gz',
                            'sample4_5_L001_R2_001.fastq.gz',
@@ -1029,7 +1029,7 @@ class EmpPairedTests(unittest.TestCase, EmpTestingUtils):
                            'sample3_2_L001_R1_001.fastq.gz',
                            'sample4_5_L001_R1_001.fastq.gz',
                            'sample5_4_L001_R1_001.fastq.gz')
-        exp_samples_rev = ('sample1_1_L001_R2_001.fastq.fastq.gz',
+        exp_samples_rev = ('sample1_1_L001_R2_001.fastq.gz',
                            'sample2_3_L001_R2_001.fastq.gz',
                            'sample3_2_L001_R2_001.fastq.gz',
                            'sample4_5_L001_R2_001.fastq.gz',

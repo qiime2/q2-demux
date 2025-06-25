@@ -242,7 +242,7 @@ plugin.methods.register_function(
     },
     parameter_descriptions={
         'fraction': ('The fraction of sequences to retain in subsample.'),
-        'drop_empty': ('Choose whether to drop empty reads.')
+        'drop_empty': ('Whether to drop empty reads.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
@@ -271,7 +271,7 @@ plugin.methods.register_function(
     },
     parameter_descriptions={
         'fraction': ('The fraction of sequences to retain in subsample.'),
-        'drop_empty': ('Choose whether to drop empty reads.')
+        'drop_empty': ('Whether to drop empty reads.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'

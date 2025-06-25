@@ -116,7 +116,6 @@ class SubsampleSingleTests(SubsampleTests):
         self.assertEqual(os.listdir(path), ['MANIFEST'])
         with open(mf_path, mode='r') as mf:
             lines = mf.readlines()
-        print(lines)
         self.assertEqual(len(lines), 1)
 
     def test_subsample_single_drop_empty_reads_some(self):
@@ -126,14 +125,16 @@ class SubsampleSingleTests(SubsampleTests):
         dropped_some = subsample_single(view, fraction=0.1, drop_empty=True)
 
         path = dropped_some.path
-        file_path = 'sample-short_S2_L001_R1_001.fastq.gz'
-        act_path = os.path.join(path, file_path)
-        self.assertFalse(os.path.exists(act_path))
+        file_path_removed = 'sample-short_S2_L001_R1_001.fastq.gz'
+        path_removed = os.path.join(path, file_path_removed)
+        self.assertFalse(os.path.exists(path_removed))
+        file_path_kept = 'sample-long_S1_L001_R1_001.fastq.gz'
+        path_kept = os.path.join(path, file_path_kept)
+        self.assertTrue(os.path.exists(path_kept))
 
         mf_path = path / 'MANIFEST'
         with open(mf_path, mode='r') as mf:
             lines = mf.readlines()
-        print(lines)
         self.assertTrue(mf_path.exists())
         self.assertTrue(any('sample-long_S1_L001_R1_001.fastq.gz'
                             in line for line in lines))
@@ -204,7 +205,6 @@ class SubsamplePairedTests(SubsampleTests):
         self.assertEqual(os.listdir(path), ['MANIFEST'])
         with open(mf_path, mode='r') as mf:
             lines = mf.readlines()
-        print(lines)
         self.assertEqual(len(lines), 1)
 
     def test_subsample_paired_drop_empty_reads_some(self):
@@ -215,16 +215,21 @@ class SubsamplePairedTests(SubsampleTests):
 
         path = dropped_some.path
         file_path = 'sample2_2_L001_R1_001.fastq.gz'
-        act_path = os.path.join(path, file_path)
-        self.assertFalse(os.path.exists(act_path))
-        file_path_reverse = 'sample2_2_L001_R2_001.fastq.gz'
-        act_path_reverse = os.path.join(path, file_path_reverse)
-        self.assertFalse(os.path.exists(act_path_reverse))
+        path_remove = os.path.join(path, file_path)
+        self.assertFalse(os.path.exists(path_remove))
+        file_path_rev = 'sample2_2_L001_R2_001.fastq.gz'
+        path_remove_rev = os.path.join(path, file_path_rev)
+        self.assertFalse(os.path.exists(path_remove_rev))
+        file_path_keep = 'sample1_1_L001_R1_001.fastq.gz'
+        path_keep = os.path.join(path, file_path_keep)
+        self.assertTrue(os.path.exists(path_keep))
+        file_path_keep_rev = 'sample1_1_L001_R2_001.fastq.gz'
+        path_keep_rev = os.path.join(path, file_path_keep_rev)
+        self.assertTrue(os.path.exists(path_keep_rev))
 
         mf_path = path / 'MANIFEST'
         with open(mf_path, mode='r') as mf:
             lines = mf.readlines()
-        print(lines)
         self.assertTrue(mf_path.exists())
         self.assertTrue(any('sample1_1_L001_R1_001.fastq.gz'
                             in line for line in lines))
