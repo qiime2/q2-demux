@@ -26,18 +26,22 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
                      ) -> CasavaOneEightSingleLanePerSampleDirFmt:
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
-    if drop_empty:
-        result = remove_files(sequences, fraction)
-    else:
-        for _, fwd_path in manifest.itertuples():
-            fwd_name = os.path.basename(fwd_path)
-            fwd_path_in = str(sequences.path / fwd_name)
-            fwd_path_out = str(result.path / fwd_name)
+    for _, fwd_path in manifest.itertuples():
+        fwd_name = os.path.basename(fwd_path)
+        fwd_path_in = str(sequences.path / fwd_name)
+        fwd_path_out = str(result.path / fwd_name)
 
-            with gzip.open(str(fwd_path_out), mode='w') as fwd:
-                for fwd_rec in read_fastq_seqs(fwd_path_in):
-                    if random.random() <= fraction:
-                        fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
+        with gzip.open(str(fwd_path_out), mode='w') as fwd:
+            for fwd_rec in read_fastq_seqs(fwd_path_in):
+                if random.random() <= fraction:
+                    fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
+
+    if drop_empty:
+        remove_files(
+            result,
+            str(sequences.path / 'MANIFEST'),
+            str(result.path / 'MANIFEST')
+        )
 
     return result
 
@@ -49,97 +53,56 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
 
-    if drop_empty:
-        result = remove_files(sequences, fraction, is_paired=True)
-    else:
-        for _, fwd_path, rev_path in manifest.itertuples():
-            fwd_name = os.path.basename(fwd_path)
-            rev_name = os.path.basename(rev_path)
-            fwd_path_in = str(sequences.path / fwd_name)
-            rev_path_in = str(sequences.path / rev_name)
-            fwd_path_out = str(result.path / fwd_name)
-            rev_path_out = str(result.path / rev_name)
+    for _, fwd_path, rev_path in manifest.itertuples():
+        fwd_name = os.path.basename(fwd_path)
+        rev_name = os.path.basename(rev_path)
+        fwd_path_in = str(sequences.path / fwd_name)
+        rev_path_in = str(sequences.path / rev_name)
+        fwd_path_out = str(result.path / fwd_name)
+        rev_path_out = str(result.path / rev_name)
 
-            with gzip.open(str(fwd_path_out), mode='w') as fwd:
-                with gzip.open(str(rev_path_out), mode='w') as rev:
-                    file_pair = zip(read_fastq_seqs(fwd_path_in),
-                                    read_fastq_seqs(rev_path_in))
-                    for fwd_rec, rev_rec in file_pair:
-                        if random.random() <= fraction:
-                            fwd.write(
-                                ('\n'.join(fwd_rec) + '\n').encode('utf-8'))
-                            rev.write(
-                                ('\n'.join(rev_rec) + '\n').encode('utf-8'))
+        with gzip.open(str(fwd_path_out), mode='w') as fwd:
+            with gzip.open(str(rev_path_out), mode='w') as rev:
+                file_pair = zip(read_fastq_seqs(fwd_path_in),
+                                read_fastq_seqs(rev_path_in))
+                for fwd_rec, rev_rec in file_pair:
+                    if random.random() <= fraction:
+                        fwd.write(
+                            ('\n'.join(fwd_rec) + '\n').encode('utf-8'))
+                        rev.write(
+                            ('\n'.join(rev_rec) + '\n').encode('utf-8'))
+
+    if drop_empty:
+        remove_files(
+                    result,
+                    str(sequences.path/'MANIFEST'),
+                    str(result.path/'MANIFEST')
+        )
 
     return result
 
 
-def remove_files(sequences,
-                 fraction: float,
-                 is_paired: bool = False,
-                 ) -> CasavaOneEightSingleLanePerSampleDirFmt:
-    result = CasavaOneEightSingleLanePerSampleDirFmt()
-    manifest = sequences.manifest.view(pd.DataFrame)
-    removed_files = []
-    mf_path_in = str(sequences.path / 'MANIFEST')
-    mf_path_out = str(result.path / 'MANIFEST')
+def remove_files(sequence_format, mf_path_in, mf_path_out):
+    empty_files = []
 
-    if is_paired:
-        for _, fwd_path, rev_path in manifest.itertuples():
-            fwd_name = os.path.basename(fwd_path)
-            rev_name = os.path.basename(rev_path)
-            fwd_path_in = str(sequences.path / fwd_name)
-            rev_path_in = str(sequences.path / rev_name)
-            fwd_path_out = str(result.path / fwd_name)
-            rev_path_out = str(result.path / rev_name)
-            reads = 0
+    file_list = os.listdir(str(sequence_format))
 
-            with gzip.open(str(fwd_path_out), mode='w') as fwd:
-                with gzip.open(str(rev_path_out), mode='w') as rev:
-                    file_pair = zip(read_fastq_seqs(fwd_path_in),
-                                    read_fastq_seqs(rev_path_in))
-                    for fwd_rec, rev_rec in file_pair:
-                        if random.random() <= fraction:
-                            fwd.write(
-                                ('\n'.join(fwd_rec) + '\n').encode('utf-8'))
-                            rev.write(
-                                ('\n'.join(rev_rec) + '\n').encode('utf-8'))
-                            reads += 1
-            if reads == 0:
-                os.remove(fwd_path_out)
-                os.remove(rev_path_out)
-                removed_files.append(fwd_name)
-                removed_files.append(rev_name)
-    else:
-        for _, fwd_path in manifest.itertuples():
-            fwd_name = os.path.basename(fwd_path)
-            fwd_path_in = str(sequences.path / fwd_name)
-            fwd_path_out = str(result.path / fwd_name)
+    sf_path = sequence_format.path
 
-            reads = 0
-            with gzip.open(str(fwd_path_out), mode='w') as fwd:
-                for fwd_rec in read_fastq_seqs(fwd_path_in):
-                    if random.random() <= fraction:
-                        fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
-                        reads += 1
-            if reads == 0:
-                os.remove(fwd_path_out)
-                removed_files.append(fwd_name)
+    for file in file_list:
+        file_path = sf_path / file
+        gz_file = gzip.GzipFile(str(file_path), 'rb')
+        if gz_file.peek(1) == b'':
+            os.remove(sf_path / file)
+            empty_files.append(file)
 
     with open(mf_path_in, mode='r') as mf:
         lines = mf.readlines()
 
     new_lines = []
     for line in lines:
-        keep_file = True
-        for removed_file in removed_files:
-            if removed_file in line:
-                keep_file = False
-                break
-        if keep_file:
+        if not any(empty_file in line for empty_file in empty_files):
             new_lines.append(line)
 
     with open(mf_path_out, mode='w') as mf:
         mf.writelines(new_lines)
-
-    return result
