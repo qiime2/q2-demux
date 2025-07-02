@@ -24,7 +24,7 @@ def subsample_single(
                      sequences: SingleLanePerSampleSingleEndFastqDirFmt,
                      fraction: float,
                      drop_empty: bool = False
-                     ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+) -> CasavaOneEightSingleLanePerSampleDirFmt:
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
     for _, fwd_path in manifest.itertuples():
@@ -38,10 +38,7 @@ def subsample_single(
                     fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
 
     if drop_empty:
-        remove_empty_files(
-            sequences,
-            result
-        )
+        remove_empty_files(sequences, result)
 
     return result
 
@@ -50,7 +47,7 @@ def subsample_paired(
                      sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                      fraction: float,
                      drop_empty: bool = False
-                     ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+) -> CasavaOneEightSingleLanePerSampleDirFmt:
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
 
@@ -74,17 +71,19 @@ def subsample_paired(
                             ('\n'.join(rev_rec) + '\n').encode('utf-8'))
 
     if drop_empty:
-        remove_empty_files(
-            sequences,
-            result
-        )
+        remove_empty_files(sequences, result)
 
     return result
 
 
-def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
-                       result: CasavaOneEightSingleLanePerSampleDirFmt
-                       ):
+single_end_type = SingleLanePerSampleSingleEndFastqDirFmt
+paired_end_type = SingleLanePerSamplePairedEndFastqDirFmt
+
+
+def remove_empty_files(
+        sequences: single_end_type | paired_end_type,
+        result: CasavaOneEightSingleLanePerSampleDirFmt
+):
     """
     This function removes files from the `result` directory if there are no
     reads after random subsampling. Afterward the files are also removed
@@ -119,5 +118,7 @@ def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
         mf.writelines(new_lines)
 
     if len(os.listdir(result.path)) == 1:
-        raise ValueError('All sample were empty after subsampling, try again'
-                         ' with a larger fraction')
+        raise ValueError(
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction'
+        )
