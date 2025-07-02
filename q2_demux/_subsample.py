@@ -106,5 +106,5 @@ def remove_empty_files(
     if len(os.listdir(result.path)) == 0:
         raise ValueError(
             'All sample were empty after subsampling, try again with a larger '
-            'fraction'
+            'fraction.'
         )

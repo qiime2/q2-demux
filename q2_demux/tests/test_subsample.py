@@ -103,10 +103,8 @@ class SubsampleSingleTests(SubsampleTests):
 
     def test_subsample_single_drop_empty_reads_all(self):
         """
-        This function tests that if the subsampling fraction is zero all
-        samples are empty and dropped from the `result` directory and
-        MANIFEST file for single end reads, as well as testing that an error
-        is raised informing the user that all samples are empty.
+        This function tests that if the subsampling fraction is zero an error
+        is raised alerting the user that all samples are empty.
         """
         path = self.get_data_path('subsample_data_test_single')
         view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
@@ -114,12 +112,9 @@ class SubsampleSingleTests(SubsampleTests):
         with self.assertRaisesRegex(
             ValueError,
             'All sample were empty after subsampling, try again with a larger '
-            'fraction'
+            'fraction.'
         ):
-            actual = subsample_single(view, fraction=0.0, drop_empty=True)
-
-            path = actual.path
-            self.assertEqual(os.listdir(path), [])
+            subsample_single(view, fraction=0.0, drop_empty=True)
 
     def test_subsample_single_drop_empty_reads_some(self):
         """
@@ -127,7 +122,6 @@ class SubsampleSingleTests(SubsampleTests):
         after subsampling, only the empty samples are dropped for single end
         reads.
         """
-
         path = self.get_data_path('subsample_data_test_single')
         view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
 
@@ -206,24 +200,18 @@ class SubsamplePairedTests(SubsampleTests):
 
     def test_subsample_paired_drop_empty_reads_all(self):
         """
-               This function tests that if the subsampling fraction is zero all
-               samples are empty and dropped from the `result` directory and
-               MANIFEST file for paired end reads, as well as testing that
-               an error is raised informing the user that all samples are
-               empty.
-               """
+        This function tests that if the subsampling fraction is zero an error
+        will be raised alerting the user that all samples are empty.
+        """
         path = self.get_data_path('subsample_data_test_paired')
         view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
 
         with self.assertRaisesRegex(
             ValueError,
             'All sample were empty after subsampling, try again with a larger '
-            'fraction'
+            'fraction.'
         ):
-            actual = subsample_paired(view, fraction=0.0, drop_empty=True)
-
-            path = actual.path
-            self.assertEqual(os.listdir(path), [])
+            subsample_paired(view, fraction=0.0, drop_empty=True)
 
     def test_subsample_paired_drop_empty_reads_some(self):
         """
