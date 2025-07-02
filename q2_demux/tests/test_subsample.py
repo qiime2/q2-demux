@@ -102,12 +102,20 @@ class SubsampleSingleTests(SubsampleTests):
         self.assertEqual(obs_sample_count, 5)
 
     def test_subsample_single_drop_empty_reads_all(self):
+        """
+        This function tests that if the subsampling fraction is zero all
+        samples are empty and dropped from the `result` directory and
+        MANIFEST file for single end reads, as well as testing that an error
+        is raised informing the user that all samples are empty.
+        """
         path = self.get_data_path('subsample_data_test_single')
         view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
 
-        with self.assertRaisesRegex(ValueError, 'All files have 0 '
-                                    'reads, try again with a larger '
-                                    'fraction'):
+        with self.assertRaisesRegex(
+            ValueError,
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction'
+        ):
             actual = subsample_single(view, fraction=0.0, drop_empty=True)
 
             path = actual.path
@@ -118,34 +126,41 @@ class SubsampleSingleTests(SubsampleTests):
             self.assertEqual(len(lines), 1)
 
     def test_subsample_single_drop_empty_reads_some(self):
+        """
+        This function tests that if some samples are empty and some are not
+        after subsampling, only the empty samples are dropped for single end
+        reads.
+        """
+
+        path = self.get_data_path('subsample_data_test_single')
+        view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_single(
+            view, fraction=0.0008, drop_empty=True
+        )
+
+        path = dropped_some.path
+        file_path_removed = 'sample-short_S2_L001_R1_001.fastq.gz'
+        path_removed = os.path.join(path, file_path_removed)
+        file_path_kept = 'sample-long_S1_L001_R1_001.fastq.gz'
+        path_kept = os.path.join(path, file_path_kept)
+
+        mf_path = path / 'MANIFEST'
+        with open(mf_path, mode='r') as mf:
+            lines = mf.read()
         try:
-            path = self.get_data_path('subsample_data_test_single')
-            view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
-
-            dropped_some = subsample_single(view,
-                                            fraction=0.0008,
-                                            drop_empty=True
-                                            )
-
-            path = dropped_some.path
-            file_path_removed = 'sample-short_S2_L001_R1_001.fastq.gz'
-            path_removed = os.path.join(path, file_path_removed)
             self.assertFalse(os.path.exists(path_removed))
-            file_path_kept = 'sample-long_S1_L001_R1_001.fastq.gz'
-            path_kept = os.path.join(path, file_path_kept)
             self.assertTrue(os.path.exists(path_kept))
 
-            mf_path = path / 'MANIFEST'
-            with open(mf_path, mode='r') as mf:
-                lines = mf.readlines()
             self.assertTrue(mf_path.exists())
-            self.assertTrue(any('sample-long_S1_L001_R1_001.fastq.gz'
-                                in line for line in lines))
-            self.assertFalse(any('sample-short_S2_L001_R1_001.fastq.gz'
-                                 in line for line in lines))
+            self.assertIn(file_path_kept, lines)
+            self.assertNotIn(file_path_removed, lines)
+
         except AssertionError:
-            raise AssertionError("This test fails approximately 1 in 1000 "
-                                 "times. Run the test again")
+            raise AssertionError(
+                "This test fails approximately 1 in 1000 times. Run the test "
+                "again."
+            )
 
 
 class SubsamplePairedTests(SubsampleTests):
@@ -201,12 +216,21 @@ class SubsamplePairedTests(SubsampleTests):
         self.assertEqual(rev_obs_sample_count, 5)
 
     def test_subsample_paired_drop_empty_reads_all(self):
+        """
+               This function tests that if the subsampling fraction is zero all
+               samples are empty and dropped from the `result` directory and
+               MANIFEST file for paired end reads, as well as testing that
+               an error is raised informing the user that all samples are
+               empty.
+               """
         path = self.get_data_path('subsample_data_test_paired')
         view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
 
-        with self.assertRaisesRegex(ValueError, 'All files have 0 '
-                                    'reads, try again with a larger '
-                                    'fraction'):
+        with self.assertRaisesRegex(
+            ValueError,
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction'
+        ):
             actual = subsample_paired(view, fraction=0.0, drop_empty=True)
 
             path = actual.path
@@ -217,41 +241,46 @@ class SubsamplePairedTests(SubsampleTests):
             self.assertEqual(len(lines), 1)
 
     def test_subsample_paired_drop_empty_reads_some(self):
+        """
+        This function tests that if some samples are empty and some are not
+        after subsampling, only the empty samples are dropped for paired end
+        reads.
+        """
+        path = self.get_data_path('subsample_data_test_paired')
+        view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_paired(
+            view, fraction=0.0008, drop_empty=True
+        )
+
+        path = dropped_some.path
+        file_path = 'sample2_2_L001_R1_001.fastq.gz'
+        path_remove = os.path.join(path, file_path)
+        file_path_rev = 'sample2_2_L001_R2_001.fastq.gz'
+        path_remove_rev = os.path.join(path, file_path_rev)
+
+        file_path_keep = 'sample1_1_L001_R1_001.fastq.gz'
+        path_keep = os.path.join(path, file_path_keep)
+        file_path_keep_rev = 'sample1_1_L001_R2_001.fastq.gz'
+        path_keep_rev = os.path.join(path, file_path_keep_rev)
+
+        mf_path = path / 'MANIFEST'
+        with open(mf_path, mode='r') as mf:
+            lines = mf.read()
+
         try:
-            path = self.get_data_path('subsample_data_test_paired')
-            view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
-
-            dropped_some = subsample_paired(view,
-                                            fraction=0.0008,
-                                            drop_empty=True
-                                            )
-
-            path = dropped_some.path
-            file_path = 'sample2_2_L001_R1_001.fastq.gz'
-            path_remove = os.path.join(path, file_path)
             self.assertFalse(os.path.exists(path_remove))
-            file_path_rev = 'sample2_2_L001_R2_001.fastq.gz'
-            path_remove_rev = os.path.join(path, file_path_rev)
             self.assertFalse(os.path.exists(path_remove_rev))
-            file_path_keep = 'sample1_1_L001_R1_001.fastq.gz'
-            path_keep = os.path.join(path, file_path_keep)
             self.assertTrue(os.path.exists(path_keep))
-            file_path_keep_rev = 'sample1_1_L001_R2_001.fastq.gz'
-            path_keep_rev = os.path.join(path, file_path_keep_rev)
             self.assertTrue(os.path.exists(path_keep_rev))
 
-            mf_path = path / 'MANIFEST'
-            with open(mf_path, mode='r') as mf:
-                lines = mf.readlines()
             self.assertTrue(mf_path.exists())
-            self.assertTrue(any('sample1_1_L001_R1_001.fastq.gz'
-                                in line for line in lines))
-            self.assertTrue(any('sample1_1_L001_R2_001.fastq.gz'
-                                in line for line in lines))
-            self.assertFalse(any('sample2_2_L001_R1_001.fastq.gz'
-                                 in line for line in lines))
-            self.assertFalse(any('sample2_2_L001_R2_001.fastq.gz'
-                                 in line for line in lines))
+            self.assertIn(file_path_keep, lines)
+            self.assertIn(file_path_keep_rev, lines)
+
+            self.assertNotIn(file_path, lines)
+            self.assertNotIn(file_path_rev, lines)
+
         except AssertionError:
             raise AssertionError("This test fails approximately 1 in 1000 "
                                  "times. Run the test again")

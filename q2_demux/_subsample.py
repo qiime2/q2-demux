@@ -20,7 +20,8 @@ from q2_types.per_sample_sequences import (
 from ._util import read_fastq_seqs
 
 
-def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
+def subsample_single(
+                     sequences: SingleLanePerSampleSingleEndFastqDirFmt,
                      fraction: float,
                      drop_empty: bool = False
                      ) -> CasavaOneEightSingleLanePerSampleDirFmt:
@@ -45,7 +46,8 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
     return result
 
 
-def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
+def subsample_paired(
+                     sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                      fraction: float,
                      drop_empty: bool = False
                      ) -> CasavaOneEightSingleLanePerSampleDirFmt:
@@ -85,7 +87,7 @@ def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                        ):
     """
     This function removes files from the `result` directory if there are no
-    reads after random subsampling. Afterwards the files are also removed
+    reads after random subsampling. Afterward the files are also removed
     from the MANIFEST file.
     """
     empty_files = []
@@ -117,5 +119,5 @@ def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
         mf.writelines(new_lines)
 
     if len(os.listdir(result.path)) == 1:
-        raise ValueError('All files have 0 reads, try again with a larger '
-                         'fraction')
+        raise ValueError('All sample were empty after subsampling, try again'
+                         ' with a larger fraction')
