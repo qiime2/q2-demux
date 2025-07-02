@@ -232,7 +232,8 @@ plugin.methods.register_function(
                                     PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
                                           inclusive_start=False,
-                                          inclusive_end=False)},
+                                          inclusive_end=False),
+                'drop_empty': Bool},
     outputs=[
         ('subsampled_sequences', SampleData[SequencesWithQuality])
     ],
@@ -240,7 +241,8 @@ plugin.methods.register_function(
         'sequences': 'The demultiplexed sequences to be subsampled.'
     },
     parameter_descriptions={
-        'fraction': ('The fraction of sequences to retain in subsample.')
+        'fraction': ('The fraction of sequences to retain in subsample.'),
+        'drop_empty': ('Whether to drop empty samples.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'
@@ -259,7 +261,8 @@ plugin.methods.register_function(
     inputs={'sequences': SampleData[PairedEndSequencesWithQuality]},
     parameters={'fraction': Float % Range(0, 1,
                                           inclusive_start=False,
-                                          inclusive_end=False)},
+                                          inclusive_end=False),
+                'drop_empty': Bool},
     outputs=[
         ('subsampled_sequences', SampleData[PairedEndSequencesWithQuality])
     ],
@@ -267,7 +270,8 @@ plugin.methods.register_function(
         'sequences': 'The demultiplexed sequences to be subsampled.'
     },
     parameter_descriptions={
-        'fraction': ('The fraction of sequences to retain in subsample.')
+        'fraction': ('The fraction of sequences to retain in subsample.'),
+        'drop_empty': ('Whether to drop empty samples.')
     },
     output_descriptions={
         'subsampled_sequences': 'The subsampled sequences.'

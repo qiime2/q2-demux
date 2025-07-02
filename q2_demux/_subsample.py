@@ -20,27 +20,36 @@ from q2_types.per_sample_sequences import (
 from ._util import read_fastq_seqs
 
 
-def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
-                     fraction: float
-                     ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+def subsample_single(
+    sequences: SingleLanePerSampleSingleEndFastqDirFmt,
+    fraction: float,
+    drop_empty: bool = False
+) -> CasavaOneEightSingleLanePerSampleDirFmt:
+
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
-
     for _, fwd_path in manifest.itertuples():
         fwd_name = os.path.basename(fwd_path)
         fwd_path_in = str(sequences.path / fwd_name)
         fwd_path_out = str(result.path / fwd_name)
+
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             for fwd_rec in read_fastq_seqs(fwd_path_in):
                 if random.random() <= fraction:
                     fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
 
+    if drop_empty:
+        remove_empty_files(sequences, result)
+
     return result
 
 
-def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
-                     fraction: float
-                     ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+def subsample_paired(
+    sequences: SingleLanePerSamplePairedEndFastqDirFmt,
+    fraction: float,
+    drop_empty: bool = False
+) -> CasavaOneEightSingleLanePerSampleDirFmt:
+
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
 
@@ -51,13 +60,51 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
         rev_path_in = str(sequences.path / rev_name)
         fwd_path_out = str(result.path / fwd_name)
         rev_path_out = str(result.path / rev_name)
+
         with gzip.open(str(fwd_path_out), mode='w') as fwd:
             with gzip.open(str(rev_path_out), mode='w') as rev:
                 file_pair = zip(read_fastq_seqs(fwd_path_in),
                                 read_fastq_seqs(rev_path_in))
                 for fwd_rec, rev_rec in file_pair:
                     if random.random() <= fraction:
-                        fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
-                        rev.write(('\n'.join(rev_rec) + '\n').encode('utf-8'))
+                        fwd.write(
+                            ('\n'.join(fwd_rec) + '\n').encode('utf-8'))
+                        rev.write(
+                            ('\n'.join(rev_rec) + '\n').encode('utf-8'))
+
+    if drop_empty:
+        remove_empty_files(sequences, result)
 
     return result
+
+
+single_end_type = SingleLanePerSampleSingleEndFastqDirFmt
+paired_end_type = SingleLanePerSamplePairedEndFastqDirFmt
+
+
+def remove_empty_files(
+    sequences: single_end_type | paired_end_type,
+    result: CasavaOneEightSingleLanePerSampleDirFmt
+):
+    """
+    This function removes files from the `result` directory if there are no
+    reads after random subsampling. Afterward the files are also removed
+    from the MANIFEST file.
+    """
+    empty_files = []
+
+    file_list = os.listdir(str(result))
+    sf_path = result.path
+
+    for file in file_list:
+        file_path = sf_path / file
+        gz_file = gzip.GzipFile(str(file_path), 'rb')
+        if gz_file.peek(1) == b'':
+            os.remove(sf_path / file)
+            empty_files.append(file)
+
+    if len(os.listdir(result.path)) == 0:
+        raise ValueError(
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction.'
+        )

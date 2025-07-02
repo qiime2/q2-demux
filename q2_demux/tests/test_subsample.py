@@ -8,6 +8,7 @@
 import itertools
 import gzip
 import unittest
+import os
 
 from qiime2.plugin.testing import TestPluginBase
 from qiime2.plugin.util import transform
@@ -100,6 +101,50 @@ class SubsampleSingleTests(SubsampleTests):
 
         self.assertEqual(obs_sample_count, 5)
 
+    def test_subsample_single_drop_empty_reads_all(self):
+        """
+        This function tests that if the subsampling fraction is zero an error
+        is raised alerting the user that all samples are empty.
+        """
+        path = self.get_data_path('subsample_data_test_single')
+        view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
+
+        with self.assertRaisesRegex(
+            ValueError,
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction.'
+        ):
+            subsample_single(view, fraction=0.0, drop_empty=True)
+
+    def test_subsample_single_drop_empty_reads_some(self):
+        """
+        This function tests that if some samples are empty and some are not
+        after subsampling, only the empty samples are dropped for single end
+        reads.
+        """
+        path = self.get_data_path('subsample_data_test_single')
+        view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_single(
+            view, fraction=0.0008, drop_empty=True
+        )
+
+        path = dropped_some.path
+        file_path_removed = 'sample-short_S2_L001_R1_001.fastq.gz'
+        path_removed = os.path.join(path, file_path_removed)
+        file_path_kept = 'sample-long_S1_L001_R1_001.fastq.gz'
+        path_kept = os.path.join(path, file_path_kept)
+
+        try:
+            self.assertFalse(os.path.exists(path_removed))
+            self.assertTrue(os.path.exists(path_kept))
+
+        except AssertionError:
+            raise AssertionError(
+                "This test fails approximately 1 in 1000 times. Run the test "
+                "again."
+            )
+
 
 class SubsamplePairedTests(SubsampleTests):
 
@@ -152,6 +197,55 @@ class SubsamplePairedTests(SubsampleTests):
 
         self.assertEqual(fwd_obs_sample_count, 5)
         self.assertEqual(rev_obs_sample_count, 5)
+
+    def test_subsample_paired_drop_empty_reads_all(self):
+        """
+        This function tests that if the subsampling fraction is zero an error
+        will be raised alerting the user that all samples are empty.
+        """
+        path = self.get_data_path('subsample_data_test_paired')
+        view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
+
+        with self.assertRaisesRegex(
+            ValueError,
+            'All sample were empty after subsampling, try again with a larger '
+            'fraction.'
+        ):
+            subsample_paired(view, fraction=0.0, drop_empty=True)
+
+    def test_subsample_paired_drop_empty_reads_some(self):
+        """
+        This function tests that if some samples are empty and some are not
+        after subsampling, only the empty samples are dropped for paired end
+        reads.
+        """
+        path = self.get_data_path('subsample_data_test_paired')
+        view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
+
+        dropped_some = subsample_paired(
+            view, fraction=0.0008, drop_empty=True
+        )
+
+        path = dropped_some.path
+        file_path = 'sample2_2_L001_R1_001.fastq.gz'
+        path_remove = os.path.join(path, file_path)
+        file_path_rev = 'sample2_2_L001_R2_001.fastq.gz'
+        path_remove_rev = os.path.join(path, file_path_rev)
+
+        file_path_keep = 'sample1_1_L001_R1_001.fastq.gz'
+        path_keep = os.path.join(path, file_path_keep)
+        file_path_keep_rev = 'sample1_1_L001_R2_001.fastq.gz'
+        path_keep_rev = os.path.join(path, file_path_keep_rev)
+
+        try:
+            self.assertFalse(os.path.exists(path_remove))
+            self.assertFalse(os.path.exists(path_remove_rev))
+            self.assertTrue(os.path.exists(path_keep))
+            self.assertTrue(os.path.exists(path_keep_rev))
+
+        except AssertionError:
+            raise AssertionError("This test fails approximately 1 in 1000 "
+                                 "times. Run the test again")
 
 
 if __name__ == '__main__':
