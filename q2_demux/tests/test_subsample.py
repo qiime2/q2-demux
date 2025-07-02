@@ -105,14 +105,17 @@ class SubsampleSingleTests(SubsampleTests):
         path = self.get_data_path('subsample_data_test_single')
         view = SingleLanePerSampleSingleEndFastqDirFmt(path, mode='r')
 
-        actual = subsample_single(view, fraction=0.0, drop_empty=True)
+        with self.assertRaisesRegex(ValueError, 'All files have 0 '
+                                    'reads, try again with a larger '
+                                    'fraction'):
+            actual = subsample_single(view, fraction=0.0, drop_empty=True)
 
-        path = actual.path
-        mf_path = actual.path / 'MANIFEST'
-        self.assertEqual(os.listdir(path), ['MANIFEST'])
-        with open(mf_path, mode='r') as mf:
-            lines = mf.readlines()
-        self.assertEqual(len(lines), 1)
+            path = actual.path
+            mf_path = actual.path / 'MANIFEST'
+            self.assertEqual(os.listdir(path), ['MANIFEST'])
+            with open(mf_path, mode='r') as mf:
+                lines = mf.readlines()
+            self.assertEqual(len(lines), 1)
 
     def test_subsample_single_drop_empty_reads_some(self):
         try:
@@ -201,14 +204,17 @@ class SubsamplePairedTests(SubsampleTests):
         path = self.get_data_path('subsample_data_test_paired')
         view = SingleLanePerSamplePairedEndFastqDirFmt(path, mode='r')
 
-        actual = subsample_paired(view, fraction=0.0, drop_empty=True)
+        with self.assertRaisesRegex(ValueError, 'All files have 0 '
+                                    'reads, try again with a larger '
+                                    'fraction'):
+            actual = subsample_paired(view, fraction=0.0, drop_empty=True)
 
-        path = actual.path
-        mf_path = actual.path / 'MANIFEST'
-        self.assertEqual(os.listdir(path), ['MANIFEST'])
-        with open(mf_path, mode='r') as mf:
-            lines = mf.readlines()
-        self.assertEqual(len(lines), 1)
+            path = actual.path
+            mf_path = actual.path / 'MANIFEST'
+            self.assertEqual(os.listdir(path), ['MANIFEST'])
+            with open(mf_path, mode='r') as mf:
+                lines = mf.readlines()
+            self.assertEqual(len(lines), 1)
 
     def test_subsample_paired_drop_empty_reads_some(self):
         try:

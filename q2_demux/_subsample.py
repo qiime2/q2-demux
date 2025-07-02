@@ -115,3 +115,7 @@ def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
 
     with open(mf_path_out, mode='w') as mf:
         mf.writelines(new_lines)
+
+    if len(os.listdir(result.path)) == 1:
+        raise ValueError('All files have 0 reads, try again with a larger '
+                         'fraction')
