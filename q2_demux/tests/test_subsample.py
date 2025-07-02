@@ -119,11 +119,7 @@ class SubsampleSingleTests(SubsampleTests):
             actual = subsample_single(view, fraction=0.0, drop_empty=True)
 
             path = actual.path
-            mf_path = actual.path / 'MANIFEST'
-            self.assertEqual(os.listdir(path), ['MANIFEST'])
-            with open(mf_path, mode='r') as mf:
-                lines = mf.readlines()
-            self.assertEqual(len(lines), 1)
+            self.assertEqual(os.listdir(path), [])
 
     def test_subsample_single_drop_empty_reads_some(self):
         """
@@ -145,16 +141,9 @@ class SubsampleSingleTests(SubsampleTests):
         file_path_kept = 'sample-long_S1_L001_R1_001.fastq.gz'
         path_kept = os.path.join(path, file_path_kept)
 
-        mf_path = path / 'MANIFEST'
-        with open(mf_path, mode='r') as mf:
-            lines = mf.read()
         try:
             self.assertFalse(os.path.exists(path_removed))
             self.assertTrue(os.path.exists(path_kept))
-
-            self.assertTrue(mf_path.exists())
-            self.assertIn(file_path_kept, lines)
-            self.assertNotIn(file_path_removed, lines)
 
         except AssertionError:
             raise AssertionError(
@@ -234,11 +223,7 @@ class SubsamplePairedTests(SubsampleTests):
             actual = subsample_paired(view, fraction=0.0, drop_empty=True)
 
             path = actual.path
-            mf_path = actual.path / 'MANIFEST'
-            self.assertEqual(os.listdir(path), ['MANIFEST'])
-            with open(mf_path, mode='r') as mf:
-                lines = mf.readlines()
-            self.assertEqual(len(lines), 1)
+            self.assertEqual(os.listdir(path), [])
 
     def test_subsample_paired_drop_empty_reads_some(self):
         """
@@ -264,22 +249,11 @@ class SubsamplePairedTests(SubsampleTests):
         file_path_keep_rev = 'sample1_1_L001_R2_001.fastq.gz'
         path_keep_rev = os.path.join(path, file_path_keep_rev)
 
-        mf_path = path / 'MANIFEST'
-        with open(mf_path, mode='r') as mf:
-            lines = mf.read()
-
         try:
             self.assertFalse(os.path.exists(path_remove))
             self.assertFalse(os.path.exists(path_remove_rev))
             self.assertTrue(os.path.exists(path_keep))
             self.assertTrue(os.path.exists(path_keep_rev))
-
-            self.assertTrue(mf_path.exists())
-            self.assertIn(file_path_keep, lines)
-            self.assertIn(file_path_keep_rev, lines)
-
-            self.assertNotIn(file_path, lines)
-            self.assertNotIn(file_path_rev, lines)
 
         except AssertionError:
             raise AssertionError("This test fails approximately 1 in 1000 "

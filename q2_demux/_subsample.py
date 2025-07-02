@@ -95,8 +95,6 @@ def remove_empty_files(
 
     file_list = os.listdir(str(result))
     sf_path = result.path
-    mf_path_in = str(sequences.path / 'MANIFEST')
-    mf_path_out = str(result.path / 'MANIFEST')
 
     for file in file_list:
         file_path = sf_path / file
@@ -105,21 +103,7 @@ def remove_empty_files(
             os.remove(sf_path / file)
             empty_files.append(file)
 
-    with open(mf_path_in, mode='r') as mf:
-        lines = mf.readlines()
-
-    new_lines = []
-    for line in lines:
-        for empty_file in empty_files:
-            if empty_file in line:
-                break
-        else:
-            new_lines.append(line)
-
-    with open(mf_path_out, mode='w') as mf:
-        mf.writelines(new_lines)
-
-    if len(os.listdir(result.path)) == 1:
+    if len(os.listdir(result.path)) == 0:
         raise ValueError(
             'All sample were empty after subsampling, try again with a larger '
             'fraction'
