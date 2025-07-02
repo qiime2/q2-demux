@@ -37,10 +37,9 @@ def subsample_single(sequences: SingleLanePerSampleSingleEndFastqDirFmt,
                     fwd.write(('\n'.join(fwd_rec) + '\n').encode('utf-8'))
 
     if drop_empty:
-        remove_files(
-            result,
-            str(sequences.path / 'MANIFEST'),
-            str(result.path / 'MANIFEST')
+        remove_empty_files(
+            sequences,
+            result
         )
 
     return result
@@ -73,21 +72,28 @@ def subsample_paired(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
                             ('\n'.join(rev_rec) + '\n').encode('utf-8'))
 
     if drop_empty:
-        remove_files(
-                    result,
-                    str(sequences.path/'MANIFEST'),
-                    str(result.path/'MANIFEST')
+        remove_empty_files(
+            sequences,
+            result
         )
 
     return result
 
 
-def remove_files(sequence_format, mf_path_in, mf_path_out):
+def remove_empty_files(sequences: SingleLanePerSamplePairedEndFastqDirFmt,
+                       result: CasavaOneEightSingleLanePerSampleDirFmt
+                       ):
+    """
+    This function removes files from the `result` directory if there are no
+    reads after random subsampling. Afterwards the files are also removed
+    from the MANIFEST file.
+    """
     empty_files = []
 
-    file_list = os.listdir(str(sequence_format))
-
-    sf_path = sequence_format.path
+    file_list = os.listdir(str(result))
+    sf_path = result.path
+    mf_path_in = str(sequences.path / 'MANIFEST')
+    mf_path_out = str(result.path / 'MANIFEST')
 
     for file in file_list:
         file_path = sf_path / file
@@ -101,7 +107,10 @@ def remove_files(sequence_format, mf_path_in, mf_path_out):
 
     new_lines = []
     for line in lines:
-        if not any(empty_file in line for empty_file in empty_files):
+        for empty_file in empty_files:
+            if empty_file in line:
+                break
+        else:
             new_lines.append(line)
 
     with open(mf_path_out, mode='w') as mf:
