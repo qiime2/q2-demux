@@ -21,10 +21,11 @@ from ._util import read_fastq_seqs
 
 
 def subsample_single(
-                     sequences: SingleLanePerSampleSingleEndFastqDirFmt,
-                     fraction: float,
-                     drop_empty: bool = False
+    sequences: SingleLanePerSampleSingleEndFastqDirFmt,
+    fraction: float,
+    drop_empty: bool = False
 ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
     for _, fwd_path in manifest.itertuples():
@@ -44,10 +45,11 @@ def subsample_single(
 
 
 def subsample_paired(
-                     sequences: SingleLanePerSamplePairedEndFastqDirFmt,
-                     fraction: float,
-                     drop_empty: bool = False
+    sequences: SingleLanePerSamplePairedEndFastqDirFmt,
+    fraction: float,
+    drop_empty: bool = False
 ) -> CasavaOneEightSingleLanePerSampleDirFmt:
+
     result = CasavaOneEightSingleLanePerSampleDirFmt()
     manifest = sequences.manifest.view(pd.DataFrame)
 
@@ -81,8 +83,8 @@ paired_end_type = SingleLanePerSamplePairedEndFastqDirFmt
 
 
 def remove_empty_files(
-        sequences: single_end_type | paired_end_type,
-        result: CasavaOneEightSingleLanePerSampleDirFmt
+    sequences: single_end_type | paired_end_type,
+    result: CasavaOneEightSingleLanePerSampleDirFmt
 ):
     """
     This function removes files from the `result` directory if there are no
