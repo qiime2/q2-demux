@@ -18,22 +18,23 @@ from q2_types.per_sample_sequences import \
 from ._summarize import _PlotQualView
 
 
-def filter_samples(demux: _PlotQualView, metadata: Metadata = None, where: str = None, 
-                   exclude_ids: bool = False, remove_empty: bool = False) \
+def filter_samples(demux: _PlotQualView, metadata: Metadata = None,
+                   where: str = None, exclude_ids: bool = False,
+                   remove_empty: bool = False) \
                    -> CasavaOneEightSingleLanePerSampleDirFmt:
-    
+
     if not any([metadata, remove_empty]):
         raise ValueError(
             "At least one of the following parameters must be provided: "
             "metadata, remove-empty."
         )
-    
+
     results = CasavaOneEightSingleLanePerSampleDirFmt()
     paired = demux.paired
-    samples = demux.directory_format    
+    samples = demux.directory_format
     manifest = samples.manifest.view(pd.DataFrame)
     ids_to_keep = set(manifest.index)
-    
+
     if metadata is not None:
         ids_to_keep = metadata.get_ids(where=where)
         if not ids_to_keep:
@@ -45,7 +46,7 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata = None, where: str =
     if remove_empty:
         ids_empty = _filter_empty(manifest)
         ids_to_keep = set(ids_to_keep) - set(ids_empty)
-    
+
     try:
         for id in ids_to_keep:
             forward = manifest.loc[id].forward
@@ -64,16 +65,16 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata = None, where: str =
 
 def _filter_empty(manifest):
     """
-    Identify and return sample names from a manifest DataFrame where at least one FASTQ
-    file is empty.
+    Identify and return sample names from a manifest DataFrame where
+    at least one FASTQ file is empty.
 
     Parameters:
-        manifest (pandas.DataFrame): A DataFrame where the index contains sample names
-            and the values are file paths pointing to FASTQ files.
+        manifest (pandas.DataFrame): A DataFrame where the index contains
+        sample names and the values are file paths pointing to FASTQ files.
 
     Returns:
-        list: A list of sample names for which at least one associated file is empty
-            (no content on the first line).
+        list: A list of sample names for which at least one associated
+        file is empty (no content on the first line).
     """
     empty_samples = []
     for sample, row in manifest.iterrows():

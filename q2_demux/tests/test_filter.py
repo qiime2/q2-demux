@@ -231,23 +231,23 @@ class FilterSamplesTests(TestPluginBase):
                                True)
 
     def test_no_parameters_error(self):
-        with self.assertRaisesRegex(ValueError, "At least one of the followin"):
+        with self.assertRaisesRegex(ValueError, "At least one of"):
             filter_samples(self.sample_paired, None, None, False)
-            
+
     def test_filter_empty_single(self):
         obs = _filter_empty(self.manifest_single)
         exp = ["sample2"]
         self.assertListEqual(obs, exp)
-    
+
     def test_filter_empty_paired(self):
         obs = _filter_empty(self.manifest_paired)
         exp = ["sample2"]
         self.assertListEqual(obs, exp)
-        
+
     def test_filter_paired_empty(self):
         dir_fmt = filter_samples(self.sample_paired, None, None, False, True)
         self._assert_paired_contains(dir_fmt, ['sample1R1', 'sample1R2'])
-        
+
     def test_filter_single_empty(self):
         dir_fmt = filter_samples(self.sample_single, None, None, False, True)
         self._assert_paired_contains(dir_fmt, ['sample1R1'])
@@ -269,6 +269,7 @@ class FilterSamplesTests(TestPluginBase):
             dir_fmt = filter_samples(self.sample_paired,
                                      self.md_paired_subset, where, True, True)
             self._assert_paired_contains(dir_fmt, exp)
+
 
 if __name__ == '__main__':
     unittest.main()
