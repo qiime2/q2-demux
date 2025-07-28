@@ -48,6 +48,7 @@ TO DOs:
 """
 
 import numpy as np
+import math
 import functools
 
 
@@ -212,7 +213,7 @@ class GolayDecoder(object):
             The array of vectors with errors
         """
         def _comb(n, k):
-            fac = np.math.factorial
+            fac = math.factorial
             return fac(n) / fac(k) / fac(n - k)
 
         nvecs = int(veclen + _comb(veclen, 2) + _comb(veclen, 3))
