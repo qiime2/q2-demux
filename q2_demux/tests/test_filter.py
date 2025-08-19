@@ -17,7 +17,7 @@ from q2_types.per_sample_sequences import (
     SingleLanePerSampleSingleEndFastqDirFmt,
     SingleLanePerSamplePairedEndFastqDirFmt)
 
-from q2_demux._filter import filter_samples, _filter_empty
+from q2_demux._filter import filter_samples, _get_empty_sample_ids
 from q2_demux._summarize import _PlotQualView
 
 
@@ -232,44 +232,77 @@ class FilterSamplesTests(TestPluginBase):
 
     def test_no_parameters_error(self):
         with self.assertRaisesRegex(ValueError, "At least one of"):
-            filter_samples(self.sample_paired, None, None, False)
+            filter_samples(
+                demux=self.sample_paired,
+                metadata=None,
+                where=None,
+                exclude_ids=False,
+                remove_empty=False,
+            )
 
     def test_filter_empty_single(self):
-        obs = _filter_empty(self.manifest_single)
+        obs = _get_empty_sample_ids(self.manifest_single)
         exp = ["sample2"]
         self.assertListEqual(obs, exp)
 
     def test_filter_empty_paired(self):
-        obs = _filter_empty(self.manifest_paired)
+        obs = _get_empty_sample_ids(self.manifest_paired)
         exp = ["sample2"]
         self.assertListEqual(obs, exp)
 
     def test_filter_paired_empty(self):
-        dir_fmt = filter_samples(self.sample_paired, None, None, False, True)
+        dir_fmt = filter_samples(
+            demux=self.sample_paired,
+            metadata=None,
+            where=None,
+            exclude_ids=False,
+            remove_empty=True,
+        )
         self._assert_paired_contains(dir_fmt, ['sample1R1', 'sample1R2'])
 
     def test_filter_single_empty(self):
-        dir_fmt = filter_samples(self.sample_single, None, None, False, True)
-        self._assert_paired_contains(dir_fmt, ['sample1R1'])
+        dir_fmt = filter_samples(
+            demux=self.sample_single,
+            metadata=None,
+            where=None,
+            exclude_ids=False,
+            remove_empty=True,
+        )
+        self._assert_single_contains(dir_fmt, ['sample1'])
 
     def test_filter_single_subset_exclude_empty(self):
-        exps = [(None, []),
-                ("Study='A'", []),
-                ("Study='A' OR Study='B'", [])]
-        for (where, exp) in exps:
-            dir_fmt = filter_samples(self.sample_single,
-                                     self.md_single_subset, where, True, True)
+        exps = [
+            (None, True, []),
+            ("Study='A'", True, []),
+            ("Study='A' OR Study='B'", True, []),
+            ("Study='A'", False, ['sample1']),
+        ]
+        for (where, exclude, exp) in exps:
+            dir_fmt = filter_samples(
+                demux=self.sample_single,
+                metadata=self.md_single_subset,
+                where=where,
+                exclude_ids=exclude,
+                remove_empty=True,
+            )
             self._assert_single_contains(dir_fmt, exp)
 
     def test_filter_paired_subset_exclude_empty(self):
-        exps = [(None, []),
-                ("Study='A'", []),
-                ("Study='A' OR Study='B'", [])]
-        for (where, exp) in exps:
-            dir_fmt = filter_samples(self.sample_paired,
-                                     self.md_paired_subset, where, True, True)
+        exps = [
+            (None, True, []),
+            ("Study='A'", True, []),
+            ("Study='A' OR Study='B'", True, []),
+            ("Study='A'", False, ['sample1R1', 'sample1R2']),
+        ]
+        for (where, exclude, exp) in exps:
+            dir_fmt = filter_samples(
+                demux=self.sample_paired,
+                metadata=self.md_paired_subset,
+                where=where,
+                exclude_ids=exclude,
+                remove_empty=True,
+            )
             self._assert_paired_contains(dir_fmt, exp)
-
 
 if __name__ == '__main__':
     unittest.main()

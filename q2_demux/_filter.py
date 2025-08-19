@@ -44,7 +44,7 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata = None,
         ids_to_keep = set(manifest.index) - set(ids_to_keep)
 
     if remove_empty:
-        ids_empty = _filter_empty(manifest)
+        ids_empty = _get_empty_sample_ids(manifest)
         ids_to_keep = set(ids_to_keep) - set(ids_empty)
 
     try:
@@ -63,7 +63,7 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata = None,
     return results
 
 
-def _filter_empty(manifest):
+def _get_empty_sample_ids(manifest):
     """
     Identify and return sample names from a manifest DataFrame where
     at least one FASTQ file is empty.
