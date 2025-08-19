@@ -304,5 +304,6 @@ class FilterSamplesTests(TestPluginBase):
             )
             self._assert_paired_contains(dir_fmt, exp)
 
+
 if __name__ == '__main__':
     unittest.main()
