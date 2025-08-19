@@ -292,7 +292,8 @@ plugin.methods.register_function(
     inputs={'demux': SampleData[T]},
     parameters={'metadata': Metadata,
                 'where': Str,
-                'exclude_ids': Bool},
+                'exclude_ids': Bool,
+                'remove_empty': Bool},
     outputs=[
         ('filtered_demux', SampleData[T])
     ],
@@ -313,15 +314,17 @@ plugin.methods.register_function(
         'exclude_ids': 'Defaults to False. If True, the samples selected by '
                        'the `metadata` and optional `where` parameter will be '
                        'excluded from the filtered data.',
+        'remove_empty': 'Remove samples with empty FASTQ files.',
     },
     output_descriptions={
         'filtered_demux': 'Filtered demultiplexed data.'
     },
     name='Filter samples out of demultiplexed data.',
     description='Filter samples indicated in given metadata out of '
-                'demultiplexed data. Specific samples can be further selected '
-                'with the WHERE clause, and the `exclude_ids` parameter '
-                'allows for filtering of all samples not specified.',
+                'demultiplexed data or filter out empty samples. Specific '
+                'samples can be further selected with the WHERE clause, '
+                'and the `exclude_ids` parameter allows for filtering of '
+                'all samples not specified.',
 )
 
 importlib.import_module('q2_demux.types._deferred_setup')
