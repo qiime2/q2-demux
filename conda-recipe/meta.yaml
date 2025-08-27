@@ -21,7 +21,7 @@ requirements:
   - pandas {{ pandas }}
   - numpy {{ numpy }}
   - scikit-bio {{ scikit_bio }}
-  - seaborn >=0.8.1
+  - seaborn {{ seaborn }}
   - pyyaml
   - psutil
   - ipywidgets
