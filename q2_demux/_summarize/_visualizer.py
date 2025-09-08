@@ -8,7 +8,7 @@
 
 import collections
 import os
-import pkg_resources
+import importlib
 import shutil
 import random
 import json
@@ -21,7 +21,7 @@ from .._util import read_fastq_seqs
 from ..types import _PlotQualView
 import q2templates
 
-TEMPLATES = pkg_resources.resource_filename('q2_demux', '_summarize')
+TEMPLATES = importlib.resources.files('q2_demux') / '_summarize'
 
 
 def _decode_qual_to_phred33(qual_str):
