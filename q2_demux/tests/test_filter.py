@@ -309,6 +309,5 @@ class FilterSamplesTests(TestPluginBase):
                 filter_samples(demux, metadata, where, True, remove_empty)
 
 
-
 if __name__ == '__main__':
     unittest.main()
