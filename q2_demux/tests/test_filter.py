@@ -289,21 +289,25 @@ class FilterSamplesTests(TestPluginBase):
     def test_filter_value_error_no_samples_remain(self):
         args = [
             (self.sample_paired, self.md_paired_all, None, False),
-            (self.sample_paired, self.md_paired_all, "Study='A' OR Study='B'", False),
+            (self.sample_paired, self.md_paired_all,
+             "Study='A' OR Study='B'", False),
             (self.sample_paired, self.md_paired_subset, None, True),
             (self.sample_paired, self.md_paired_subset, "Study='A'", True),
-            (self.sample_paired, self.md_paired_subset, "Study='A' OR Study='B'", True),
+            (self.sample_paired, self.md_paired_subset,
+             "Study='A' OR Study='B'", True),
             (self.sample_single, self.md_single_all, None, False),
-            (self.sample_single, self.md_single_all, "Study='A' OR Study='B'", False),
+            (self.sample_single, self.md_single_all,
+             "Study='A' OR Study='B'", False),
             (self.sample_single, self.md_single_subset, None, True),
             (self.sample_single, self.md_single_subset, "Study='A'", True),
-            (self.sample_single, self.md_single_subset, "Study='A' OR Study='B'", True),
+            (self.sample_single, self.md_single_subset,
+             "Study='A' OR Study='B'", True),
         ]
-        
+
         for (demux, metadata, where, remove_empty) in args:
             with self.assertRaisesRegex(ValueError, "No samples remain"):
                 filter_samples(demux, metadata, where, True, remove_empty)
-    
+
 
 
 if __name__ == '__main__':
