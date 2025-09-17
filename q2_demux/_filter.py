@@ -47,6 +47,9 @@ def filter_samples(demux: _PlotQualView, metadata: Metadata = None,
         ids_empty = _get_empty_sample_ids(manifest)
         ids_to_keep = set(ids_to_keep) - set(ids_empty)
 
+    if len(ids_to_keep) == 0:
+        raise ValueError("No samples remain after filtering.")
+
     try:
         for id in ids_to_keep:
             forward = manifest.loc[id].forward
