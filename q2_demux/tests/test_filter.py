@@ -298,8 +298,8 @@ class FilterSamplesTests(TestPluginBase):
             (self.sample_single, self.md_single_subset, None, True),
             (self.sample_single, self.md_single_subset, "Study='A'", True),
             (self.sample_single, self.md_single_subset, "Study='A' OR Study='B'", True),
-
         ]
+        
         for (demux, metadata, where, remove_empty) in args:
             with self.assertRaisesRegex(ValueError, "No samples remain"):
                 filter_samples(demux, metadata, where, True, remove_empty)
