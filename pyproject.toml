@@ -48,3 +48,6 @@ include = ["q2_demux*"]
 
 [tool.setuptools.package-data]
 q2_demux = ["**/*"]
+
+[tool.setuptools.exclude-package-data]
+q2_demux = ["**/node_modules/**"]
