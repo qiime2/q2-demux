@@ -73,10 +73,8 @@ class FilterSamplesTests(TestPluginBase):
             self._assert_single_contains(dir_fmt, exp)
 
     def test_filter_single_all_exclude(self):
-        exps = [(None, []),
-                ("Study='A'", ['sample2']),
-                ("Study='B'", ['sample1']),
-                ("Study='A' OR Study='B'", [])]
+        exps = [("Study='A'", ['sample2']),
+                ("Study='B'", ['sample1'])]
         for (where, exp) in exps:
             dir_fmt = filter_samples(self.sample_single, self.md_single_all,
                                      where, True)
@@ -157,10 +155,8 @@ class FilterSamplesTests(TestPluginBase):
             self._assert_paired_contains(dir_fmt, exp)
 
     def test_filter_paired_all_exclude(self):
-        exps = [(None, []),
-                ("Study='A'", ['sample2R1', 'sample2R2']),
-                ("Study='B'", ['sample1R1', 'sample1R2']),
-                ("Study='A' OR Study='B'", [])]
+        exps = [("Study='A'", ['sample2R1', 'sample2R2']),
+                ("Study='B'", ['sample1R1', 'sample1R2'])]
         for (where, exp) in exps:
             dir_fmt = filter_samples(self.sample_paired, self.md_paired_all,
                                      where, True)
@@ -271,38 +267,46 @@ class FilterSamplesTests(TestPluginBase):
         self._assert_single_contains(dir_fmt, ['sample1'])
 
     def test_filter_single_subset_exclude_empty(self):
-        exps = [
-            (None, True, []),
-            ("Study='A'", True, []),
-            ("Study='A' OR Study='B'", True, []),
-            ("Study='A'", False, ['sample1']),
-        ]
-        for (where, exclude, exp) in exps:
-            dir_fmt = filter_samples(
-                demux=self.sample_single,
-                metadata=self.md_single_subset,
-                where=where,
-                exclude_ids=exclude,
-                remove_empty=True,
-            )
-            self._assert_single_contains(dir_fmt, exp)
+        dir_fmt = filter_samples(
+            demux=self.sample_single,
+            metadata=self.md_single_subset,
+            where="Study='A'",
+            exclude_ids=False,
+            remove_empty=True,
+        )
+        self._assert_single_contains(dir_fmt, ['sample1'])
 
     def test_filter_paired_subset_exclude_empty(self):
-        exps = [
-            (None, True, []),
-            ("Study='A'", True, []),
-            ("Study='A' OR Study='B'", True, []),
-            ("Study='A'", False, ['sample1R1', 'sample1R2']),
+        dir_fmt = filter_samples(
+            demux=self.sample_paired,
+            metadata=self.md_paired_subset,
+            where="Study='A'",
+            exclude_ids=False,
+            remove_empty=True,
+        )
+        self._assert_paired_contains(dir_fmt, ['sample1R1', 'sample1R2'])
+
+    def test_filter_value_error_no_samples_remain(self):
+        args = [
+            (self.sample_paired, self.md_paired_all, None, False),
+            (self.sample_paired, self.md_paired_all,
+             "Study='A' OR Study='B'", False),
+            (self.sample_paired, self.md_paired_subset, None, True),
+            (self.sample_paired, self.md_paired_subset, "Study='A'", True),
+            (self.sample_paired, self.md_paired_subset,
+             "Study='A' OR Study='B'", True),
+            (self.sample_single, self.md_single_all, None, False),
+            (self.sample_single, self.md_single_all,
+             "Study='A' OR Study='B'", False),
+            (self.sample_single, self.md_single_subset, None, True),
+            (self.sample_single, self.md_single_subset, "Study='A'", True),
+            (self.sample_single, self.md_single_subset,
+             "Study='A' OR Study='B'", True),
         ]
-        for (where, exclude, exp) in exps:
-            dir_fmt = filter_samples(
-                demux=self.sample_paired,
-                metadata=self.md_paired_subset,
-                where=where,
-                exclude_ids=exclude,
-                remove_empty=True,
-            )
-            self._assert_paired_contains(dir_fmt, exp)
+
+        for (demux, metadata, where, remove_empty) in args:
+            with self.assertRaisesRegex(ValueError, "No samples remain"):
+                filter_samples(demux, metadata, where, True, remove_empty)
 
 
 if __name__ == '__main__':
